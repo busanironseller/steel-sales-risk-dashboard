@@ -10,7 +10,7 @@
  * DCE products (iron ore, coking coal) have no SHFE equivalent and are Sina-only,
  * labelled as such.
  */
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, readFile, mkdir } from 'node:fs/promises';
 import { fetchProduct, SHFE_PRODUCTS, sessionAt } from './shfe.mjs';
 import { sinaUrl } from './sources.mjs';
 
@@ -206,7 +206,19 @@ async function main() {
   }
 
   if (!instruments.hrc) {
-    throw new Error('HRC is the primary signal — refusing to write market.json without it');
+    // HRC fetch failed — try to keep existing market.json's HRC data so the
+    // pipeline can still run with stale-but-present data instead of hard-failing.
+    try {
+      const prev = JSON.parse(await readFile(OUT, 'utf8'));
+      if (prev.instruments?.hrc) {
+        instruments.hrc = prev.instruments.hrc;
+        instruments.hrc.quality = 'STALE (carried forward — SHFE fetch failed this cycle)';
+        console.log('  WARN hrc        carried forward from previous market.json (SHFE unavailable)');
+      }
+    } catch { /* no previous file — fall through */ }
+    if (!instruments.hrc) {
+      throw new Error('HRC is the primary signal — refusing to write market.json without it');
+    }
   }
 
   // Only HRC is charted. Everything else is a Market Pulse row, which needs just

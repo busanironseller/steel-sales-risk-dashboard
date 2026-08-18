@@ -92,3 +92,35 @@ export async function deleteIssue(id: number): Promise<void> {
   const db = await getDb();
   await db.query(`DELETE FROM issues WHERE id = $1`, [id]);
 }
+
+/**
+ * Auto-seed issues from critical signals on first visit (empty DB).
+ * Creates one issue per critical impact × first region, so the dashboard
+ * always shows actionable items out of the box.
+ */
+export async function seedIssuesIfEmpty(impacts: Impact[]): Promise<Issue[]> {
+  const db = await getDb();
+  const count = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM issues`);
+  if (count.rows[0].n > 0) return listIssues();
+
+  for (const imp of impacts) {
+    const region = imp.regions[0] ?? 'Global';
+    const action = imp.actions[0] ?? '';
+    await db.query(
+      `INSERT INTO issues (title, impact_id, rule_id, risk_type, region, products, action, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        `${region} · ${imp.products.join('/')} — ${imp.riskType}`,
+        imp.id,
+        imp.ruleId,
+        imp.riskType,
+        region,
+        imp.products.join('/'),
+        action,
+        imp.severity === 'HIGH' || imp.severity === 'CRITICAL' ? 'ACTION_REQUIRED' : 'NEW',
+      ],
+    );
+  }
+
+  return listIssues();
+}

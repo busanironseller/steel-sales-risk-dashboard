@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Chart } from './Chart';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
-import { createIssue, deleteIssue, listIssues, updateIssueStatus } from './db';
+import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
 import type { Analysis, Impact, Issue, IssueStatus, MarketData } from './types';
 
 const BASE = import.meta.env.BASE_URL;
@@ -70,14 +70,17 @@ export function App() {
         setMarket(m);
         setAnalysis(a);
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
+        // Auto-seed issues from critical signals on first visit
+        try {
+          const seeded = await seedIssuesIfEmpty(a.criticalSignals);
+          setIssues(seeded);
+        } catch (e) {
+          setDbError(String(e));
+        }
       } catch (err) {
         setLoadError(String(err));
       }
     })();
-  }, []);
-
-  useEffect(() => {
-    listIssues().then(setIssues).catch((e) => setDbError(String(e)));
   }, []);
 
   useEffect(() => {
