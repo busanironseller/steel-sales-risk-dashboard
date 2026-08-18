@@ -166,10 +166,8 @@ async function main() {
         failures,
         articles,
       },
-      null,
-      2,
-    ),
-  );
+      ),
+    );
 
   console.log(
     `\nnews.json written — ${articles.length} articles ` +

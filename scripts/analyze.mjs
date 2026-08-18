@@ -325,7 +325,7 @@ async function main() {
     ruleCount: RULES.length,
   };
 
-  await writeFile(new URL('analysis.json', DATA), JSON.stringify(analysis, null, 2));
+  await writeFile(new URL('analysis.json', DATA), JSON.stringify(analysis));
 
   console.log(`  news       ${scored.length} relevant / ${news.articles.length} collected (${rejected} filtered out)`);
   console.log(`  signals    ${signals.length} market signal(s)`);

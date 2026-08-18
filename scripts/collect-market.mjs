@@ -15,7 +15,9 @@ import { fetchProduct, SHFE_PRODUCTS, sessionAt } from './shfe.mjs';
 import { sinaUrl } from './sources.mjs';
 
 const OUT = new URL('../public/data/market.json', import.meta.url);
-const HISTORY_BARS = 480;
+// Only HRC gets a chart; the others only need enough bars for the 120m metric.
+const HISTORY_BARS = 240;
+const SECONDARY_BARS = 12;
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
@@ -125,7 +127,7 @@ async function collectShfe(pid) {
     daily: normalizeSinaBars(
       daily.map((d) => ({ ...d, d: `${d.d} 00:00:00` })),
       { source: 'SINA_BACKFILL' },
-    ).slice(-260),
+    ).slice(-120),
     quality: 'OK',
   };
 }
@@ -169,7 +171,7 @@ async function collectDce(spec) {
     bars: bars.slice(-HISTORY_BARS),
     officialBarCount: 0,
     historySource: 'Sina Finance',
-    daily: daily.slice(-260),
+    daily: [],
     quality: 'DELAYED_UNOFFICIAL',
   };
 }
@@ -207,22 +209,27 @@ async function main() {
     throw new Error('HRC is the primary signal — refusing to write market.json without it');
   }
 
+  // Only HRC is charted. Everything else is a Market Pulse row, which needs just
+  // enough bars to compute the 120m change — keeping 240 of them would multiply
+  // the payload the scheduled collector rewrites every half hour.
+  for (const [key, inst] of Object.entries(instruments)) {
+    if (key === 'hrc') continue;
+    inst.bars = inst.bars.slice(-SECONDARY_BARS);
+    inst.daily = [];
+  }
+
   await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
   await writeFile(
     OUT,
-    JSON.stringify(
-      {
-        generatedAt: new Date().toISOString(),
-        sources: {
-          SHFE: 'Shanghai Futures Exchange — public delayed market data',
-          SINA: 'Sina Finance futures API (unofficial, delayed)',
-        },
-        instruments,
-        failures,
+    JSON.stringify({
+      generatedAt: new Date().toISOString(),
+      sources: {
+        SHFE: 'Shanghai Futures Exchange — public delayed market data',
+        SINA: 'Sina Finance futures API (unofficial, delayed)',
       },
-      null,
-      2,
-    ),
+      instruments,
+      failures,
+    }),
   );
 
   console.log(`\nmarket.json — ${Object.keys(instruments).length} instruments, ${failures.length} failure(s)`);
