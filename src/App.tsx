@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chart } from './Chart';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
 import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
@@ -62,10 +62,22 @@ export function App() {
   const [filterProduct, setFilterProduct] = useState<string>('ALL');
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [expandedCluster, setExpandedCluster] = useState<string | null>(null);
+  const [expandedSignal, setExpandedSignal] = useState<string | null>(null);
+
+  // Refs for values loadData reads but shouldn't trigger recreation
+  const refreshingRef = useRef(refreshing);
+  refreshingRef.current = refreshing;
+  const analysisRef = useRef(analysis);
+  analysisRef.current = analysis;
+  const selectedImpactRef = useRef(selectedImpact);
+  selectedImpactRef.current = selectedImpact;
+  const marketRef = useRef(market);
+  marketRef.current = market;
 
   /** Cache-busting fetch for JSON data files */
   const loadData = useCallback(async (isManual = false) => {
-    if (refreshing) return;
+    if (refreshingRef.current) return;
     setRefreshing(true);
     try {
       const bust = `?t=${Date.now()}`;
@@ -75,12 +87,12 @@ export function App() {
       ]);
 
       // Check if data actually changed (compare generatedAt)
-      const changed = !analysis || a.generatedAt !== analysis.generatedAt;
+      const changed = !analysisRef.current || a.generatedAt !== analysisRef.current.generatedAt;
 
       setMarket(m);
       setAnalysis(a);
       setLastRefresh(new Date());
-      if (!selectedImpact || changed) {
+      if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
       }
 
@@ -100,11 +112,11 @@ export function App() {
       if (isManual) {
         setToast('❌ 데이터 로드 실패');
       }
-      if (!market) setLoadError(String(err));
+      if (!marketRef.current) setLoadError(String(err));
     } finally {
       setRefreshing(false);
     }
-  }, [refreshing, analysis, selectedImpact, market]);
+  }, []); // stable — reads from refs, never recreated
 
   // Initial load
   useEffect(() => { loadData(); }, []);
@@ -373,7 +385,7 @@ export function App() {
         {/* ──────────────── 02 CRITICAL SIGNALS ──────────────── */}
         <Panel
           title="CRITICAL SIGNALS"
-          titleKo="핵심 위험 신호"
+          titleKo="핵심 위험 신호 — 클릭하여 근거 확인"
           index="02"
           glow={highCount > 0 ? 'high' : undefined}
           meta={`${analysis.criticalSignals.length}건 감지 · 전체 ${analysis.impacts.length}건 · 규칙 ${analysis.ruleCount}개`}
@@ -382,47 +394,133 @@ export function App() {
             <EmptyState text="현재 임계값을 넘은 위험 신호가 없습니다." />
           ) : (
             <div className="divide-y divide-[var(--color-slate-line)]">
-              {analysis.criticalSignals.map((sig) => (
-                <button
-                  key={sig.id}
-                  onClick={() => setSelectedImpact(sig.id)}
-                  className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--color-steel-soft)] ${
-                    sig.id === impact?.id ? 'bg-[var(--color-steel-mid)]' : ''
-                  }`}
-                >
-                  <SeverityTag severity={sig.severity} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-baseline gap-x-2">
-                      <span className="text-[13px] font-semibold text-[var(--color-ink)]">
-                        {sig.ruleNameKo ?? sig.ruleName}
-                      </span>
-                      <Arrow direction={sig.direction} />
-                      <span className="text-[10px] text-[var(--color-faint)]">
-                        {sig.origin === 'MARKET_SIGNAL' ? '시장 신호' : '뉴스 클러스터'}
-                        {' · '}
-                        {sig.riskTypeKo ?? sig.riskType}
-                      </span>
-                    </div>
-                    <div className="mt-0.5 text-[11.5px] text-[var(--color-muted)]">{sig.fact}</div>
-                    {sig.narrativeKo && (
-                      <div className="mt-1.5 text-[11.5px] leading-[1.5] text-[var(--color-ink)] border-l-2 border-[var(--color-risk-med)] pl-2 py-0.5"
-                        style={{ background: 'linear-gradient(90deg, rgba(255,171,64,0.06), transparent 70%)' }}>
-                        <span className="text-[9px] font-bold tracking-[0.1em] text-[var(--color-risk-med)] mr-1.5">왜 위험한가</span>
-                        {sig.narrativeKo}
+              {analysis.criticalSignals.map((sig) => {
+                const isExpanded = expandedSignal === sig.id;
+                return (
+                  <div key={sig.id}>
+                    <button
+                      onClick={() => {
+                        setExpandedSignal(isExpanded ? null : sig.id);
+                        setSelectedImpact(sig.id);
+                      }}
+                      className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--color-steel-soft)] ${
+                        isExpanded ? 'bg-[var(--color-steel-mid)]' : ''
+                      }`}
+                    >
+                      <SeverityTag severity={sig.severity} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <span className="text-[13px] font-semibold text-[var(--color-ink)]">
+                            {sig.ruleNameKo ?? sig.ruleName}
+                          </span>
+                          <Arrow direction={sig.direction} />
+                          <span className="text-[10px] text-[var(--color-faint)]">
+                            {sig.origin === 'MARKET_SIGNAL' ? '시장 신호' : '뉴스 클러스터'}
+                            {' · '}
+                            {sig.riskTypeKo ?? sig.riskType}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 text-[11.5px] text-[var(--color-muted)]">{sig.fact}</div>
+                        {!isExpanded && sig.narrativeKo && (
+                          <div className="mt-1 text-[10.5px] text-[var(--color-steel)]">
+                            ▸ 클릭하여 근거 · 인과관계 · 조치 사항 확인
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <ConfidenceTag confidence={sig.confidence} />
+                        <span className="text-[10px] text-[var(--color-faint)]">
+                          {sig.regions.slice(0, 3).join(' · ')}
+                        </span>
+                        <span className="text-[10px] text-[var(--color-faint)]">
+                          {sig.products.slice(0, 4).join(' · ')}
+                        </span>
+                        <span className="text-[10px] mt-0.5" style={{ color: 'var(--color-steel)' }}>
+                          {isExpanded ? '▾ 접기' : '▸ 펼치기'}
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* ── Expanded detail: WHY + EVIDENCE + ACTIONS ── */}
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-1 space-y-3 border-l-2 ml-4 border-[var(--color-steel)]"
+                        style={{ background: 'linear-gradient(90deg, rgba(79,195,247,0.04), transparent 50%)' }}>
+
+                        {sig.narrativeKo && (
+                          <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
+                            style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
+                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
+                              💡 왜 위험한가 — 영업 영향
+                            </div>
+                            {sig.narrativeKo}
+                          </div>
+                        )}
+
+                        <div>
+                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
+                            📰 인과 체인
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                            {(sig.chainKo ?? sig.chain).map((step: string, i: number) => (
+                              <span key={step} className="flex items-center gap-1">
+                                {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
+                                <span className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
+                                  i === (sig.chainKo ?? sig.chain).length - 1
+                                    ? 'font-semibold text-[var(--color-ink)] bg-[rgba(255,82,82,0.1)] border border-[rgba(255,82,82,0.3)]'
+                                    : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
+                                }`}>
+                                  {step}
+                                </span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {sig.evidence && sig.evidence.length > 0 && (
+                          <div>
+                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
+                              📋 근거 기사 — {sig.evidence.length}건 (클릭하여 원문 확인)
+                            </div>
+                            <ul className="space-y-2">
+                              {sig.evidence.map((e: any) => (
+                                <li key={e.id} className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
+                                  style={{ border: '1px solid var(--color-slate-line)' }}>
+                                  <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                    className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                    ↗ {e.title}
+                                  </a>
+                                  <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
+                                    {e.source} · {e.publishedAt.slice(0, 10)}
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div>
+                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1.5 uppercase">
+                            ✅ 권장 조치
+                          </div>
+                          <ul className="space-y-1.5">
+                            {(sig.actionsKo?.length ? sig.actionsKo : sig.actions).map((a: string) => (
+                              <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
+                                <span>· {a}</span>
+                                <button
+                                  className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                                  onClick={(ev) => { ev.stopPropagation(); onCreateIssue(sig, sig.regions[0], a); }}
+                                >
+                                  + 이슈 등록
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                     )}
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <ConfidenceTag confidence={sig.confidence} />
-                    <span className="text-[10px] text-[var(--color-faint)]">
-                      {sig.regions.slice(0, 3).join(' · ')}
-                    </span>
-                    <span className="text-[10px] text-[var(--color-faint)]">
-                      {sig.products.slice(0, 4).join(' · ')}
-                    </span>
-                  </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </Panel>
@@ -459,7 +557,14 @@ export function App() {
                     filteredSalesImpact.map((row) => {
                       const target = analysis.impacts.find((i) => i.id === row.impactId);
                       return (
-                        <tr key={row.id}>
+                        <tr key={row.id}
+                          className="cursor-pointer hover:bg-[var(--color-steel-soft)] transition-colors"
+                          onClick={() => {
+                            setSelectedImpact(row.impactId);
+                            setExpandedSignal(row.impactId);
+                          }}
+                          title="클릭하여 상세 근거 확인"
+                        >
                           <td className="font-semibold whitespace-nowrap">{row.region}</td>
                           <td className="text-[11px] text-[var(--color-muted)]">{row.products.join(' / ')}</td>
                           <td className="whitespace-nowrap">
@@ -468,11 +573,14 @@ export function App() {
                           </td>
                           <td className="text-center"><Arrow direction={row.direction} /></td>
                           <td><ConfidenceTag confidence={row.confidence} /></td>
-                          <td className="text-[11.5px] text-[var(--color-muted)]">{row.action}</td>
+                          <td className="text-[11.5px] text-[var(--color-muted)]">
+                            {row.action}
+                            <div className="text-[10px] text-[var(--color-steel)] mt-0.5">▸ 근거 보기</div>
+                          </td>
                           <td className="text-right whitespace-nowrap">
                             <button
                               className="border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                              onClick={() => target && onCreateIssue(target, row.region, row.action)}
+                              onClick={(ev) => { ev.stopPropagation(); target && onCreateIssue(target, row.region, row.action); }}
                               disabled={!target}
                             >
                               + 이슈
@@ -644,7 +752,7 @@ export function App() {
         {/* ──────────────── 06 EVENT RADAR ──────────────── */}
         <Panel
           title="EVENT RADAR"
-          titleKo="글로벌 이벤트 레이더"
+          titleKo="글로벌 이벤트 레이더 — 클릭하여 근거 기사 확인"
           index="06"
           meta={
             <>
@@ -656,62 +764,132 @@ export function App() {
           <div className="divide-y divide-[var(--color-slate-line)]">
             {analysis.eventClusters.map((c) => {
               const relatedImpact = analysis.impacts.find((i: any) => i.ruleId === c.ruleId);
+              const isExpanded = expandedCluster === c.id;
               return (
-                <div
-                  key={c.id}
-                  className="px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-steel-soft)]"
-                  onClick={() => setSelectedImpact(`IM_${c.ruleId}_EVENT`)}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span
-                          className="border px-1.5 py-px text-[9.5px] rounded-sm font-medium"
-                          style={{
-                            borderColor: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.5)' : 'var(--color-slate-line)',
-                            color: c.status === 'ACTIVE' ? 'var(--color-risk-high)' : 'var(--color-muted)',
-                            background: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.08)' : 'transparent',
-                          }}
-                        >
-                          {c.status === 'ACTIVE' ? '🔴 활성' : c.status === 'OPEN' ? '🟡 감시' : c.status === 'COOLING' ? '⚪ 완화' : '종료'}
-                        </span>
-                        <ConfidenceTag confidence={c.confidence} />
-                        <span className="text-[10px] text-[var(--color-faint)]">
-                          {c.riskTypeKo ?? c.riskType} · {c.articleCount}건 / {c.publisherCount}매체
-                        </span>
-                      </div>
-                      <div className="text-[13px] font-semibold text-[var(--color-ink)] mb-1">
-                        {c.eventTypeKo ?? c.eventType}
-                      </div>
-                      {relatedImpact?.narrativeKo && (
-                        <div className="text-[11.5px] leading-[1.5] text-[var(--color-muted)] mb-1.5">
-                          {relatedImpact.narrativeKo}
+                <div key={c.id}>
+                  <div
+                    className="px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-steel-soft)]"
+                    onClick={() => {
+                      setExpandedCluster(isExpanded ? null : c.id);
+                      setSelectedImpact(`IM_${c.ruleId}_EVENT`);
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span
+                            className="border px-1.5 py-px text-[9.5px] rounded-sm font-medium"
+                            style={{
+                              borderColor: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.5)' : 'var(--color-slate-line)',
+                              color: c.status === 'ACTIVE' ? 'var(--color-risk-high)' : 'var(--color-muted)',
+                              background: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.08)' : 'transparent',
+                            }}
+                          >
+                            {c.status === 'ACTIVE' ? '🔴 활성' : c.status === 'OPEN' ? '🟡 감시' : c.status === 'COOLING' ? '⚪ 완화' : '종료'}
+                          </span>
+                          <ConfidenceTag confidence={c.confidence} />
+                          <span className="text-[10px] text-[var(--color-faint)]">
+                            {c.riskTypeKo ?? c.riskType} · {c.articleCount}건 / {c.publisherCount}매체
+                          </span>
                         </div>
-                      )}
-                      <div className="flex flex-wrap gap-1.5 text-[10px]">
-                        <span className="text-[var(--color-faint)]">영향 지역:</span>
-                        {c.regions.map((r: string) => (
-                          <span key={r} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
-                            {r}
-                          </span>
-                        ))}
-                        <span className="text-[var(--color-faint)] ml-1">제품:</span>
-                        {c.products.slice(0, 4).map((p: string) => (
-                          <span key={p} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
-                            {p}
-                          </span>
-                        ))}
+                        <div className="text-[13px] font-semibold text-[var(--color-ink)] mb-1">
+                          {c.eventTypeKo ?? c.eventType}
+                        </div>
+                        {relatedImpact?.narrativeKo && (
+                          <div className="text-[11.5px] leading-[1.5] text-[var(--color-muted)] mb-1.5">
+                            {relatedImpact.narrativeKo}
+                          </div>
+                        )}
+                        <div className="flex flex-wrap gap-1.5 text-[10px]">
+                          <span className="text-[var(--color-faint)]">영향 지역:</span>
+                          {c.regions.map((r: string) => (
+                            <span key={r} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
+                              {r}
+                            </span>
+                          ))}
+                          <span className="text-[var(--color-faint)] ml-1">제품:</span>
+                          {c.products.slice(0, 4).map((p: string) => (
+                            <span key={p} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
+                              {p}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <div className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">
-                        최신 {c.latestUpdate.slice(0, 10)}
-                      </div>
-                      <div className="num text-[10px] text-[var(--color-faint)]">
-                        {c.ageHours}시간 전
+                      <div className="shrink-0 text-right">
+                        <div className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">
+                          최신 {c.latestUpdate.slice(0, 10)}
+                        </div>
+                        <div className="num text-[10px] text-[var(--color-faint)]">
+                          {c.ageHours}시간 전
+                        </div>
+                        <div className="text-[10px] mt-1" style={{ color: 'var(--color-steel)' }}>
+                          {isExpanded ? '▾ 근거 접기' : '▸ 근거 기사 보기'}
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* ── Expanded: source articles ── */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 pt-1 ml-4 border-l-2 border-[var(--color-steel)] space-y-3"
+                      style={{ background: 'linear-gradient(90deg, rgba(79,195,247,0.04), transparent 50%)' }}>
+
+                      {relatedImpact?.narrativeKo && (
+                        <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
+                          style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
+                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
+                            💡 이 이벤트가 왜 위험한가
+                          </div>
+                          {relatedImpact.narrativeKo}
+                        </div>
+                      )}
+
+                      <div>
+                        <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
+                          📋 근거 기사 — 총 {c.articleCount}건 중 상위 {c.evidence.length}건 (클릭하여 원문 확인)
+                        </div>
+                        <ul className="space-y-1.5">
+                          {c.evidence.map((e: any) => (
+                            <li key={e.id}
+                              className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
+                              style={{ border: '1px solid var(--color-slate-line)' }}>
+                              <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                ↗ {e.title}
+                              </a>
+                              <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
+                                {e.source} · {e.publishedAt.slice(0, 10)}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-2 text-[10px] text-[var(--color-faint)]">
+                          이 클러스터는 {c.publisherCount}개 독립 매체가 보도했습니다. 매칭 키워드: {c.keywords.slice(0, 6).join(', ')}
+                        </div>
+                      </div>
+
+                      {relatedImpact && (
+                        <div>
+                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1.5 uppercase">
+                            ✅ 권장 조치
+                          </div>
+                          <ul className="space-y-1.5">
+                            {(relatedImpact.actionsKo?.length ? relatedImpact.actionsKo : relatedImpact.actions).map((a: string) => (
+                              <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
+                                <span>· {a}</span>
+                                <button
+                                  className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                                  onClick={(ev) => { ev.stopPropagation(); onCreateIssue(relatedImpact, relatedImpact.regions[0], a); }}
+                                >
+                                  + 이슈 등록
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
