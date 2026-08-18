@@ -17,6 +17,9 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    # Collectors retry three times against remote endpoints; if they are hanging
+    # rather than failing, fail the run instead of holding a runner for an hour.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
