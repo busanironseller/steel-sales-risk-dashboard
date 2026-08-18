@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chart } from './Chart';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
 import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
@@ -20,6 +20,36 @@ const INSTRUMENT_KO: Record<string, string> = {
   ironOre: '철광석',
   cokingCoal: '원료탄',
 };
+
+/** Detect trade-policy sub-type from article title and return Korean label */
+function tradePolicyLabel(title: string): string {
+  const t = title.toLowerCase();
+  if (t.includes('section 232')) return '🇺🇸 Section 232';
+  if (t.includes('section 338')) return '🇺🇸 Section 338';
+  if (t.includes('section 301')) return '🇺🇸 Section 301';
+  if (t.includes('anti-dumping') || t.includes('antidumping') || t.includes('반덤핑')) return '⚖️ 반덤핑';
+  if (t.includes('countervailing') || t.includes('상계관세')) return '⚖️ 상계관세';
+  if (t.includes('safeguard') || t.includes('세이프가드')) return '🛡️ 세이프가드';
+  if (t.includes('tariff') || t.includes('관세')) return '📋 관세';
+  if (t.includes('quota') || t.includes('쿼터')) return '📊 수입 쿼터';
+  if (t.includes('sanction') || t.includes('제재')) return '🚫 제재';
+  return '📰 통상';
+}
+
+/** Extract target country from article title */
+function targetCountry(title: string): string {
+  const t = title.toLowerCase();
+  if (t.includes('china') || t.includes('중국')) return '→ 중국';
+  if (t.includes('korea') || t.includes('한국')) return '→ 한국';
+  if (t.includes('india') || t.includes('인도')) return '→ 인도';
+  if (t.includes('eu ') || t.includes('europe') || t.includes('유럽')) return '→ EU';
+  if (t.includes('us ') || t.includes('u.s.') || t.includes('america') || t.includes('미국')) return '→ 미국';
+  if (t.includes('canada') || t.includes('캐나다')) return '→ 캐나다';
+  if (t.includes('japan') || t.includes('일본')) return '→ 일본';
+  if (t.includes('vietnam') || t.includes('베트남')) return '→ 베트남';
+  if (t.includes('turkey') || t.includes('türkiye') || t.includes('터키')) return '→ 터키';
+  return '';
+}
 
 function shanghaiToKst(stamp: string): string {
   const [date, time] = stamp.split(' ');
@@ -64,6 +94,7 @@ export function App() {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [expandedCluster, setExpandedCluster] = useState<string | null>(null);
   const [expandedSignal, setExpandedSignal] = useState<string | null>(null);
+  const [expandedSalesRow, setExpandedSalesRow] = useState<string | null>(null);
 
   // Refs for values loadData reads but shouldn't trigger recreation
   const refreshingRef = useRef(refreshing);
@@ -74,6 +105,8 @@ export function App() {
   selectedImpactRef.current = selectedImpact;
   const marketRef = useRef(market);
   marketRef.current = market;
+  const signalsRef = useRef<HTMLDivElement>(null);
+  const eventsRef = useRef<HTMLDivElement>(null);
 
   /** Cache-busting fetch for JSON data files */
   const loadData = useCallback(async (isManual = false) => {
@@ -139,7 +172,20 @@ export function App() {
     [analysis, selectedImpact],
   );
 
-  // Filtered sales impact
+  const isFiltered = filterRegion !== 'ALL' || filterProduct !== 'ALL';
+  const matchFilter = (regions: string[], products: string[]) => {
+    if (filterRegion !== 'ALL' && !regions.includes(filterRegion)) return false;
+    if (filterProduct !== 'ALL' && !products.includes(filterProduct)) return false;
+    return true;
+  };
+
+  // Filtered views — ALL sections respond to filters
+  const filteredCriticalSignals = useMemo(() => {
+    if (!analysis) return [];
+    if (!isFiltered) return analysis.criticalSignals;
+    return analysis.criticalSignals.filter((s) => matchFilter(s.regions, s.products));
+  }, [analysis, filterRegion, filterProduct]);
+
   const filteredSalesImpact = useMemo(() => {
     if (!analysis) return [];
     return analysis.salesImpact.filter((row) => {
@@ -147,6 +193,12 @@ export function App() {
       if (filterProduct !== 'ALL' && !row.products.includes(filterProduct)) return false;
       return true;
     });
+  }, [analysis, filterRegion, filterProduct]);
+
+  const filteredEventClusters = useMemo(() => {
+    if (!analysis) return [];
+    if (!isFiltered) return analysis.eventClusters;
+    return analysis.eventClusters.filter((c) => matchFilter(c.regions, c.products));
   }, [analysis, filterRegion, filterProduct]);
 
   async function onCreateIssue(target: Impact, region: string, action: string) {
@@ -195,8 +247,8 @@ export function App() {
   const session = sessionState(hrc.sourceTimestamp);
   const collectedAgo = minutesSince(analysis.generatedAt);
   const stale = collectedAgo > 90;
-  const highCount = analysis.criticalSignals.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL').length;
-  const medCount = analysis.criticalSignals.filter((s) => s.severity === 'MEDIUM').length;
+  const highCount = filteredCriticalSignals.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL').length;
+  const medCount = filteredCriticalSignals.filter((s) => s.severity === 'MEDIUM').length;
 
   return (
     <div className="min-h-screen">
@@ -237,15 +289,16 @@ export function App() {
                 background: refreshing ? 'transparent' : 'rgba(79,195,247,0.08)',
                 cursor: refreshing ? 'wait' : 'pointer',
               }}
-              title="서버에서 최신 데이터를 다시 불러옵니다 (5분마다 자동 새로고침)"
+              title="CI에서 수집된 최신 데이터를 다시 불러옵니다. 데이터 수집은 GitHub Actions에서 30분마다 자동 실행됩니다."
             >
               <span className={refreshing ? 'animate-spin' : ''} style={{ display: 'inline-block' }}>
                 ↻
               </span>
-              {refreshing ? '로딩 중...' : '새로고침'}
+              {refreshing ? '로딩 중...' : '데이터 갱신'}
             </button>
-            <div className="num text-[var(--color-faint)]">
-              {fmtIso(analysis.generatedAt)} KST
+            <div className="num text-[var(--color-faint)] text-right">
+              <div>수집 {fmtIso(analysis.generatedAt)}</div>
+              <div className="text-[9px]">수집 주기: 30분 (GitHub Actions CI/CD)</div>
             </div>
           </div>
         </div>
@@ -255,24 +308,30 @@ export function App() {
 
         {/* ──────────────── HERO STAT CARDS ──────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard
-            label="위험 신호"
-            value={highCount}
-            sub={`HIGH 이상 ${highCount}건`}
-            tone="high"
-          />
-          <StatCard
-            label="주의 신호"
-            value={medCount}
-            sub={`MEDIUM ${medCount}건`}
-            tone="med"
-          />
-          <StatCard
-            label="이벤트 클러스터"
-            value={analysis.eventClusters.length}
-            sub={`뉴스 ${analysis.inputs.articlesRelevant}건 분석`}
-            tone="steel"
-          />
+          <div className="cursor-pointer" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+            <StatCard
+              label="위험 신호"
+              value={highCount}
+              sub={`HIGH 이상 ${highCount}건${isFiltered ? ' (필터)' : ''}`}
+              tone="high"
+            />
+          </div>
+          <div className="cursor-pointer" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+            <StatCard
+              label="주의 신호"
+              value={medCount}
+              sub={`MEDIUM ${medCount}건${isFiltered ? ' (필터)' : ''}`}
+              tone="med"
+            />
+          </div>
+          <div className="cursor-pointer" onClick={() => eventsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+            <StatCard
+              label="이벤트 클러스터"
+              value={filteredEventClusters.length}
+              sub={`뉴스 ${analysis.inputs.articlesRelevant}건 분석${isFiltered ? ' (필터)' : ''}`}
+              tone="steel"
+            />
+          </div>
           <StatCard
             label="활성 이슈"
             value={issues.filter((i) => i.status !== 'RESOLVED').length}
@@ -284,6 +343,11 @@ export function App() {
         {/* ──────────────── FILTER BAR ──────────────── */}
         <div className="flex flex-wrap items-center gap-3 px-1">
           <span className="eyebrow">필터</span>
+          {isFiltered && (
+            <span className="text-[10px] text-[var(--color-risk-med)] font-semibold">
+              ● 필터 적용 중 — 전체 대시보드에 반영
+            </span>
+          )}
           <div className="flex flex-wrap gap-1.5">
             <FilterChip label="전체 지역" active={filterRegion === 'ALL'} onClick={() => setFilterRegion('ALL')} />
             {ALL_REGIONS.map((r) => (
@@ -383,18 +447,19 @@ export function App() {
         </Panel>
 
         {/* ──────────────── 02 CRITICAL SIGNALS ──────────────── */}
+        <div ref={signalsRef}>
         <Panel
           title="CRITICAL SIGNALS"
-          titleKo="핵심 위험 신호 — 클릭하여 근거 확인"
+          titleKo={`핵심 위험 신호 — 클릭하여 근거 확인${isFiltered ? ' (필터 적용)' : ''}`}
           index="02"
           glow={highCount > 0 ? 'high' : undefined}
-          meta={`${analysis.criticalSignals.length}건 감지 · 전체 ${analysis.impacts.length}건 · 규칙 ${analysis.ruleCount}개`}
+          meta={`${filteredCriticalSignals.length}건${isFiltered ? ` / 전체 ${analysis.criticalSignals.length}건` : '건 감지'} · 규칙 ${analysis.ruleCount}개`}
         >
-          {analysis.criticalSignals.length === 0 ? (
-            <EmptyState text="현재 임계값을 넘은 위험 신호가 없습니다." />
+          {filteredCriticalSignals.length === 0 ? (
+            <EmptyState text={isFiltered ? '선택한 필터 조건에 맞는 위험 신호가 없습니다. 필터를 변경해보세요.' : '현재 임계값을 넘은 위험 신호가 없습니다.'} />
           ) : (
             <div className="divide-y divide-[var(--color-slate-line)]">
-              {analysis.criticalSignals.map((sig) => {
+              {filteredCriticalSignals.map((sig) => {
                 const isExpanded = expandedSignal === sig.id;
                 return (
                   <div key={sig.id}>
@@ -487,6 +552,12 @@ export function App() {
                                   style={{ border: '1px solid var(--color-slate-line)' }}>
                                   <a href={e.link} target="_blank" rel="noreferrer noopener"
                                     className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                    <span className="inline-block px-1 py-px mr-1 rounded-sm text-[9px] font-bold bg-[var(--color-surface)] text-[var(--color-muted)]">
+                                      {tradePolicyLabel(e.title)}
+                                    </span>
+                                    {targetCountry(e.title) && (
+                                      <span className="text-[10px] text-[var(--color-risk-med)] mr-1">{targetCountry(e.title)}</span>
+                                    )}
                                     ↗ {e.title}
                                   </a>
                                   <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
@@ -524,14 +595,15 @@ export function App() {
             </div>
           )}
         </Panel>
+        </div>
 
         {/* ──────────────── 03 + 04 SALES IMPACT + RISK BRIEF ──────────────── */}
         <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
           <Panel
             title="SALES IMPACT"
-            titleKo="판매 영향 분석"
+            titleKo={`판매 영향 분석${isFiltered ? ' (필터 적용)' : ''}`}
             index="03"
-            meta={`${filteredSalesImpact.length}건 ${filterRegion !== 'ALL' || filterProduct !== 'ALL' ? '(필터 적용)' : ''}`}
+            meta={`${filteredSalesImpact.length}건${isFiltered ? ` / 전체 ${analysis.salesImpact.length}건` : ''}`}
           >
             <div className="overflow-x-auto">
               <table className="grid">
@@ -550,43 +622,132 @@ export function App() {
                   {filteredSalesImpact.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="text-center text-[var(--color-faint)] py-6">
-                        필터 조건에 맞는 항목이 없습니다.
+                        {isFiltered ? '선택한 필터 조건에 맞는 항목이 없습니다.' : '판매 영향 항목이 없습니다.'}
                       </td>
                     </tr>
                   ) : (
                     filteredSalesImpact.map((row) => {
                       const target = analysis.impacts.find((i) => i.id === row.impactId);
+                      const isSalesExpanded = expandedSalesRow === row.id;
                       return (
-                        <tr key={row.id}
-                          className="cursor-pointer hover:bg-[var(--color-steel-soft)] transition-colors"
-                          onClick={() => {
-                            setSelectedImpact(row.impactId);
-                            setExpandedSignal(row.impactId);
-                          }}
-                          title="클릭하여 상세 근거 확인"
-                        >
-                          <td className="font-semibold whitespace-nowrap">{row.region}</td>
-                          <td className="text-[11px] text-[var(--color-muted)]">{row.products.join(' / ')}</td>
-                          <td className="whitespace-nowrap">
-                            <SeverityTag severity={row.severity} />
-                            <span className="ml-1.5 text-[11px] text-[var(--color-muted)]">{row.riskTypeKo ?? row.riskType}</span>
-                          </td>
-                          <td className="text-center"><Arrow direction={row.direction} /></td>
-                          <td><ConfidenceTag confidence={row.confidence} /></td>
-                          <td className="text-[11.5px] text-[var(--color-muted)]">
-                            {row.action}
-                            <div className="text-[10px] text-[var(--color-steel)] mt-0.5">▸ 근거 보기</div>
-                          </td>
-                          <td className="text-right whitespace-nowrap">
-                            <button
-                              className="border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                              onClick={(ev) => { ev.stopPropagation(); target && onCreateIssue(target, row.region, row.action); }}
-                              disabled={!target}
-                            >
-                              + 이슈
-                            </button>
-                          </td>
-                        </tr>
+                        <React.Fragment key={row.id}>
+                          <tr
+                            className={`cursor-pointer transition-colors ${isSalesExpanded ? 'bg-[var(--color-steel-mid)]' : 'hover:bg-[var(--color-steel-soft)]'}`}
+                            onClick={() => {
+                              setExpandedSalesRow(isSalesExpanded ? null : row.id);
+                              setSelectedImpact(row.impactId);
+                            }}
+                          >
+                            <td className="font-semibold whitespace-nowrap">{row.region}</td>
+                            <td className="text-[11px] text-[var(--color-muted)]">{row.products.join(' / ')}</td>
+                            <td className="whitespace-nowrap">
+                              <SeverityTag severity={row.severity} />
+                              <span className="ml-1.5 text-[11px] text-[var(--color-muted)]">{row.riskTypeKo ?? row.riskType}</span>
+                            </td>
+                            <td className="text-center"><Arrow direction={row.direction} /></td>
+                            <td><ConfidenceTag confidence={row.confidence} /></td>
+                            <td className="text-[11.5px] text-[var(--color-muted)]">
+                              {row.action}
+                              <div className="text-[10px] mt-0.5" style={{ color: 'var(--color-steel)' }}>
+                                {isSalesExpanded ? '▾ 근거 접기' : '▸ 근거 보기'}
+                              </div>
+                            </td>
+                            <td className="text-right whitespace-nowrap">
+                              <button
+                                className="border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                                onClick={(ev) => { ev.stopPropagation(); target && onCreateIssue(target, row.region, row.action); }}
+                                disabled={!target}
+                              >
+                                + 이슈
+                              </button>
+                            </td>
+                          </tr>
+                          {/* ── Inline drill-down for Sales Impact ── */}
+                          {isSalesExpanded && target && (
+                            <tr>
+                              <td colSpan={7} className="p-0 border-b-0">
+                                <div className="px-4 pb-4 pt-2 ml-4 space-y-3 border-l-2 border-[var(--color-steel)]"
+                                  style={{ background: 'linear-gradient(90deg, rgba(79,195,247,0.04), transparent 50%)' }}>
+
+                                  {target.narrativeKo && (
+                                    <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
+                                      style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
+                                      <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
+                                        💡 왜 위험한가 — {row.region} 시장
+                                      </div>
+                                      {target.narrativeKo}
+                                    </div>
+                                  )}
+
+                                  <div>
+                                    <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
+                                      📰 인과 체인
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                                      {(target.chainKo ?? target.chain).map((step: string, i: number) => (
+                                        <span key={step} className="flex items-center gap-1">
+                                          {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
+                                          <span className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
+                                            i === (target.chainKo ?? target.chain).length - 1
+                                              ? 'font-semibold text-[var(--color-ink)] bg-[rgba(255,82,82,0.1)] border border-[rgba(255,82,82,0.3)]'
+                                              : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
+                                          }`}>
+                                            {step}
+                                          </span>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {target.evidence && target.evidence.length > 0 && (
+                                    <div>
+                                      <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
+                                        📋 근거 기사 — {target.evidence.length}건
+                                      </div>
+                                      <ul className="space-y-1.5">
+                                        {target.evidence.slice(0, 4).map((e: any) => (
+                                          <li key={e.id} className="rounded-md px-3 py-1.5 transition-colors hover:bg-[var(--color-surface)]"
+                                            style={{ border: '1px solid var(--color-slate-line)' }}>
+                                            <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                              className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                              <span className="inline-block px-1 py-px mr-1 rounded-sm text-[9px] font-bold bg-[var(--color-surface)] text-[var(--color-muted)]">
+                                                {tradePolicyLabel(e.title)}
+                                              </span>
+                                              {targetCountry(e.title) && (
+                                                <span className="text-[10px] text-[var(--color-risk-med)] mr-1">{targetCountry(e.title)}</span>
+                                              )}
+                                              ↗ {e.title}
+                                            </a>
+                                            <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
+                                              {e.source} · {e.publishedAt.slice(0, 10)}
+                                            </div>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                  <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1 uppercase">
+                                    ✅ 권장 조치
+                                  </div>
+                                  <ul className="space-y-1">
+                                    {(target.actionsKo?.length ? target.actionsKo : target.actions).map((a: string) => (
+                                      <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
+                                        <span>· {a}</span>
+                                        <button
+                                          className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                                          onClick={(ev) => { ev.stopPropagation(); onCreateIssue(target, row.region, a); }}
+                                        >
+                                          + 이슈 등록
+                                        </button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       );
                     })
                   )}
@@ -750,19 +911,23 @@ export function App() {
         </Panel>
 
         {/* ──────────────── 06 EVENT RADAR ──────────────── */}
+        <div ref={eventsRef}>
         <Panel
           title="EVENT RADAR"
-          titleKo="글로벌 이벤트 레이더 — 클릭하여 근거 기사 확인"
+          titleKo={`글로벌 이벤트 레이더${isFiltered ? ' (필터 적용)' : ''}`}
           index="06"
           meta={
             <>
-              {analysis.eventClusters.length}개 클러스터 · 관련 {analysis.inputs.articlesRelevant} /{' '}
-              전체 {analysis.inputs.articlesCollected}건 ({analysis.inputs.articlesRejected}건 필터링)
+              {filteredEventClusters.length}개 클러스터{isFiltered ? ` / 전체 ${analysis.eventClusters.length}개` : ''} · 관련 {analysis.inputs.articlesRelevant} /{' '}
+              전체 {analysis.inputs.articlesCollected}건
             </>
           }
         >
           <div className="divide-y divide-[var(--color-slate-line)]">
-            {analysis.eventClusters.map((c) => {
+            {filteredEventClusters.length === 0 && (
+              <EmptyState text={isFiltered ? '선택한 필터 조건에 맞는 이벤트가 없습니다.' : '감지된 이벤트가 없습니다.'} />
+            )}
+            {filteredEventClusters.map((c) => {
               const relatedImpact = analysis.impacts.find((i: any) => i.ruleId === c.ruleId);
               const isExpanded = expandedCluster === c.id;
               return (
@@ -855,6 +1020,12 @@ export function App() {
                               style={{ border: '1px solid var(--color-slate-line)' }}>
                               <a href={e.link} target="_blank" rel="noreferrer noopener"
                                 className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                <span className="inline-block px-1 py-px mr-1 rounded-sm text-[9px] font-bold bg-[var(--color-surface)] text-[var(--color-muted)]">
+                                  {tradePolicyLabel(e.title)}
+                                </span>
+                                {targetCountry(e.title) && (
+                                  <span className="text-[10px] text-[var(--color-risk-med)] mr-1">{targetCountry(e.title)}</span>
+                                )}
                                 ↗ {e.title}
                               </a>
                               <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
@@ -895,6 +1066,7 @@ export function App() {
             })}
           </div>
         </Panel>
+        </div>
 
         {/* ──────────────── 07 ISSUE & ACTION ──────────────── */}
         <Panel
