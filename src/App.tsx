@@ -344,18 +344,32 @@ export function App() {
                   <SeverityTag severity={sig.severity} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-x-2">
-                      <span className="text-[13px] font-semibold text-[var(--color-ink)]">{sig.ruleName}</span>
+                      <span className="text-[13px] font-semibold text-[var(--color-ink)]">
+                        {sig.ruleNameKo ?? sig.ruleName}
+                      </span>
                       <Arrow direction={sig.direction} />
                       <span className="text-[10px] text-[var(--color-faint)]">
                         {sig.origin === 'MARKET_SIGNAL' ? '시장 신호' : '뉴스 클러스터'}
+                        {' · '}
+                        {sig.riskTypeKo ?? sig.riskType}
                       </span>
                     </div>
                     <div className="mt-0.5 text-[11.5px] text-[var(--color-muted)]">{sig.fact}</div>
+                    {sig.narrativeKo && (
+                      <div className="mt-1.5 text-[11.5px] leading-[1.5] text-[var(--color-ink)] border-l-2 border-[var(--color-risk-med)] pl-2 py-0.5"
+                        style={{ background: 'linear-gradient(90deg, rgba(255,171,64,0.06), transparent 70%)' }}>
+                        <span className="text-[9px] font-bold tracking-[0.1em] text-[var(--color-risk-med)] mr-1.5">왜 위험한가</span>
+                        {sig.narrativeKo}
+                      </div>
+                    )}
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <ConfidenceTag confidence={sig.confidence} />
                     <span className="text-[10px] text-[var(--color-faint)]">
                       {sig.regions.slice(0, 3).join(' · ')}
+                    </span>
+                    <span className="text-[10px] text-[var(--color-faint)]">
+                      {sig.products.slice(0, 4).join(' · ')}
                     </span>
                   </div>
                 </button>
@@ -401,7 +415,7 @@ export function App() {
                           <td className="text-[11px] text-[var(--color-muted)]">{row.products.join(' / ')}</td>
                           <td className="whitespace-nowrap">
                             <SeverityTag severity={row.severity} />
-                            <span className="ml-1.5 text-[11px] text-[var(--color-muted)]">{row.riskType}</span>
+                            <span className="ml-1.5 text-[11px] text-[var(--color-muted)]">{row.riskTypeKo ?? row.riskType}</span>
                           </td>
                           <td className="text-center"><Arrow direction={row.direction} /></td>
                           <td><ConfidenceTag confidence={row.confidence} /></td>
@@ -429,7 +443,7 @@ export function App() {
             titleKo="위험 분석 브리프"
             index="04"
             glow={impact?.severity === 'HIGH' || impact?.severity === 'CRITICAL' ? 'high' : impact?.severity === 'MEDIUM' ? 'med' : undefined}
-            meta={impact ? `${impact.ruleId} · ${impact.origin === 'MARKET_SIGNAL' ? '시장' : '뉴스'}` : undefined}
+            meta={impact ? `${impact.ruleId} · ${impact.origin === 'MARKET_SIGNAL' ? '시장' : '뉴스'} · ${impact.riskTypeKo ?? impact.riskType}` : undefined}
           >
             {!impact ? (
               <EmptyState text="선택된 Impact가 없습니다. 위의 시그널을 클릭하세요." />
@@ -438,8 +452,21 @@ export function App() {
                 <div className="flex flex-wrap items-center gap-2">
                   <SeverityTag severity={impact.severity} />
                   <ConfidenceTag confidence={impact.confidence} />
-                  <span className="text-[12px] font-semibold text-[var(--color-ink)]">{impact.ruleName}</span>
+                  <span className="text-[12px] font-semibold text-[var(--color-ink)]">
+                    {impact.ruleNameKo ?? impact.ruleName}
+                  </span>
                 </div>
+
+                {/* ── 왜 위험한가: 내러티브 ── */}
+                {impact.narrativeKo && (
+                  <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
+                    style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
+                    <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
+                      💡 왜 위험한가 — 영업 영향 요약
+                    </div>
+                    {impact.narrativeKo}
+                  </div>
+                )}
 
                 <Epistemic kind="FACT">
                   {impact.fact}
@@ -449,24 +476,26 @@ export function App() {
                 </Epistemic>
 
                 <Epistemic kind="RULE">
-                  <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
-                    {impact.chain.map((step, i) => (
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    {(impact.chainKo ?? impact.chain).map((step: string, i: number) => (
                       <span key={step} className="flex items-center gap-1">
                         {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
                         <span
-                          className={
-                            i === impact.chain.length - 1
-                              ? 'font-semibold text-[var(--color-ink)]'
-                              : 'text-[var(--color-muted)]'
-                          }
+                          className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
+                            i === (impact.chainKo ?? impact.chain).length - 1
+                              ? 'font-semibold text-[var(--color-ink)] bg-[rgba(255,82,82,0.1)] border border-[rgba(255,82,82,0.3)]'
+                              : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
+                          }`}
                         >
                           {step}
                         </span>
                       </span>
                     ))}
                   </div>
-                  {impact.lagNote && (
-                    <div className="mt-1 text-[10.5px] text-[var(--color-faint)]">{impact.lagNote}</div>
+                  {(impact.lagNoteKo ?? impact.lagNote) && (
+                    <div className="mt-1 text-[10.5px] text-[var(--color-faint)]">
+                      ⏱ {impact.lagNoteKo ?? impact.lagNote}
+                    </div>
                   )}
                 </Epistemic>
 
@@ -474,7 +503,7 @@ export function App() {
 
                 <Epistemic kind="ACTION">
                   <ul className="space-y-1.5">
-                    {impact.actions.map((a) => (
+                    {(impact.actionsKo?.length ? impact.actionsKo : impact.actions).map((a: string) => (
                       <li key={a} className="flex items-start justify-between gap-2">
                         <span>· {a}</span>
                         <button
@@ -498,7 +527,7 @@ export function App() {
                   <div>
                     <div className="eyebrow mb-1.5">근거 자료 · {impact.evidence.length}건</div>
                     <ul className="space-y-1.5">
-                      {impact.evidence.slice(0, 4).map((e) => (
+                      {impact.evidence.slice(0, 4).map((e: any) => (
                         <li key={e.id} className="text-[11px] leading-snug">
                           <a
                             href={e.link}
@@ -575,52 +604,68 @@ export function App() {
             </>
           }
         >
-          <div className="overflow-x-auto">
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th>이벤트</th>
-                  <th>상태</th>
-                  <th className="text-right">기사</th>
-                  <th className="text-right">매체</th>
-                  <th>신뢰도</th>
-                  <th>최신</th>
-                  <th>매칭 키워드</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analysis.eventClusters.map((c) => (
-                  <tr
-                    key={c.id}
-                    className="cursor-pointer"
-                    onClick={() => setSelectedImpact(`IM_${c.ruleId}_EVENT`)}
-                  >
-                    <td className="font-semibold text-[var(--color-ink)]">{c.eventType}</td>
-                    <td>
-                      <span
-                        className="border px-1.5 py-px text-[9.5px] rounded-sm font-medium"
-                        style={{
-                          borderColor: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.5)' : 'var(--color-slate-line)',
-                          color: c.status === 'ACTIVE' ? 'var(--color-risk-high)' : 'var(--color-muted)',
-                          background: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.08)' : 'transparent',
-                        }}
-                      >
-                        {c.status === 'ACTIVE' ? '활성' : c.status === 'OPEN' ? '감시' : c.status === 'COOLING' ? '완화' : '종료'}
-                      </span>
-                    </td>
-                    <td className="num text-right">{c.articleCount}</td>
-                    <td className="num text-right">{c.publisherCount}</td>
-                    <td><ConfidenceTag confidence={c.confidence} /></td>
-                    <td className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">
-                      {c.latestUpdate.slice(0, 10)} ({c.ageHours}h)
-                    </td>
-                    <td className="text-[10.5px] text-[var(--color-faint)]">
-                      {c.keywords.slice(0, 4).join(', ')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="divide-y divide-[var(--color-slate-line)]">
+            {analysis.eventClusters.map((c) => {
+              const relatedImpact = analysis.impacts.find((i: any) => i.ruleId === c.ruleId);
+              return (
+                <div
+                  key={c.id}
+                  className="px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-steel-soft)]"
+                  onClick={() => setSelectedImpact(`IM_${c.ruleId}_EVENT`)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span
+                          className="border px-1.5 py-px text-[9.5px] rounded-sm font-medium"
+                          style={{
+                            borderColor: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.5)' : 'var(--color-slate-line)',
+                            color: c.status === 'ACTIVE' ? 'var(--color-risk-high)' : 'var(--color-muted)',
+                            background: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.08)' : 'transparent',
+                          }}
+                        >
+                          {c.status === 'ACTIVE' ? '🔴 활성' : c.status === 'OPEN' ? '🟡 감시' : c.status === 'COOLING' ? '⚪ 완화' : '종료'}
+                        </span>
+                        <ConfidenceTag confidence={c.confidence} />
+                        <span className="text-[10px] text-[var(--color-faint)]">
+                          {c.riskTypeKo ?? c.riskType} · {c.articleCount}건 / {c.publisherCount}매체
+                        </span>
+                      </div>
+                      <div className="text-[13px] font-semibold text-[var(--color-ink)] mb-1">
+                        {c.eventTypeKo ?? c.eventType}
+                      </div>
+                      {relatedImpact?.narrativeKo && (
+                        <div className="text-[11.5px] leading-[1.5] text-[var(--color-muted)] mb-1.5">
+                          {relatedImpact.narrativeKo}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-1.5 text-[10px]">
+                        <span className="text-[var(--color-faint)]">영향 지역:</span>
+                        {c.regions.map((r: string) => (
+                          <span key={r} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
+                            {r}
+                          </span>
+                        ))}
+                        <span className="text-[var(--color-faint)] ml-1">제품:</span>
+                        {c.products.slice(0, 4).map((p: string) => (
+                          <span key={p} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">
+                        최신 {c.latestUpdate.slice(0, 10)}
+                      </div>
+                      <div className="num text-[10px] text-[var(--color-faint)]">
+                        {c.ageHours}시간 전
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Panel>
 

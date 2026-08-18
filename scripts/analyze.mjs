@@ -101,7 +101,9 @@ function buildEventClusters(articles) {
           id: `EC_${rule.id}`,
           ruleId: rule.id,
           eventType: rule.name,
+          eventTypeKo: rule.nameKo ?? rule.name,
           riskType: rule.riskType,
+          riskTypeKo: rule.riskTypeKo ?? rule.riskType,
           regions: rule.regions,
           products: rule.products,
           articles: [],
@@ -167,32 +169,41 @@ function impactsFromMarket(signals, market) {
 
       const direction = rule.directionFrom(signal.pct);
       const actions = Array.isArray(rule.actions) ? rule.actions : rule.actions[direction] ?? [];
+      const actionsKo = rule.actionsKo
+        ? (Array.isArray(rule.actionsKo) ? rule.actionsKo : rule.actionsKo[direction] ?? [])
+        : [];
+      const narrative = rule.narrativeKo?.[direction] ?? rule.narrativeKo?.UP ?? null;
 
       impacts.push({
         id: `IM_${rule.id}_${signal.instrument}`,
         ruleId: rule.id,
         ruleName: rule.name,
+        ruleNameKo: rule.nameKo ?? rule.name,
         origin: 'MARKET_SIGNAL',
         originId: signal.id,
         severity: signal.severity,
-        // A market signal is a measured number, so the fact is certain even when
-        // the downstream inference is not.
         confidence: signal.severity === 'HIGH' ? 'HIGH' : 'MEDIUM',
         direction,
         riskType: rule.riskType,
+        riskTypeKo: rule.riskTypeKo ?? rule.riskType,
         products: rule.products,
         regions: rule.regions,
         chain: rule.chain,
+        chainKo: rule.chainKo ?? rule.chain,
         lagNote: rule.lagNote ?? null,
+        lagNoteKo: rule.lagNoteKo ?? rule.lagNote ?? null,
+        narrativeKo: narrative,
         fact: signal.fact,
         factSource: signal.source,
         factTimestamp: signal.sourceTimestamp,
         rule: rule.chain.join(' → '),
         inference:
-          `${rule.products.join('/')} 제품의 ${rule.riskType} 리스크가 ` +
+          `${rule.regions.join('/')} 향 ${rule.products.join('/')} 거래에서 ` +
+          `${rule.riskTypeKo ?? rule.riskType} 리스크가 ` +
           `${direction === 'UP' ? '상승' : '하락'}할 가능성이 있습니다. ` +
-          `(Rule ${rule.id} 기반 추론이며, 실제 오퍼 변동은 확인이 필요합니다)`,
+          `(시장 데이터 기반 추론이며, 실제 오퍼 변동은 확인이 필요합니다)`,
         actions,
+        actionsKo,
       });
     }
   }
@@ -204,6 +215,10 @@ function impactsFromEvents(clusters) {
     const rule = RULES.find((r) => r.id === cluster.ruleId);
     const direction = rule.directionFrom();
     const actions = Array.isArray(rule.actions) ? rule.actions : rule.actions[direction] ?? [];
+    const actionsKo = rule.actionsKo
+      ? (Array.isArray(rule.actionsKo) ? rule.actionsKo : rule.actionsKo[direction] ?? [])
+      : [];
+    const narrative = rule.narrativeKo?.[direction] ?? rule.narrativeKo?.UP ?? null;
     const severity =
       cluster.confidence === 'HIGH' ? 'HIGH' : cluster.confidence === 'MEDIUM' ? 'MEDIUM' : 'LOW';
 
@@ -211,27 +226,33 @@ function impactsFromEvents(clusters) {
       id: `IM_${rule.id}_EVENT`,
       ruleId: rule.id,
       ruleName: rule.name,
+      ruleNameKo: rule.nameKo ?? rule.name,
       origin: 'EVENT_CLUSTER',
       originId: cluster.id,
       severity,
       confidence: cluster.confidence,
       direction,
       riskType: rule.riskType,
+      riskTypeKo: rule.riskTypeKo ?? rule.riskType,
       products: rule.products,
       regions: rule.regions,
       chain: rule.chain,
+      chainKo: rule.chainKo ?? rule.chain,
       lagNote: rule.lagNote ?? null,
+      lagNoteKo: rule.lagNoteKo ?? rule.lagNote ?? null,
+      narrativeKo: narrative,
       fact:
-        `${cluster.eventType} 관련 보도 ${cluster.articleCount}건 ` +
+        `${rule.nameKo ?? cluster.eventType} 관련 보도 ${cluster.articleCount}건 ` +
         `(매체 ${cluster.publisherCount}곳, 최신 ${cluster.latestUpdate.slice(0, 10)})`,
       factSource: `Google News RSS — ${[...new Set(cluster.evidence.map((e) => e.source))].slice(0, 3).join(', ')}`,
       factTimestamp: cluster.latestUpdate,
-      rule: rule.chain.join(' → '),
+      rule: (rule.chainKo ?? rule.chain).join(' → '),
       inference:
         `${rule.regions.join('/')} 향 ${rule.products.join('/')} 거래에서 ` +
-        `${rule.riskType} 리스크가 ${direction === 'UP' ? '상승' : '하락'}할 가능성이 있습니다. ` +
+        `${rule.riskTypeKo ?? rule.riskType} 리스크가 ${direction === 'UP' ? '상승' : '하락'}할 가능성이 있습니다. ` +
         `(보도 기반 추론이며 실제 계약 영향은 개별 확인이 필요합니다)`,
       actions,
+      actionsKo,
       evidence: cluster.evidence,
     };
   });
@@ -273,10 +294,11 @@ function salesImpact(impacts) {
         region,
         products: impact.products,
         riskType: impact.riskType,
+        riskTypeKo: impact.riskTypeKo ?? impact.riskType,
         direction: impact.direction,
         severity: impact.severity,
         confidence: impact.confidence,
-        action: impact.actions[0] ?? 'Review exposure',
+        action: impact.actionsKo?.[0] ?? impact.actions[0] ?? '노출 점검 필요',
         impactId: impact.id,
         ruleId: impact.ruleId,
       });
