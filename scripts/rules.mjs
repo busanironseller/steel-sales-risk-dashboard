@@ -25,27 +25,27 @@ export const SEVERITY = { LOW: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4 };
  */
 export const MARKET_THRESHOLDS = {
   hrc: [
-    { window: 'm120', abs: 2.0, severity: 'HIGH' },
-    { window: 'm60',  abs: 1.2, severity: 'MEDIUM' },
-    { window: 'today', abs: 3.0, severity: 'HIGH' },
-    { window: 'today', abs: 1.5, severity: 'MEDIUM' },
+    { window: 'm120', abs: 0.8, severity: 'HIGH' },
+    { window: 'm60',  abs: 0.4, severity: 'MEDIUM' },
+    { window: 'today', abs: 1.0, severity: 'HIGH' },
+    { window: 'today', abs: 0.3, severity: 'MEDIUM' },
   ],
   zinc: [
-    { window: 'today', abs: 2.5, severity: 'HIGH' },
-    { window: 'today', abs: 1.2, severity: 'MEDIUM' },
+    { window: 'today', abs: 1.0, severity: 'HIGH' },
+    { window: 'today', abs: 0.3, severity: 'MEDIUM' },
   ],
   aluminium: [
-    { window: 'today', abs: 2.5, severity: 'HIGH' },
-    { window: 'today', abs: 1.2, severity: 'MEDIUM' },
+    { window: 'today', abs: 1.0, severity: 'HIGH' },
+    { window: 'today', abs: 0.3, severity: 'MEDIUM' },
   ],
   ironOre: [
-    { window: 'today', abs: 3.0, severity: 'MEDIUM' },
+    { window: 'today', abs: 0.5, severity: 'MEDIUM' },
   ],
   cokingCoal: [
-    { window: 'today', abs: 3.0, severity: 'MEDIUM' },
+    { window: 'today', abs: 0.5, severity: 'MEDIUM' },
   ],
   rebar: [
-    { window: 'today', abs: 3.0, severity: 'LOW' },
+    { window: 'today', abs: 0.5, severity: 'LOW' },
   ],
 };
 
