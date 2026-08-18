@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Chart } from './Chart';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
 import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
 import type { Analysis, Impact, Issue, IssueStatus, MarketData } from './types';
 
 const BASE = import.meta.env.BASE_URL;
+const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5분마다 자동 새로고침
 const KST = 'Asia/Seoul';
 const PULSE_ORDER = ['hrc', 'rebar', 'zinc', 'aluminium', 'ironOre', 'cokingCoal'];
 const STATUSES: IssueStatus[] = ['NEW', 'REVIEWING', 'ACTION_REQUIRED', 'RESOLVED'];
@@ -59,29 +60,60 @@ export function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [filterRegion, setFilterRegion] = useState<string>('ALL');
   const [filterProduct, setFilterProduct] = useState<string>('ALL');
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [m, a] = await Promise.all([
-          fetch(`${BASE}data/market.json`).then((r) => r.json()),
-          fetch(`${BASE}data/analysis.json`).then((r) => r.json()),
-        ]);
-        setMarket(m);
-        setAnalysis(a);
+  /** Cache-busting fetch for JSON data files */
+  const loadData = useCallback(async (isManual = false) => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const bust = `?t=${Date.now()}`;
+      const [m, a] = await Promise.all([
+        fetch(`${BASE}data/market.json${bust}`).then((r) => r.json()),
+        fetch(`${BASE}data/analysis.json${bust}`).then((r) => r.json()),
+      ]);
+
+      // Check if data actually changed (compare generatedAt)
+      const changed = !analysis || a.generatedAt !== analysis.generatedAt;
+
+      setMarket(m);
+      setAnalysis(a);
+      setLastRefresh(new Date());
+      if (!selectedImpact || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
-        // Auto-seed issues from critical signals on first visit
-        try {
-          const seeded = await seedIssuesIfEmpty(a.criticalSignals);
-          setIssues(seeded);
-        } catch (e) {
-          setDbError(String(e));
-        }
-      } catch (err) {
-        setLoadError(String(err));
       }
-    })();
-  }, []);
+
+      // Auto-seed issues from critical signals on first visit
+      try {
+        const seeded = await seedIssuesIfEmpty(a.criticalSignals);
+        setIssues(seeded);
+      } catch (e) {
+        setDbError(String(e));
+      }
+
+      if (isManual) {
+        setToast(changed ? '✅ 새 데이터가 반영되었습니다' : 'ℹ️ 아직 새 데이터가 없습니다 (CI 대기 중)');
+      }
+      setLoadError(null);
+    } catch (err) {
+      if (isManual) {
+        setToast('❌ 데이터 로드 실패');
+      }
+      if (!market) setLoadError(String(err));
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing, analysis, selectedImpact, market]);
+
+  // Initial load
+  useEffect(() => { loadData(); }, []);
+
+  // Auto-refresh every 5 minutes
+  useEffect(() => {
+    const id = setInterval(() => loadData(false), AUTO_REFRESH_MS);
+    return () => clearInterval(id);
+  }, [loadData]);
 
   useEffect(() => {
     if (!toast) return;
@@ -174,7 +206,7 @@ export function App() {
             </div>
           </div>
 
-          <div className="ml-auto flex flex-wrap items-center gap-x-5 gap-y-1 text-[10px]">
+          <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
             <StatusChip label="MODE" value="PROTOTYPE" tone="var(--color-risk-med)" />
             <StatusChip label="HRC" value={session.labelKo} tone={session.tone} />
             <StatusChip
@@ -183,6 +215,23 @@ export function App() {
               tone={stale ? 'var(--color-risk-med)' : 'var(--color-ok)'}
               pulse={!stale}
             />
+            <button
+              onClick={() => loadData(true)}
+              disabled={refreshing}
+              className="flex items-center gap-1.5 border rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all"
+              style={{
+                borderColor: refreshing ? 'var(--color-slate-line)' : 'var(--color-steel)',
+                color: refreshing ? 'var(--color-faint)' : 'var(--color-steel)',
+                background: refreshing ? 'transparent' : 'rgba(79,195,247,0.08)',
+                cursor: refreshing ? 'wait' : 'pointer',
+              }}
+              title="서버에서 최신 데이터를 다시 불러옵니다 (5분마다 자동 새로고침)"
+            >
+              <span className={refreshing ? 'animate-spin' : ''} style={{ display: 'inline-block' }}>
+                ↻
+              </span>
+              {refreshing ? '로딩 중...' : '새로고침'}
+            </button>
             <div className="num text-[var(--color-faint)]">
               {fmtIso(analysis.generatedAt)} KST
             </div>

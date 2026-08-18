@@ -158,6 +158,15 @@ table.grid tbody tr:hover {
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
+/* Spin animation for refresh button */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}
+
 /* Filter bar */
 .filter-chip {
   display: inline-flex;
