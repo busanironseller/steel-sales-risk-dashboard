@@ -47,17 +47,30 @@ export const NEWS_QUERIES = [
     q: 'when:7d ("iron ore" OR "coking coal" OR zinc OR aluminium) price (steel OR smelter)' },
   { domain: 'trade_policy',  weight: 1.0, lang: 'en',
     q: 'when:7d (anti-dumping OR countervailing OR safeguard OR tariff OR quota) steel' },
+  { domain: 'trade_policy',  weight: 1.0, lang: 'en',
+    q: 'when:7d ("Section 232" OR "Section 338" OR "Section 301") (steel OR aluminum OR tariff)' },
+  { domain: 'trade_policy',  weight: 0.9, lang: 'en',
+    q: 'when:7d (tariff OR "trade war" OR "trade deal") (US OR Canada OR EU OR China) steel metals' },
   { domain: 'china_supply',  weight: 1.0, lang: 'en',
     q: 'when:7d China steel (export OR rebate OR "production cut" OR "capacity") ' },
   { domain: 'energy',        weight: 0.7, lang: 'en',
     q: 'when:7d (electricity OR "natural gas" OR "energy cost") (steel OR smelter OR mill)' },
+  { domain: 'energy',        weight: 0.8, lang: 'en',
+    q: 'when:7d ("oil price" OR "crude oil" OR Brent OR WTI) (shipping OR supply OR risk)' },
   { domain: 'logistics',     weight: 0.8, lang: 'en',
     q: 'when:7d (freight OR "container rate" OR "Red Sea" OR "port congestion") shipping' },
+  { domain: 'logistics',     weight: 0.9, lang: 'en',
+    q: 'when:7d ("Strait of Hormuz" OR Hormuz OR Houthi OR "Red Sea") (shipping OR attack OR disruption)' },
   { domain: 'geopolitics',   weight: 0.8, lang: 'en',
     q: 'when:7d (sanctions OR "export control" OR conflict) (steel OR metals OR shipping)' },
+  { domain: 'geopolitics',   weight: 0.9, lang: 'en',
+    q: 'when:7d (Iran OR "Middle East") (war OR conflict OR shipping OR oil OR sanctions)' },
   { domain: 'korea_steel',   weight: 1.0, lang: 'ko',
     q: 'when:7d (철강 OR 도금강판 OR 컬러강판 OR 열연) (가격 OR 수출 OR 반덤핑)' },
+  { domain: 'korea_steel',   weight: 0.9, lang: 'ko',
+    q: 'when:7d (관세 OR 무역전쟁 OR 호르무즈 OR 이란) (철강 OR 수출 OR 해운)' },
 ];
+
 
 export const GOOGLE_NEWS_BASE = 'https://news.google.com/rss/search';
 

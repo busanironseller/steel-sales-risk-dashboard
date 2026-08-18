@@ -239,7 +239,10 @@ export const RELEVANCE_TERMS = {
     'tariff', 'anti-dumping', 'antidumping', 'countervailing', 'safeguard', 'quota',
     'cbam', 'sanction', 'export control', 'freight', 'shipping', 'port', 'red sea',
     'hormuz', 'suez', 'container', 'bunker', 'crude', 'zinc', 'aluminium', 'aluminum',
-    'nickel', 'scrap', 'export', 'import', '관세', '반덤핑', '운임', '수출',
+    'nickel', 'scrap', 'export', 'import', 'section 232', 'section 338', 'section 301',
+    'trade war', 'iran', 'houthi', 'strait', 'chokepoint', 'oil price', 'brent',
+    'marine insurance', 'war risk', 'conflict', 'ceasefire', 'rerouting',
+    '관세', '반덤핑', '운임', '수출', '무역전쟁', '호르무즈', '이란',
   ],
   negative: [
     'fashion', 'collection', 'sneaker', 'jewelry', 'jewellery', 'watch', 'perfume',
