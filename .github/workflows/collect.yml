@@ -1,0 +1,40 @@
+name: Scheduled data collection
+
+on:
+  schedule:
+    # Every 30 minutes during SHFE day + night sessions (01:00-15:00 UTC covers
+    # 09:00-23:00 Asia/Shanghai). Cron on GitHub Actions is best-effort, not exact.
+    - cron: '*/30 1-15 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run refresh
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          # Nothing to do when the market is closed and no feed moved.
+          if git diff --staged --quiet; then
+            echo "no data change"
+            exit 0
+          fi
+          git commit -m "data: scheduled refresh $(date -u +'%Y-%m-%dT%H:%MZ')"
+          git push

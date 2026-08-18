@@ -9,7 +9,7 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import { NEWS_QUERIES, newsFeedUrl } from './sources.mjs';
 
-const OUT = new URL('../data/news.json', import.meta.url);
+const OUT = new URL('../public/data/news.json', import.meta.url);
 const MAX_AGE_DAYS = 10;
 const MAX_ITEMS = 400;
 
@@ -154,7 +154,7 @@ async function main() {
     ...rest,
   }));
 
-  await mkdir(new URL('../data/', import.meta.url), { recursive: true });
+  await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
   await writeFile(
     OUT,
     JSON.stringify(

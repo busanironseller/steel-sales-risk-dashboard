@@ -1,21 +1,30 @@
 /**
- * Collects futures bars for every series in sources.mjs and writes data/market.json.
+ * Builds data/market.json.
  *
- * Failure policy: a series that cannot be fetched or parsed is recorded in
- * `failures[]` and omitted from `series`. It is never backfilled, carried over,
- * or approximated — the UI is responsible for showing the gap.
+ * SHFE official is authoritative for everything it covers: it names the actual
+ * contract, carries the exchange's own timestamp, and its tick file yields
+ * session-correct 30-minute bars. Sina only fills the chart's history behind the
+ * current trading day, and every bar records which source it came from so the UI
+ * never implies official provenance for a backfilled bar.
+ *
+ * DCE products (iron ore, coking coal) have no SHFE equivalent and are Sina-only,
+ * labelled as such.
  */
-import { writeFile, mkdir, readFile } from 'node:fs/promises';
-import { FUTURES, sinaUrl } from './sources.mjs';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { fetchProduct, SHFE_PRODUCTS, sessionAt } from './shfe.mjs';
+import { sinaUrl } from './sources.mjs';
 
-const OUT = new URL('../data/market.json', import.meta.url);
-const MIN_BARS_30M = 240;   // ~10 trading days
-const MAX_BARS_30M = 720;   // ~30 trading days, keeps the payload small
-const MAX_BARS_DAILY = 500; // ~2 years
+const OUT = new URL('../public/data/market.json', import.meta.url);
+const HISTORY_BARS = 480;
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+
+const DCE_PRODUCTS = [
+  { key: 'ironOre',    symbol: 'I0',  label: 'DCE Iron Ore',    labelKo: '철광석',  unit: 'CNY/t' },
+  { key: 'cokingCoal', symbol: 'JM0', label: 'DCE Coking Coal', labelKo: '원료탄',  unit: 'CNY/t' },
+];
 
 async function fetchText(url, { attempts = 3 } = {}) {
   let lastError;
@@ -35,7 +44,6 @@ async function fetchText(url, { attempts = 3 } = {}) {
   throw lastError;
 }
 
-/** Sina wraps the payload as `var _cb=([...]);` behind a redirect-guard comment. */
 function parseJsonp(text) {
   const open = text.indexOf('(');
   const close = text.lastIndexOf(')');
@@ -50,136 +58,174 @@ const num = (v) => {
   return Number.isFinite(n) ? n : null;
 };
 
-function normalizeBars(raw) {
-  return raw
-    .map((b) => ({
-      t: b.d,
-      o: num(b.o),
-      h: num(b.h),
-      l: num(b.l),
-      c: num(b.c),
-      v: num(b.v),
-      oi: num(b.p),
-    }))
-    .filter((b) => b.t && b.o !== null && b.h !== null && b.l !== null && b.c !== null);
+/**
+ * Sina stamps a 30-minute bar with a time inside the slot rather than its start,
+ * so labels are floored onto the same grid the SHFE bars use before the two
+ * series are put on one axis.
+ */
+function floorToSlot(stamp, minutes = 30) {
+  const [datePart, timePart] = String(stamp).split(' ');
+  if (!datePart || !timePart) return null;
+  const [h, m] = timePart.split(':').map(Number);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+  const slot = Math.floor((h * 60 + m) / minutes) * minutes;
+  return `${datePart} ${String(Math.floor(slot / 60)).padStart(2, '0')}:${String(slot % 60).padStart(2, '0')}:00`;
 }
 
-/** Percent change of the last close against the close `n` bars earlier. */
-function pctChange(bars, n) {
-  if (bars.length <= n) return null;
-  const now = bars.at(-1).c;
-  const then = bars.at(-1 - n).c;
-  if (!then) return null;
-  return ((now - then) / then) * 100;
+function normalizeSinaBars(raw, { source }) {
+  const out = [];
+  const seen = new Set();
+  for (const b of raw) {
+    const t = floorToSlot(b.d);
+    if (!t || seen.has(t)) continue;
+    const bar = { t, o: num(b.o), h: num(b.h), l: num(b.l), c: num(b.c), v: num(b.v), oi: num(b.p), source };
+    // §22 validation — a bar that fails its own OHLC invariants is dropped, not drawn.
+    if ([bar.o, bar.h, bar.l, bar.c].some((x) => x === null || x <= 0)) continue;
+    if (bar.l > Math.min(bar.o, bar.c) || bar.h < Math.max(bar.o, bar.c)) continue;
+    bar.session = sessionAt(t.split(' ')[1]) ?? 'UNKNOWN';
+    seen.add(t);
+    out.push(bar);
+  }
+  return out.sort((a, b) => a.t.localeCompare(b.t));
 }
 
-/** Annualised stdev of daily log returns over the trailing window. */
-function realizedVol(daily, window = 20) {
-  if (daily.length < window + 1) return null;
-  const slice = daily.slice(-(window + 1));
-  const returns = [];
-  for (let i = 1; i < slice.length; i++) {
-    if (slice[i - 1].c > 0 && slice[i].c > 0) {
-      returns.push(Math.log(slice[i].c / slice[i - 1].c));
-    }
-  }
-  if (returns.length < 2) return null;
-  const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
-  const variance =
-    returns.reduce((a, r) => a + (r - mean) ** 2, 0) / (returns.length - 1);
-  return Math.sqrt(variance) * Math.sqrt(252) * 100;
+async function sinaSeries(symbol, kind) {
+  return parseJsonp(await fetchText(sinaUrl(symbol, kind)));
 }
 
-async function collectSeries(spec) {
-  const [minText, dayText] = await Promise.all([
-    fetchText(sinaUrl(spec.symbol, '30m')),
-    fetchText(sinaUrl(spec.symbol, 'daily')),
-  ]);
+/** SHFE bars win any timestamp collision; Sina only fills what precedes them. */
+function mergeBars(history, official) {
+  const officialFrom = official.length ? official[0].t : null;
+  const kept = officialFrom ? history.filter((b) => b.t < officialFrom) : history;
+  return [...kept, ...official].slice(-HISTORY_BARS);
+}
 
-  const bars30m = normalizeBars(parseJsonp(minText));
-  const daily = normalizeBars(parseJsonp(dayText));
+async function collectShfe(pid) {
+  const live = await fetchProduct(pid);
+  const official = live.bars.map((b) => ({ ...b, source: 'SHFE' }));
 
-  if (bars30m.length < MIN_BARS_30M) {
-    throw new Error(`only ${bars30m.length} 30m bars (min ${MIN_BARS_30M})`);
+  let history = [];
+  let historySource = null;
+  try {
+    const sinaSymbol = `${pid.toUpperCase()}0`;
+    history = normalizeSinaBars(await sinaSeries(sinaSymbol, '30m'), { source: 'SINA_BACKFILL' });
+    historySource = 'Sina Finance (backfill)';
+  } catch (err) {
+    // A missing backfill costs chart history, not correctness — keep going.
+    console.warn(`  warn ${pid}: history backfill failed (${err.message})`);
   }
-  if (daily.length < 60) {
-    throw new Error(`only ${daily.length} daily bars`);
-  }
 
-  const trimmed30m = bars30m.slice(-MAX_BARS_30M);
-  const trimmedDaily = daily.slice(-MAX_BARS_DAILY);
-  const last = trimmed30m.at(-1);
+  const daily = await sinaSeries(`${pid.toUpperCase()}0`, 'daily').catch(() => []);
+
+  return {
+    ...live,
+    bars: mergeBars(history, official),
+    officialBarCount: official.length,
+    historySource,
+    daily: normalizeSinaBars(
+      daily.map((d) => ({ ...d, d: `${d.d} 00:00:00` })),
+      { source: 'SINA_BACKFILL' },
+    ).slice(-260),
+    quality: 'OK',
+  };
+}
+
+async function collectDce(spec) {
+  const bars = normalizeSinaBars(await sinaSeries(spec.symbol, '30m'), { source: 'SINA' });
+  const daily = normalizeSinaBars(
+    (await sinaSeries(spec.symbol, 'daily')).map((d) => ({ ...d, d: `${d.d} 00:00:00` })),
+    { source: 'SINA' },
+  );
+  if (bars.length === 0) throw new Error('no bars');
+
+  const last = bars.at(-1);
+  const prevClose = daily.length >= 2 ? daily.at(-2).c : null;
+  const change = (n) => {
+    if (bars.length <= n) return null;
+    const then = bars.at(-1 - n).c;
+    return then ? ((last.c - then) / then) * 100 : null;
+  };
 
   return {
     ...spec,
+    exchange: 'DCE',
+    currency: 'CNY',
+    contract: `${spec.symbol} (continuous main)`,
     last: last.c,
-    lastBarAt: last.t,
-    lastDailyAt: trimmedDaily.at(-1).t,
+    open: null,
+    high: Math.max(...bars.filter((b) => b.t.startsWith(last.t.slice(0, 10))).map((b) => b.h)),
+    low: Math.min(...bars.filter((b) => b.t.startsWith(last.t.slice(0, 10))).map((b) => b.l)),
+    preSettlement: prevClose,
+    volume: last.v,
+    openInterest: last.oi,
+    sourceTimestamp: last.t,
+    collectedAt: new Date().toISOString(),
     change: {
-      // 30m bars: 1 bar, then ~1 session (16 bars) and ~1 week (80 bars)
-      bar30m: pctChange(trimmed30m, 1),
-      session: pctChange(trimmedDaily, 1),
-      week: pctChange(trimmedDaily, 5),
-      month: pctChange(trimmedDaily, 20),
-      quarter: pctChange(trimmedDaily, 60),
+      today: prevClose ? ((last.c - prevClose) / prevClose) * 100 : null,
+      m30: change(1),
+      m60: change(2),
+      m120: change(4),
     },
-    volatility20d: realizedVol(trimmedDaily, 20),
-    range52w: {
-      high: Math.max(...trimmedDaily.slice(-252).map((b) => b.h)),
-      low: Math.min(...trimmedDaily.slice(-252).map((b) => b.l)),
-    },
-    bars30m: trimmed30m,
-    daily: trimmedDaily,
+    bars: bars.slice(-HISTORY_BARS),
+    officialBarCount: 0,
+    historySource: 'Sina Finance',
+    daily: daily.slice(-260),
+    quality: 'DELAYED_UNOFFICIAL',
   };
 }
 
 async function main() {
-  const startedAt = new Date().toISOString();
-  const series = {};
+  const instruments = {};
   const failures = [];
 
-  // Sequential on purpose — Sina throttles aggressively on parallel bursts.
-  for (const spec of FUTURES) {
+  for (const pid of Object.keys(SHFE_PRODUCTS)) {
     try {
-      series[spec.key] = await collectSeries(spec);
-      const s = series[spec.key];
+      const r = await collectShfe(pid);
+      instruments[r.key] = r;
       console.log(
-        `  ok   ${spec.key.padEnd(11)} ${String(s.last).padStart(9)} ${spec.unit}  ` +
-          `(${s.bars30m.length} x 30m, last ${s.lastBarAt})`,
+        `  ok   ${r.key.padEnd(10)} ${r.contract.padEnd(8)} ${String(r.last).padStart(7)} ${r.unit}  ` +
+          `${r.officialBarCount} official + ${r.bars.length - r.officialBarCount} backfill bars`,
       );
     } catch (err) {
-      failures.push({ key: spec.key, symbol: spec.symbol, error: String(err.message || err) });
-      console.error(`  FAIL ${spec.key.padEnd(11)} ${err.message || err}`);
+      failures.push({ instrument: pid, source: 'SHFE', error: String(err.message || err) });
+      console.error(`  FAIL ${pid.padEnd(10)} ${err.message || err}`);
     }
   }
 
-  if (Object.keys(series).length === 0) {
-    throw new Error('every futures series failed — refusing to write an empty market.json');
+  for (const spec of DCE_PRODUCTS) {
+    try {
+      const r = await collectDce(spec);
+      instruments[r.key] = r;
+      console.log(`  ok   ${r.key.padEnd(10)} ${String(r.last).padStart(16)} ${r.unit}  (Sina, ${r.bars.length} bars)`);
+    } catch (err) {
+      failures.push({ instrument: spec.key, source: 'SINA', error: String(err.message || err) });
+      console.error(`  FAIL ${spec.key.padEnd(10)} ${err.message || err}`);
+    }
   }
 
-  // Preserve the previous file's timestamp so the UI can tell "stale" from "missing".
-  let previousGeneratedAt = null;
-  try {
-    previousGeneratedAt = JSON.parse(await readFile(OUT, 'utf8')).generatedAt ?? null;
-  } catch {
-    /* first run */
+  if (!instruments.hrc) {
+    throw new Error('HRC is the primary signal — refusing to write market.json without it');
   }
 
-  await mkdir(new URL('../data/', import.meta.url), { recursive: true });
+  await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
   await writeFile(
     OUT,
     JSON.stringify(
-      { generatedAt: startedAt, previousGeneratedAt, source: 'Sina Finance (SHFE/DCE)', series, failures },
+      {
+        generatedAt: new Date().toISOString(),
+        sources: {
+          SHFE: 'Shanghai Futures Exchange — public delayed market data',
+          SINA: 'Sina Finance futures API (unofficial, delayed)',
+        },
+        instruments,
+        failures,
+      },
       null,
       2,
     ),
   );
 
-  console.log(
-    `\nmarket.json written — ${Object.keys(series).length}/${FUTURES.length} series, ` +
-      `${failures.length} failure(s)`,
-  );
-  // A partial collection is still useful; only a total wipeout is fatal (thrown above).
+  console.log(`\nmarket.json — ${Object.keys(instruments).length} instruments, ${failures.length} failure(s)`);
 }
 
 main().catch((err) => {
