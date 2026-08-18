@@ -3,6 +3,13 @@ name: Build and deploy to GitHub Pages
 on:
   push:
     branches: [main, master]
+  # A push made with the default GITHUB_TOKEN does not trigger other workflows,
+  # so the scheduled collector's data commit would never reach the site. Chaining
+  # off the collector's completion instead — workflow_run is not subject to that
+  # loop-prevention rule.
+  workflow_run:
+    workflows: ['Scheduled data collection']
+    types: [completed]
   workflow_dispatch:
 
 permissions:
