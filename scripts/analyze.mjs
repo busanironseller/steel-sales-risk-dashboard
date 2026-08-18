@@ -306,7 +306,7 @@ function salesImpact(impacts) {
   }
   return rows
     .sort((a, b) => SEVERITY[b.severity] - SEVERITY[a.severity] || confidenceRank[b.confidence] - confidenceRank[a.confidence])
-    .slice(0, 12);
+    .slice(0, 20);
 }
 
 // ---------------------------------------------------------------- main
@@ -342,7 +342,7 @@ async function main() {
     marketSignals: signals,
     eventClusters: clusters,
     impacts,
-    criticalSignals: critical.slice(0, 6),
+    criticalSignals: critical.slice(0, 10),
     salesImpact: salesImpact(impacts),
     ruleCount: RULES.length,
   };

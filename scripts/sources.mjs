@@ -24,7 +24,7 @@ export const FUTURES = [
   { key: 'zinc',       symbol: 'ZN0', exchange: 'SHFE', role: 'coating',   unit: 'CNY/t',
     label: 'SHFE Zinc',             labelKo: '아연 (GI 도금층 원가)' },
   { key: 'aluminium',  symbol: 'AL0', exchange: 'SHFE', role: 'coating',   unit: 'CNY/t',
-    label: 'SHFE Aluminium',        labelKo: '알루미늄 (GL 도금층 원가)' },
+    label: 'SHFE Aluminium',        labelKo: '알루미늄 (GL/AL 도금층 원가)' },
   { key: 'ironOre',    symbol: 'I0',  exchange: 'DCE',  role: 'upstream',  unit: 'CNY/t',
     label: 'DCE Iron Ore',          labelKo: '철광석' },
   { key: 'cokingCoal', symbol: 'JM0', exchange: 'DCE',  role: 'upstream',  unit: 'CNY/t',
@@ -32,27 +32,71 @@ export const FUTURES = [
 ];
 
 /**
- * Google News RSS queries, one per risk domain.
+ * Google News RSS queries — one per risk domain × product / region slice.
  *
  * `when:7d` is load-bearing: without it Google returns relevance-ordered results
  * and months-old articles outrank today's, which would quietly poison every
  * "what changed" panel on the dashboard.
+ *
+ * §2 — Product-specific queries let rules emit signals that differentiate
+ *       CRC vs GI vs GL vs COLOR when the user applies a product filter.
+ * §3 — Region-specific queries enable rules that only fire for one market,
+ *       so the Europe and GCC filters show genuinely different intelligence.
  */
 export const NEWS_QUERIES = [
+  // ── General steel / price ──
   { domain: 'steel_price',   weight: 1.0, lang: 'en',
     q: 'when:7d (HRC OR "hot-rolled coil" OR "steel price") (mill OR export OR offer)' },
-  { domain: 'coated_steel',  weight: 1.0, lang: 'en',
-    q: 'when:7d (galvanized OR galvalume OR "prepainted steel" OR PPGI OR "color coated")' },
   { domain: 'raw_material',  weight: 0.9, lang: 'en',
     q: 'when:7d ("iron ore" OR "coking coal" OR zinc OR aluminium) price (steel OR smelter)' },
+
+  // ── Product-specific domains ──
+  { domain: 'crc_market',    weight: 1.0, lang: 'en',
+    q: 'when:7d ("cold rolled" OR CRC OR "cold-rolled coil") steel (price OR export OR import)' },
+  { domain: 'gi_market',     weight: 1.0, lang: 'en',
+    q: 'when:7d (galvanized OR galvanised OR "hot-dip" OR "GI steel") (price OR export OR import OR tariff)' },
+  { domain: 'gl_market',     weight: 1.0, lang: 'en',
+    q: 'when:7d (galvalume OR "zinc-aluminium" OR "55% aluminium" OR "AZ150") steel' },
+  { domain: 'coated_steel',  weight: 1.0, lang: 'en',
+    q: 'when:7d ("prepainted steel" OR PPGI OR "color coated" OR "colour coated" OR "pre-painted")' },
+
+  // ── Coating metals (product-specific upstream) ──
+  { domain: 'zinc_market',   weight: 0.9, lang: 'en',
+    q: 'when:7d zinc (price OR LME OR SHFE OR supply OR deficit OR surplus) metal' },
+  { domain: 'aluminium_market', weight: 0.9, lang: 'en',
+    q: 'when:7d (aluminium OR aluminum) (price OR LME OR SHFE OR supply OR smelter) metal' },
+
+  // ── Trade policy (general + region-specific) ──
   { domain: 'trade_policy',  weight: 1.0, lang: 'en',
     q: 'when:7d (anti-dumping OR countervailing OR safeguard OR tariff OR quota) steel' },
   { domain: 'trade_policy',  weight: 1.0, lang: 'en',
     q: 'when:7d ("Section 232" OR "Section 338" OR "Section 301") (steel OR aluminum OR tariff)' },
-  { domain: 'trade_policy',  weight: 0.9, lang: 'en',
-    q: 'when:7d (tariff OR "trade war" OR "trade deal") (US OR Canada OR EU OR China) steel metals' },
+  { domain: 'eu_steel_trade', weight: 1.0, lang: 'en',
+    q: 'when:7d EU (steel OR metals) (safeguard OR quota OR "anti-dumping" OR import OR CBAM)' },
+  { domain: 'us_steel_trade', weight: 1.0, lang: 'en',
+    q: 'when:7d US (steel OR metals) (import OR tariff OR "Section 232" OR Korea OR "trade deal")' },
+  { domain: 'asia_steel_trade', weight: 1.0, lang: 'en',
+    q: 'when:7d (ASEAN OR "Southeast Asia" OR Vietnam OR Indonesia OR Thailand OR Philippines) steel (import OR "anti-dumping" OR safeguard OR tariff)' },
+
+  // ── China supply & export ──
   { domain: 'china_supply',  weight: 1.0, lang: 'en',
-    q: 'when:7d China steel (export OR rebate OR "production cut" OR "capacity") ' },
+    q: 'when:7d China steel (export OR rebate OR "production cut" OR capacity)' },
+  { domain: 'china_export_flood', weight: 1.0, lang: 'en',
+    q: 'when:7d China steel (overcapacity OR dumping OR surplus OR flood) (Asia OR Europe OR global OR export)' },
+
+  // ── Competitor origins ──
+  { domain: 'competitor_turkey', weight: 0.9, lang: 'en',
+    q: 'when:7d Turkey steel (export OR mill OR production OR galvanized OR price)' },
+  { domain: 'competitor_india', weight: 0.9, lang: 'en',
+    q: 'when:7d India steel (export OR mill OR production OR galvanized OR price)' },
+  { domain: 'competitor_vietnam', weight: 0.9, lang: 'en',
+    q: 'when:7d Vietnam steel (export OR production OR capacity OR mill)' },
+
+  // ── GCC / Middle East market ──
+  { domain: 'gcc_steel_market', weight: 0.9, lang: 'en',
+    q: 'when:7d ("Middle East" OR GCC OR Saudi OR UAE OR Gulf) (steel OR construction) (demand OR project OR import)' },
+
+  // ── Energy & logistics ──
   { domain: 'energy',        weight: 0.7, lang: 'en',
     q: 'when:7d (electricity OR "natural gas" OR "energy cost") (steel OR smelter OR mill)' },
   { domain: 'energy',        weight: 0.8, lang: 'en',
@@ -65,10 +109,14 @@ export const NEWS_QUERIES = [
     q: 'when:7d (sanctions OR "export control" OR conflict) (steel OR metals OR shipping)' },
   { domain: 'geopolitics',   weight: 0.9, lang: 'en',
     q: 'when:7d (Iran OR "Middle East") (war OR conflict OR shipping OR oil OR sanctions)' },
+
+  // ── Korean-language ──
   { domain: 'korea_steel',   weight: 1.0, lang: 'ko',
     q: 'when:7d (철강 OR 도금강판 OR 컬러강판 OR 열연) (가격 OR 수출 OR 반덤핑)' },
   { domain: 'korea_steel',   weight: 0.9, lang: 'ko',
     q: 'when:7d (관세 OR 무역전쟁 OR 호르무즈 OR 이란) (철강 OR 수출 OR 해운)' },
+  { domain: 'korea_steel',   weight: 0.9, lang: 'ko',
+    q: 'when:7d (포스코 OR 현대제철 OR 동국제강) (수출 OR 생산 OR 가격 OR 실적)' },
 ];
 
 

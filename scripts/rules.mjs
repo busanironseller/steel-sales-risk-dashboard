@@ -1,5 +1,5 @@
 /**
- * The approved causal rule graph (§10.2).
+ * The approved causal rule graph (§10.2 — expanded for product × region granularity).
  *
  * Nothing outside this file may create a causal path. AI-proposed paths are
  * surfaced separately and never feed severity until a human promotes them here.
@@ -7,14 +7,34 @@
  * Each rule states: what triggers it, the chain it asserts, which products and
  * regions it lands on, and what a salesperson should do about it. `direction`
  * is the effect on *our* cost/risk, not on the underlying price.
+ *
+ * §2 — Product specificity: HRC affects CRC directly but reaches GI/GL
+ *       only through the FH (Full-Hard) intermediate. Zinc affects GI
+ *       directly, GL partially (45 % Zn in 55Al-45Zn alloy). Aluminium
+ *       affects GL directly. These dependencies are reflected in separate
+ *       rules so the product filter shows different intelligence.
+ *
+ * §3 — Region specificity: EU runs a safeguard quota; US levies Section 232
+ *       tariffs; GCC has no trade barriers; ASEAN has selective anti-dumping.
+ *       Competitor origins differ by region. Rules are split so the region
+ *       filter surfaces the right risk for each market.
+ *
+ * Value chain (confirmed by domain expert):
+ *   HRC → CRC → FH (Full-Hard) → coated (GI/GL/AL/ZM/GA) → COLOR (PPGI/PPGL/PPAL/…)
+ *   - CRC: cold-rolled from HRC. Cost = f(HRC)
+ *   - GI:  FH + pure zinc dip. Cost = f(HRC, Zinc)
+ *   - GL:  FH + 55 %Al–45 %Zn alloy dip. Cost = f(HRC, Zinc, Aluminium)
+ *   - AL:  FH + aluminium dip. Specialty — only 3–4 mills worldwide. Cost = f(HRC, Aluminium)
+ *   - COLOR (umbrella): any coated substrate + paint. PPGI ⊂ COLOR.
  */
 
 export const PRODUCTS = ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'];
 
 /** Steel value chain used to explain why a substrate move reaches coated products. */
 export const VALUE_CHAIN = [
-  ['HRC', 'CRC', 'GI', 'COLOR'],
-  ['HRC', 'CRC', 'GL', 'COLOR'],
+  ['HRC', 'CRC', 'FH', 'GI', 'PPGI'],
+  ['HRC', 'CRC', 'FH', 'GL', 'PPGL'],
+  ['HRC', 'CRC', 'FH', 'AL', 'PPAL'],
 ];
 
 export const SEVERITY = { LOW: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4 };
@@ -49,58 +69,99 @@ export const MARKET_THRESHOLDS = {
   ],
 };
 
+// ═══════════════════════════════════════════════════════════════════════
+//  RULES — 18 rules split by product × region for filter differentiation
+// ═══════════════════════════════════════════════════════════════════════
+
 export const RULES = [
+
+  // ──────────────────── MARKET-TRIGGERED ────────────────────
+
+  // R1A: HRC → CRC (direct, no intermediate)
   {
-    id: 'R1_HRC_TO_COATED',
-    name: 'China HRC futures → coated offer pressure',
-    nameKo: '중국 HRC 선물 변동 → 도금강판 오퍼 압력',
+    id: 'R1A_HRC_CRC',
+    name: 'China HRC futures → CRC substrate cost',
+    nameKo: 'HRC 선물 → CRC 원판 원가 직접 영향',
     trigger: { kind: 'market', instrument: 'hrc' },
     chain: [
       'China HRC futures move',
-      'Chinese mill price expectation shifts',
-      'CRC cost base shifts',
-      'GI / GL / Color offer pressure',
+      'CRC base cost shifts immediately',
+      'CRC offer price pressure',
+    ],
+    chainKo: [
+      '중국 HRC 선물 급변',
+      'CRC 원판 원가 즉시 연동',
+      'CRC 오퍼가 압력 발생',
+    ],
+    narrativeKo: {
+      UP: 'HRC가 오르면 CRC 원가가 바로 올라갑니다. CRC는 HRC를 냉간 압연한 제품이므로, HRC 가격 변동이 가장 직접적으로 반영됩니다. 기발행 CRC 견적의 유효성을 즉시 확인하세요.',
+      DOWN: 'HRC가 하락하면 바이어가 CRC 가격 인하를 기대합니다. 기발행 견적 대비 시장 괴리가 커져 재협상 압력이 높아집니다.',
+    },
+    products: ['CRC'],
+    regions: ['China', 'Asia', 'Korea Export', 'Europe', 'GCC'],
+    riskType: 'Substrate Cost',
+    riskTypeKo: '원판(기판) 원가',
+    directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
+    actions: {
+      UP: ['Reconfirm CRC offer validity dates immediately',
+           'Check CRC quotation exposure in the last 48 hours'],
+      DOWN: ['Hold back new fixed CRC offers — buyers will expect pass-through',
+             'Re-check CRC cost basis on recent quotations'],
+    },
+    actionsKo: {
+      UP: ['CRC 오퍼 유효 기간을 즉시 재확인하세요',
+           '최근 48시간 내 발행한 CRC 견적의 노출을 점검하세요'],
+      DOWN: ['신규 CRC 고정가 오퍼 발행을 보류하세요 — 바이어가 하락분 반영을 요구합니다',
+             '최근 CRC 견적의 원가 기준을 재점검하세요'],
+    },
+  },
+
+  // R1B: HRC → coated products (indirect, via CRC→FH)
+  {
+    id: 'R1B_HRC_COATED',
+    name: 'China HRC futures → coated product base cost',
+    nameKo: 'HRC 선물 → 도금·컬러 제품 원판 원가',
+    trigger: { kind: 'market', instrument: 'hrc' },
+    chain: [
+      'China HRC futures move',
+      'CRC → Full-Hard (FH) cost shifts',
+      'Coated product (GI/GL/COLOR) substrate cost shifts',
       'Quotation validity & renegotiation risk',
     ],
     chainKo: [
       '중국 HRC 선물 급변',
-      '중국 제철소 가격 기대 변동',
-      'CRC 원가 기반 이동',
-      'GI/GL/컬러 오퍼가 연동 압력',
+      'CRC → 풀하드(FH) 원가 변동',
+      '도금 제품(GI/GL/컬러) 원판 원가 변동',
       '기존 견적 유효성 · 재협상 리스크',
     ],
     narrativeKo: {
-      UP: '중국 열연 선물이 오르면 → 제철소 CRC 오퍼가 올라가고 → 도금·컬러 제품 원가도 따라 상승합니다. 지금 나간 견적의 유효성이 흔들릴 수 있습니다.',
-      DOWN: '중국 열연 선물이 하락하면 → 바이어가 가격 인하를 기대합니다. 기발행 견적 대비 시장 괴리가 커져 재협상 압력이 높아집니다.',
+      UP: 'HRC가 오르면 CRC→FH를 경유하여 GI/GL/컬러 제품의 원판 원가가 올라갑니다. 도금 제품은 HRC 가격이 2~4주 시차로 반영되므로, 현재 나간 도금·컬러 견적의 원가 기반을 재확인해야 합니다.',
+      DOWN: 'HRC 하락 → CRC→FH 원가가 내려가면서 바이어가 도금·컬러 가격 인하를 기대합니다. 시차(2~4주)가 있으므로 성급한 가격 인하에 주의하세요.',
     },
-    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['GI', 'GL', 'PPGI', 'COLOR'],
     regions: ['China', 'Asia', 'Korea Export'],
-    riskType: 'Mill Offer',
-    riskTypeKo: '제철소 오퍼',
+    riskType: 'Substrate Cost',
+    riskTypeKo: '원판(기판) 원가',
     directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
+    lagNote: 'HRC → coated product offers typically lag by 2–4 weeks.',
+    lagNoteKo: 'HRC → 도금 제품 오퍼가 반영까지 통상 2~4주 시차',
     actions: {
-      UP: [
-        'Reconfirm open mill offers and their validity dates',
-        'Review unconfirmed GI/Color quotations for renegotiation exposure',
-        'Prioritise pending bookings before offers are withdrawn',
-      ],
-      DOWN: [
-        'Hold back new fixed offers — buyers will expect the decline to pass through',
-        'Re-check cost basis on quotations issued in the last 48 hours',
-      ],
+      UP: ['Reconfirm open GI/GL/Color mill offers and validity dates',
+           'Review unconfirmed quotations for renegotiation exposure',
+           'Prioritise pending bookings before offers are withdrawn'],
+      DOWN: ['Hold back new fixed offers — buyers will expect the decline to pass through',
+             'Re-check cost basis on quotations issued in the last 48 hours'],
     },
     actionsKo: {
-      UP: [
-        '미확정 제철소 오퍼의 유효 기간을 재확인하세요',
-        '미체결 GI/컬러 견적의 재협상 노출을 점검하세요',
-        '오퍼 철회 전에 대기 중인 부킹을 우선 확정하세요',
-      ],
-      DOWN: [
-        '신규 고정가 오퍼 발행을 보류하세요 — 바이어가 하락분 반영을 요구합니다',
-        '최근 48시간 내 발행한 견적의 원가 기준을 재점검하세요',
-      ],
+      UP: ['미확정 GI/GL/컬러 제철소 오퍼의 유효 기간을 재확인하세요',
+           '미체결 견적의 재협상 노출을 점검하세요',
+           '오퍼 철회 전에 대기 중인 부킹을 우선 확정하세요'],
+      DOWN: ['신규 고정가 오퍼 발행을 보류하세요 — 바이어가 하락분 반영을 요구합니다',
+             '최근 48시간 내 발행한 견적의 원가 기준을 재점검하세요'],
     },
   },
+
+  // R2: China mill offer hike → Asia reference
   {
     id: 'R2_MILL_OFFER',
     name: 'China mill offer hike → Asia reference offer',
@@ -119,7 +180,7 @@ export const RULES = [
     narrativeKo: {
       UP: '중국 주요 제철소(보강, 마강 등)가 오퍼를 올리면 → 아시아 전체의 기준가격이 재설정됩니다. 이미 나간 CRC/GI/컬러 견적을 새 기준가 대비 재확인해야 합니다.',
     },
-    products: ['CRC', 'GI', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
     regions: ['China', 'Asia'],
     riskType: 'Mill Offer',
     riskTypeKo: '제철소 오퍼',
@@ -127,6 +188,8 @@ export const RULES = [
     actions: { UP: ['Reconfirm all open quotations against the new reference offer'] },
     actionsKo: { UP: ['새 기준가 대비 모든 미체결 견적을 재확인하세요'] },
   },
+
+  // R3: Iron ore / coking coal → upstream
   {
     id: 'R3_RAWMAT',
     name: 'Iron ore / coking coal → integrated mill cost',
@@ -146,8 +209,8 @@ export const RULES = [
       UP: '철광석·원료탄이 오르면 → 일관제철소(고로) 생산 원가가 올라 → 수 주 후 HRC·CRC 오퍼에 반영됩니다. 당장은 아니지만 중기 원가 상승 신호입니다.',
       DOWN: '원재료 하락 → 바이어가 이전 원가 기반 오퍼에 저항합니다. 재협상 압력에 대비하세요.',
     },
-    products: ['CRC', 'GI', 'GL'],
-    regions: ['China', 'Asia'],
+    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    regions: ['China', 'Asia', 'Korea Export'],
     riskType: 'Raw Material',
     riskTypeKo: '원재료',
     directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
@@ -162,41 +225,125 @@ export const RULES = [
       DOWN: ['이전 원재료 원가 기반 오퍼에 대한 바이어 저항을 예상하세요'],
     },
   },
+
+  // R4A: Zinc → GI coating cost (GI = 순수 아연 도금)
   {
-    id: 'R4_COATING_METAL',
-    name: 'Zinc / aluminium → coating cost',
-    nameKo: '아연·알루미늄 변동 → 도금 원가 변동',
-    trigger: { kind: 'market', instrument: ['zinc', 'aluminium'] },
+    id: 'R4A_ZINC_GI',
+    name: 'Zinc price → GI coating cost',
+    nameKo: '아연 가격 → GI 도금 원가 직접 영향',
+    trigger: { kind: 'market', instrument: 'zinc' },
     chain: [
-      'Zinc / aluminium price move',
-      'Coating bath cost per tonne shifts',
-      'GI / GL conversion cost shifts',
-      'Coated product margin pressure',
+      'Zinc price move',
+      'GI coating bath cost (pure zinc) shifts',
+      'GI conversion cost and margin pressure',
     ],
     chainKo: [
-      '아연 / 알루미늄 가격 변동',
-      '도금 욕조 원가(톤당) 변동',
-      'GI / GL 가공비 변동',
-      '도금 제품 마진 압박',
+      '아연 가격 변동',
+      'GI 도금 욕조 원가(순수 아연) 변동',
+      'GI 가공비 · 마진 압박',
     ],
     narrativeKo: {
-      UP: '아연·알루미늄이 오르면 → GI/GL 도금 원가(코팅 엑스트라)가 직접 상승합니다. 신규 오퍼 발행 전 코팅 할증 재계산이 필수입니다.',
-      DOWN: '도금 원재료 하락 → 코팅 엑스트라를 경쟁 무기로 활용할 여지가 생깁니다.',
+      UP: '아연이 오르면 GI 도금 원가가 직접 상승합니다. GI는 도금층이 순수 아연이므로 아연 가격 영향을 가장 크게 받습니다. 신규 GI 오퍼 발행 전 코팅 엑스트라 재계산이 필수입니다.',
+      DOWN: '아연 하락 → GI 코팅 엑스트라를 경쟁 무기로 활용할 여지가 생깁니다. 가격 인하 카드로 활용하세요.',
     },
-    products: ['GI', 'GL', 'PPGI', 'COLOR'],
-    regions: ['Korea Export', 'Asia'],
+    products: ['GI', 'PPGI'],
+    regions: ['Korea Export', 'Asia', 'Europe', 'GCC'],
     riskType: 'Coating Cost',
-    riskTypeKo: '도금 원가',
+    riskTypeKo: '도금 원가 (아연)',
     directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
     actions: {
-      UP: ['Recalculate GI/GL coating extras before issuing new offers'],
-      DOWN: ['Coating extras may be a competitive lever on open negotiations'],
+      UP: ['Recalculate GI coating extras before issuing new offers',
+           'Check open GI/PPGI quotations for margin erosion'],
+      DOWN: ['GI coating extras may be a competitive lever on open negotiations',
+             'Consider GI price positioning vs competitor origins'],
     },
     actionsKo: {
-      UP: ['신규 오퍼 발행 전 GI/GL 코팅 엑스트라를 재계산하세요'],
-      DOWN: ['코팅 엑스트라 인하를 협상 카드로 활용할 수 있습니다'],
+      UP: ['신규 GI 오퍼 발행 전 코팅 엑스트라를 재계산하세요',
+           '미체결 GI/PPGI 견적의 마진 침식을 점검하세요'],
+      DOWN: ['GI 코팅 엑스트라 인하를 협상 카드로 활용하세요',
+             '경쟁 오리진 대비 GI 가격 포지셔닝을 검토하세요'],
     },
   },
+
+  // R4B: Aluminium → GL coating cost (GL = 55%Al-45%Zn)
+  {
+    id: 'R4B_ALUM_GL',
+    name: 'Aluminium price → GL / AL coating cost',
+    nameKo: '알루미늄 가격 → GL·AL 도금 원가',
+    trigger: { kind: 'market', instrument: 'aluminium' },
+    chain: [
+      'Aluminium price move',
+      'GL coating alloy (55 %Al) cost shifts',
+      'AL coating (pure aluminium) cost shifts',
+      'GL / AL conversion cost and margin pressure',
+    ],
+    chainKo: [
+      '알루미늄 가격 변동',
+      'GL 도금 합금(55 %Al) 원가 변동',
+      'AL 도금(순수 알루미늄) 원가 변동',
+      'GL/AL 가공비 · 마진 압박',
+    ],
+    narrativeKo: {
+      UP: '알루미늄이 오르면 GL(55 %Al-45 %Zn 합금)과 AL(순수 알루미늄 코팅)의 도금 원가가 직접 상승합니다. 특히 AL은 알루미늄 의존도가 100 %이므로 영향이 가장 큽니다.',
+      DOWN: '알루미늄 하락 → GL/AL 코팅 엑스트라를 경쟁 무기로 활용할 여지가 생깁니다.',
+    },
+    products: ['GL', 'COLOR'],
+    regions: ['Korea Export', 'Asia', 'US'],
+    riskType: 'Coating Cost',
+    riskTypeKo: '도금 원가 (알루미늄)',
+    directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
+    actions: {
+      UP: ['Recalculate GL/AL coating extras before issuing new offers',
+           'For Steelion AL: confirm Posco Steelion offer validity'],
+      DOWN: ['GL/AL coating extras may be a competitive lever',
+             'Consider aggressive GL pricing in Southeast Asia (GL-preferred market)'],
+    },
+    actionsKo: {
+      UP: ['신규 GL/AL 오퍼 발행 전 코팅 엑스트라를 재계산하세요',
+           '스틸리온 AL: 포스코스틸리온 오퍼 유효성을 확인하세요'],
+      DOWN: ['GL/AL 코팅 엑스트라 인하를 협상 카드로 활용하세요',
+             '동남아(GL 선호 시장)에서 공격적 GL 가격 포지셔닝을 검토하세요'],
+    },
+  },
+
+  // R4C: Zinc also affects GL (45 % Zn in alloy)
+  {
+    id: 'R4C_ZINC_GL',
+    name: 'Zinc price → GL coating cost (45 % Zn in 55Al-45Zn)',
+    nameKo: '아연 가격 → GL 도금 원가 (합금 내 45 % 아연)',
+    trigger: { kind: 'market', instrument: 'zinc' },
+    chain: [
+      'Zinc price move',
+      'GL alloy bath cost (45 % Zn component) shifts',
+      'GL conversion cost partially affected',
+    ],
+    chainKo: [
+      '아연 가격 변동',
+      'GL 합금 욕조 원가(45 % 아연 성분) 변동',
+      'GL 가공비 부분 영향',
+    ],
+    narrativeKo: {
+      UP: '아연이 오르면 GL 도금 원가도 일부 영향을 받습니다. GL은 55 %Al-45 %Zn 합금이므로 아연 비중은 GI보다 낮지만, 원가의 45 %를 차지하는 무시할 수 없는 요소입니다.',
+      DOWN: '아연 하락 → GL 원가의 아연 부분이 내려갑니다. GI 대비 GL 가격 경쟁력이 상대적으로 개선될 수 있습니다.',
+    },
+    products: ['GL'],
+    regions: ['Korea Export', 'Asia', 'US'],
+    riskType: 'Coating Cost',
+    riskTypeKo: '도금 원가 (GL 합금)',
+    directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
+    actions: {
+      UP: ['Factor zinc component into GL coating-extra recalculation'],
+      DOWN: ['GL cost advantage vs GI may widen — useful in Asia negotiations'],
+    },
+    actionsKo: {
+      UP: ['GL 코팅 엑스트라 재계산 시 아연 성분 변동을 반영하세요'],
+      DOWN: ['GI 대비 GL 원가 우위가 확대될 수 있습니다 — 동남아 협상에 활용하세요'],
+    },
+  },
+
+  // ──────────────────── NEWS-TRIGGERED: LOGISTICS ────────────────────
+
+  // R5: Oil → freight → CIF
   {
     id: 'R5_OIL_FREIGHT',
     name: 'Crude oil → bunker → ocean freight → CIF',
@@ -217,7 +364,7 @@ export const RULES = [
     narrativeKo: {
       UP: '유가가 오르면 → 벙커유·해상운임이 오르고 → CIF 가격이 올라 수출 경쟁력이 약화됩니다. 유럽·GCC 향 CIF 오퍼에 직접 영향합니다.',
     },
-    products: ['GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
     regions: ['Europe', 'GCC', 'Korea Export'],
     riskType: 'Freight',
     riskTypeKo: '운임',
@@ -225,6 +372,8 @@ export const RULES = [
     actions: { UP: ['Request updated freight quotations before confirming CIF offers'] },
     actionsKo: { UP: ['CIF 오퍼 확정 전 최신 운임 견적을 받으세요'] },
   },
+
+  // R6: Strait disruption
   {
     id: 'R6_STRAIT_DISRUPTION',
     name: 'Hormuz / Red Sea / Suez disruption → delivered cost',
@@ -251,7 +400,7 @@ export const RULES = [
     narrativeKo: {
       UP: '호르무즈 해협·홍해에서 선박 공격이나 항로 차단이 발생하면 → 우회 항로로 운항 일수가 늘고 → 전쟁보험료(War Risk Premium)가 급등하며 → CIF 가격이 올라 유럽·GCC 향 수출 채산성이 악화됩니다.',
     },
-    products: ['GI', 'GL', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
     regions: ['Europe', 'GCC', 'Korea Export'],
     riskType: 'Logistics',
     riskTypeKo: '물류·해운',
@@ -267,6 +416,8 @@ export const RULES = [
       '영향 항로 경유 선적의 ETD/ETA 노출을 확인하세요',
     ],
   },
+
+  // R7: Port closure
   {
     id: 'R7_PORT',
     name: 'Port closure → delay → demurrage → cancellation risk',
@@ -277,52 +428,382 @@ export const RULES = [
     narrativeKo: {
       UP: '항만 파업·폐쇄가 발생하면 → 선적이 지연되고 → 체선료가 발생하며 → 바이어의 인도 일정이 어긋나 계약 취소 위험까지 이어질 수 있습니다.',
     },
-    products: ['GI', 'GL', 'PPGI', 'COLOR'],
-    regions: ['Asia', 'Europe', 'US'],
+    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    regions: ['Asia', 'Europe', 'US', 'GCC'],
     riskType: 'Logistics',
     riskTypeKo: '물류·해운',
     directionFrom: () => 'UP',
     actions: ['Verify ETD/ETA on affected shipments and notify customers early'],
     actionsKo: ['영향 받는 선적의 ETD/ETA를 확인하고 바이어에게 사전 통보하세요'],
   },
+
+  // ──────────────────── NEWS-TRIGGERED: TRADE POLICY (REGION-SPECIFIC) ────────────────────
+
+  // R8A: EU safeguard / quota / CBAM
   {
-    id: 'R8_TRADE_REMEDY',
-    name: 'AD / CVD / Safeguard / Tariff → origin competitiveness',
-    nameKo: '반덤핑·세이프가드·관세 → 원산지별 경쟁력 변동',
+    id: 'R8A_EU_TRADE',
+    name: 'EU safeguard quota / CBAM → Europe import conditions',
+    nameKo: 'EU 세이프가드·쿼터·CBAM → 유럽 수입 조건 변동',
     trigger: {
       kind: 'news',
-      domains: ['trade_policy'],
-      keywords: ['anti-dumping', 'antidumping', 'countervailing', 'safeguard', 'tariff', 'quota', 'cbam', '반덤핑'],
+      domains: ['eu_steel_trade', 'trade_policy'],
+      keywords: ['safeguard', 'quota', 'EU', 'European', 'cbam', 'carbon border'],
     },
     chain: [
-      'Trade remedy action announced',
-      'Import cost or available volume changes',
-      'Origin competitiveness re-ranks',
-      'Contract routing may need to change',
+      'EU trade measure announced or updated',
+      'Import quota or carbon cost changes',
+      'EU market access conditions shift',
+      'Origin competitiveness in Europe re-ranks',
     ],
     chainKo: [
-      '무역 구제 조치 발표',
-      '수입 비용 또는 가용 물량 변동',
-      '원산지별 경쟁력 순위 재편',
-      '계약 루트 변경 필요 가능성',
+      'EU 무역 조치 발표 · 갱신',
+      '수입 쿼터 또는 탄소 비용 변동',
+      '유럽 시장 접근 조건 변동',
+      '유럽 내 원산지별 경쟁력 순위 재편',
     ],
     narrativeKo: {
-      UP: '반덤핑 관세·세이프가드·Section 232/338 등이 발동되면 → 특정 원산지 제품의 수입 비용이 올라가고 → 원산지 간 경쟁력이 재편되며 → 기존 계약의 공급 루트를 변경해야 할 수 있습니다.',
+      UP: 'EU가 세이프가드 쿼터를 조정하거나 CBAM 적용 범위를 변경하면 → 수입 가능 물량이나 탄소 비용이 바뀌고 → 한국산 vs 터키산·인도산·베트남산의 경쟁력이 재편됩니다. 유럽은 GI가 주력 시장입니다.',
     },
-    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
-    regions: ['Europe', 'US', 'Asia', 'Korea Export'],
+    products: ['CRC', 'GI', 'PPGI', 'COLOR'],
+    regions: ['Europe'],
     riskType: 'Trade Policy',
-    riskTypeKo: '통상 정책',
+    riskTypeKo: '통상 정책 (EU)',
     directionFrom: () => 'UP',
     actions: [
-      'Check whether affected origins appear in open offers or contracts',
-      'Confirm mill certificates and melt-and-pour evidence for the destination',
+      'Check remaining quota utilisation for the current period',
+      'Evaluate CBAM cost impact on Korea-origin vs competitor origins',
+      'Confirm mill certificates for EU destination',
     ],
     actionsKo: [
-      '영향 받는 원산지가 미체결 오퍼·계약에 포함되어 있는지 확인하세요',
-      '목적지용 제철소 인증서(Mill Certificate)와 용해·주조 증빙을 확인하세요',
+      '현재 분기 잔여 쿼터 소진율을 확인하세요',
+      '한국산 vs 경쟁 오리진(터키·인도·베트남)의 CBAM 비용 영향을 비교하세요',
+      '유럽 목적지용 제철소 인증서(Mill Certificate)를 확인하세요',
     ],
   },
+
+  // R8B: EU anti-dumping on China → origin shift (opportunity for Korea)
+  {
+    id: 'R8B_EU_AD_CHINA',
+    name: 'EU anti-dumping on China → origin competition shift',
+    nameKo: 'EU 對중국 반덤핑 → 원산지 경쟁 구도 변동',
+    trigger: {
+      kind: 'news',
+      domains: ['eu_steel_trade', 'trade_policy'],
+      keywords: ['anti-dumping', 'antidumping', 'china', 'countervailing', 'EU'],
+    },
+    chain: [
+      'EU anti-dumping duty on Chinese steel reinforced or extended',
+      'Chinese origin effectively blocked in EU market',
+      'Turkey, India, Vietnam, Korea compete for the gap',
+      'Sourcing opportunity from alternative origins',
+    ],
+    chainKo: [
+      'EU 對중국 반덤핑 관세 강화 · 연장',
+      '중국산 유럽 시장 사실상 차단',
+      '터키·인도·베트남·한국산이 공백 경쟁',
+      '대체 오리진 소싱 기회 발생',
+    ],
+    narrativeKo: {
+      UP: 'EU가 중국산 철강에 반덤핑 관세를 강화하면 → 중국산이 유럽에서 차단되고 → 터키산·인도산·베트남산과의 경쟁이 심화됩니다. 이들 국가 MILL에서 소싱도 가능하므로 경쟁자이자 기회이기도 합니다.',
+    },
+    products: ['GI', 'CRC', 'COLOR'],
+    regions: ['Europe'],
+    riskType: 'Trade Policy',
+    riskTypeKo: '통상 정책 (반덤핑)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Monitor Turkey/India/Vietnam GI offers to EU for price positioning',
+      'Evaluate sourcing from competitor-origin mills as alternative supply',
+    ],
+    actionsKo: [
+      '유럽 향 터키·인도·베트남 GI 오퍼 동향을 모니터링하세요',
+      '경쟁 오리진 MILL에서의 소싱을 대안 공급원으로 검토하세요',
+    ],
+  },
+
+  // R8C: US Section 232 / tariff → US market
+  {
+    id: 'R8C_US_TRADE',
+    name: 'US Section 232 / tariff → US market access cost',
+    nameKo: 'US Section 232·관세 → 미국 시장 접근 비용',
+    trigger: {
+      kind: 'news',
+      domains: ['us_steel_trade', 'trade_policy'],
+      keywords: ['section 232', 'section 338', 'section 301', 'tariff', 'US', 'United States', 'import duty'],
+    },
+    chain: [
+      'US tariff policy change announced',
+      'Import cost for affected origins shifts',
+      'Tariff-inclusive price competitiveness changes',
+      'Volume/margin trade-off in US market',
+    ],
+    chainKo: [
+      '미국 관세 정책 변경 발표',
+      '해당 원산지 수입 비용 변동',
+      '관세 포함 가격 경쟁력 변동',
+      '미국 시장 물량/마진 트레이드오프',
+    ],
+    narrativeKo: {
+      UP: '미국은 쿼터제가 아닌 관세제(Section 232 등)를 운영합니다. 관세율 변동이 "뉴노멀" 비용으로 반영되므로, 관세 포함 가격이 먹히는지를 기준으로 판단해야 합니다. 현재 스틸리온 GL이 미국에서 잘 팔리고 있습니다.',
+    },
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
+    regions: ['US'],
+    riskType: 'Trade Policy',
+    riskTypeKo: '통상 정책 (US 관세)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Recalculate landed cost with updated tariff rates',
+      'Check if Steelion GL margins hold at new tariff level',
+      'Compare tariff-inclusive price vs US domestic mills',
+    ],
+    actionsKo: [
+      '변경된 관세율로 미국 도착가를 재계산하세요',
+      '스틸리온 GL의 마진이 새 관세 수준에서도 유지되는지 확인하세요',
+      '관세 포함 가격을 미국 내수 제철소 가격과 비교하세요',
+    ],
+  },
+
+  // R8D: ASEAN anti-dumping / safeguard → Asia market
+  {
+    id: 'R8D_ASIA_TRADE',
+    name: 'ASEAN trade remedy → Asia market access',
+    nameKo: 'ASEAN 반덤핑·세이프가드 → 동남아 시장 접근 변동',
+    trigger: {
+      kind: 'news',
+      domains: ['asia_steel_trade', 'trade_policy'],
+      keywords: ['anti-dumping', 'antidumping', 'safeguard', 'ASEAN', 'Southeast Asia', 'Vietnam', 'Indonesia', 'Thailand', 'Philippines'],
+    },
+    chain: [
+      'ASEAN country announces trade remedy',
+      'Import cost or volume cap changes',
+      'China/Korea/India competitiveness shifts in the region',
+      'Product-specific impact (GL preferred in humid SEA)',
+    ],
+    chainKo: [
+      'ASEAN 국가 무역 구제 조치 발표',
+      '수입 비용 또는 물량 상한 변동',
+      '중국·한국·인도산 역내 경쟁력 변동',
+      '제품별 영향 (습도 높은 동남아는 GL 선호)',
+    ],
+    narrativeKo: {
+      UP: '동남아 국가가 반덤핑·세이프가드를 발동하면 → 중국산 저가 물량이 제한되어 한국산에 기회가 될 수도 있고, 반대로 한국산이 대상이면 위협이 됩니다. 동남아는 GL 선호 시장이라 GL 영향을 특히 주시하세요.',
+    },
+    products: ['GI', 'GL', 'COLOR'],
+    regions: ['Asia'],
+    riskType: 'Trade Policy',
+    riskTypeKo: '통상 정책 (ASEAN)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Identify if the trade remedy targets Korea-origin or competitor origins',
+      'If competitor-targeting: assess opportunity for Korea/Steelion products',
+      'Check GL/AL demand in affected ASEAN countries',
+    ],
+    actionsKo: [
+      '무역 구제 대상이 한국산인지 경쟁 오리진인지 확인하세요',
+      '경쟁 오리진 대상이면 한국산/스틸리온 제품의 기회를 검토하세요',
+      '영향 받는 ASEAN 국가의 GL/AL 수요를 확인하세요',
+    ],
+  },
+
+  // ──────────────────── NEWS-TRIGGERED: COMPETITION ────────────────────
+
+  // R10: China overcapacity / export flood
+  {
+    id: 'R10_CHINA_FLOOD',
+    name: 'China overcapacity / export flood → global price pressure',
+    nameKo: '중국 과잉 생산·수출 공세 → 글로벌 가격 압력',
+    trigger: {
+      kind: 'news',
+      domains: ['china_supply', 'china_export_flood'],
+      keywords: ['overcapacity', 'export', 'dumping', 'flood', 'surplus', 'capacity', 'rebate', 'production cut'],
+    },
+    chain: [
+      'China steel overcapacity or export surge reported',
+      'Low-priced Chinese material floods target markets',
+      'Regional price benchmarks pushed down',
+      'Korea-origin price competitiveness erodes',
+    ],
+    chainKo: [
+      '중국 철강 과잉 생산 또는 수출 급증 보도',
+      '저가 중국산 물량이 목표 시장에 유입',
+      '지역별 가격 벤치마크 하방 압력',
+      '한국산 가격 경쟁력 약화',
+    ],
+    narrativeKo: {
+      UP: '중국이 과잉 생산분을 수출로 밀어내면 → GCC(무역장벽 없음)와 동남아에서 중국산 저가 물량과 직접 경쟁해야 합니다. GCC는 "제일 싼 놈이 이기는" 시장이므로 마진 압박이 심합니다. 유럽은 반덤핑으로 중국산이 차단되어 상대적으로 영향이 적습니다.',
+    },
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
+    regions: ['Asia', 'GCC'],
+    riskType: 'Competition',
+    riskTypeKo: '경쟁 (중국 수출)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Monitor China FOB offer prices in target regions',
+      'GCC: assess if sourcing Chinese material ($50/t premium vs direct) is viable',
+      'Asia: check if Steelion AL/GL can maintain price premium over Chinese alternatives',
+    ],
+    actionsKo: [
+      '목표 시장별 중국 FOB 오퍼 가격을 모니터링하세요',
+      'GCC: 중국산 소싱(다이렉트 대비 톤당 $50 추가) 가능 여부를 검토하세요',
+      '동남아: 스틸리온 AL/GL이 중국산 대비 프리미엄을 유지할 수 있는지 확인하세요',
+    ],
+  },
+
+  // R11A: Turkey steel exports → Europe/GCC competition
+  {
+    id: 'R11A_TURKEY',
+    name: 'Turkey steel export activity → Europe / GCC competition',
+    nameKo: '터키 철강 수출 동향 → 유럽·중동 경쟁 변동',
+    trigger: {
+      kind: 'news',
+      domains: ['competitor_turkey', 'steel_price'],
+      keywords: ['turkey', 'türkiye', 'turkish', 'erdemir', 'tosyali', 'export'],
+    },
+    chain: [
+      'Turkey mill activity or export volume change',
+      'Turkish GI/CRC offers in EU and GCC adjust',
+      'Competition pressure on Korea-origin offers',
+    ],
+    chainKo: [
+      '터키 제철소 활동 또는 수출 물량 변동',
+      '터키산 GI/CRC 유럽·중동 오퍼 변동',
+      '한국산 오퍼에 대한 경쟁 압력 변동',
+    ],
+    narrativeKo: {
+      UP: '터키는 유럽과 중동에서 한국산의 핵심 경쟁자입니다. 터키 제철소(Erdemir, Tosyalı 등)의 오퍼가 변동은 우리 유럽/GCC 오퍼 경쟁력에 직접 영향합니다. 다만 터키 MILL 소싱도 가능하므로 기회가 될 수도 있습니다.',
+    },
+    products: ['GI', 'CRC', 'COLOR'],
+    regions: ['Europe', 'GCC'],
+    riskType: 'Competition',
+    riskTypeKo: '경쟁 (터키)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Track Turkey GI/CRC offer prices for EU and GCC destinations',
+      'Evaluate sourcing from Turkish mills as alternative or supplement',
+    ],
+    actionsKo: [
+      '유럽·중동 향 터키산 GI/CRC 오퍼 가격을 추적하세요',
+      '터키 MILL 소싱을 대안 또는 보완 공급으로 검토하세요',
+    ],
+  },
+
+  // R11B: India steel exports → Europe/GCC/Asia competition
+  {
+    id: 'R11B_INDIA',
+    name: 'India steel export activity → multi-region competition',
+    nameKo: '인도 철강 수출 동향 → 다지역 경쟁 변동',
+    trigger: {
+      kind: 'news',
+      domains: ['competitor_india', 'steel_price'],
+      keywords: ['india', 'indian', 'tata steel', 'jsw', 'sail', 'export'],
+    },
+    chain: [
+      'India mill activity or export policy change',
+      'Indian steel offers in EU / GCC / Asia adjust',
+      'Competition pressure on Korea-origin offers',
+    ],
+    chainKo: [
+      '인도 제철소 활동 또는 수출 정책 변동',
+      '인도산 유럽/중동/아시아 오퍼 변동',
+      '한국산 오퍼에 대한 경쟁 압력 변동',
+    ],
+    narrativeKo: {
+      UP: '인도는 유럽·중동·동남아에서 한국산과 경쟁하는 주요 오리진입니다. Tata Steel, JSW 등의 수출 정책 변동은 여러 시장에 동시에 영향을 미칩니다. 인도 MILL 소싱도 검토 가능합니다.',
+    },
+    products: ['GI', 'CRC', 'GL', 'COLOR'],
+    regions: ['Europe', 'GCC', 'Asia'],
+    riskType: 'Competition',
+    riskTypeKo: '경쟁 (인도)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Track India GI/CRC offer prices across regions',
+      'Evaluate sourcing from Indian mills for target markets',
+    ],
+    actionsKo: [
+      '인도산 GI/CRC 오퍼 가격을 지역별로 추적하세요',
+      '목표 시장별 인도 MILL 소싱 가능성을 검토하세요',
+    ],
+  },
+
+  // R11C: Vietnam steel → Asia/Europe competition
+  {
+    id: 'R11C_VIETNAM',
+    name: 'Vietnam steel production/export → Asia / EU competition',
+    nameKo: '베트남 철강 생산·수출 → 동남아·유럽 경쟁 변동',
+    trigger: {
+      kind: 'news',
+      domains: ['competitor_vietnam', 'asia_steel_trade'],
+      keywords: ['vietnam', 'vietnamese', 'formosa ha tinh', 'hoa phat', 'export', 'production'],
+    },
+    chain: [
+      'Vietnam mill capacity or export volume change',
+      'Vietnamese steel offers in Asia and EU adjust',
+      'Competition for GI/GL/COLOR orders shifts',
+    ],
+    chainKo: [
+      '베트남 제철소 생산능력 또는 수출 물량 변동',
+      '베트남산 아시아·유럽 오퍼 변동',
+      'GI/GL/컬러 수주 경쟁 구도 변동',
+    ],
+    narrativeKo: {
+      UP: '베트남(포모사하띤, 호아팟 등)은 동남아와 유럽에서 경쟁하는 오리진입니다. 현지 생산 능력 확대는 한국산 수출에 위협이지만, 소싱 파트너로의 기회이기도 합니다.',
+    },
+    products: ['GI', 'GL', 'COLOR'],
+    regions: ['Asia', 'Europe'],
+    riskType: 'Competition',
+    riskTypeKo: '경쟁 (베트남)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Monitor Vietnam mill offers for overlap with Korea-origin target markets',
+      'Assess Vietnam MILL sourcing opportunity if competitive',
+    ],
+    actionsKo: [
+      '한국산 목표 시장과 겹치는 베트남 MILL 오퍼를 모니터링하세요',
+      '경쟁력이 있다면 베트남 MILL 소싱 기회를 검토하세요',
+    ],
+  },
+
+  // R12: GCC demand / construction
+  {
+    id: 'R12_GCC_DEMAND',
+    name: 'GCC infrastructure / construction demand → import signal',
+    nameKo: 'GCC 인프라·건설 수요 → 수입 수요 신호',
+    trigger: {
+      kind: 'news',
+      domains: ['gcc_steel_market'],
+      keywords: ['construction', 'project', 'demand', 'infrastructure', 'vision 2030', 'neom', 'saudi', 'uae', 'qatar'],
+    },
+    chain: [
+      'GCC mega-project or construction activity reported',
+      'Steel import demand in the region shifts',
+      'Pricing environment changes (demand-pull vs price war)',
+    ],
+    chainKo: [
+      'GCC 대형 프로젝트 또는 건설 활동 보도',
+      '역내 철강 수입 수요 변동',
+      '가격 환경 변동 (수요 견인 vs 가격 경쟁)',
+    ],
+    narrativeKo: {
+      UP: 'GCC에서 대형 인프라 프로젝트(Vision 2030, NEOM 등)가 진행되면 → 철강 수입 수요가 늘고 → 가격 경쟁이 완화될 수 있습니다. 다만 중국·인도·터키산도 동시에 유입되므로 가격 경쟁은 여전합니다.',
+    },
+    products: ['GI', 'GL', 'COLOR'],
+    regions: ['GCC'],
+    riskType: 'Demand',
+    riskTypeKo: '수요 동향 (GCC)',
+    directionFrom: () => 'UP',
+    actions: [
+      'Identify specific projects driving demand and target product requirements',
+      'Assess if demand uplift justifies holding price vs aggressive pricing',
+    ],
+    actionsKo: [
+      '수요를 견인하는 프로젝트와 필요 제품 사양을 확인하세요',
+      '수요 증가가 가격 유지를 정당화하는지 vs 공격적 가격 전략이 필요한지 판단하세요',
+    ],
+  },
+
+  // ──────────────────── NEWS-TRIGGERED: SANCTIONS ────────────────────
+
+  // R9: Sanctions
   {
     id: 'R9_SANCTION',
     name: 'Sanction → payment / shipping / insurance restriction',
@@ -362,6 +843,7 @@ export const RELEVANCE_TERMS = {
     'galvanized', 'galvanised', 'galvalume', 'ppgi', 'prepainted', 'color coated',
     'colour coated', 'iron ore', 'coking coal', 'billet', 'rebar', 'mill', 'smelter',
     'blast furnace', 'metallurgical', '철강', '열연', '냉연', '도금', '컬러강판', '철광석', '원료탄',
+    'flat steel', 'flat-rolled', 'slab', 'plate',
   ],
   contextual: [
     'tariff', 'anti-dumping', 'antidumping', 'countervailing', 'safeguard', 'quota',
@@ -371,6 +853,10 @@ export const RELEVANCE_TERMS = {
     'trade war', 'iran', 'houthi', 'strait', 'chokepoint', 'oil price', 'brent',
     'marine insurance', 'war risk', 'conflict', 'ceasefire', 'rerouting',
     '관세', '반덤핑', '운임', '수출', '무역전쟁', '호르무즈', '이란',
+    'overcapacity', 'dumping', 'surplus', 'production cut', 'rebate',
+    'turkey', 'india', 'vietnam', 'indonesia', 'posco', 'hyundai steel',
+    'construction', 'infrastructure', 'vision 2030', 'neom',
+    'galvalume', 'aluminized', 'zinc-aluminium',
   ],
   negative: [
     'fashion', 'collection', 'sneaker', 'jewelry', 'jewellery', 'watch', 'perfume',
