@@ -1,0 +1,17 @@
+{
+  "name": "steel-sales-risk-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Steel Sales Risk Intelligence & Early Warning Dashboard for coated-steel (CRC/GI/GL/PPGI) export sales",
+  "scripts": {
+    "collect:market": "node scripts/collect-market.mjs",
+    "collect:news": "node scripts/collect-news.mjs",
+    "collect": "npm run collect:market && npm run collect:news",
+    "analyze": "node scripts/analyze.mjs",
+    "refresh": "npm run collect && npm run analyze"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
