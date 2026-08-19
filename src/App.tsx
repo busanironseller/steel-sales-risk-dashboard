@@ -5,12 +5,26 @@ import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEm
 import type { Analysis, Impact, Issue, IssueStatus, MarketData } from './types';
 
 const BASE = import.meta.env.BASE_URL;
-const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5분마다 자동 새로고침
+const AUTO_REFRESH_MS = 5 * 60 * 1000;
 const KST = 'Asia/Seoul';
 const PULSE_ORDER = ['hrc', 'rebar', 'zinc', 'aluminium', 'ironOre', 'cokingCoal'];
 const STATUSES: IssueStatus[] = ['NEW', 'REVIEWING', 'ACTION_REQUIRED', 'RESOLVED'];
 const ALL_REGIONS = ['China', 'Asia', 'Korea Export', 'Europe', 'GCC', 'US'];
 const ALL_PRODUCTS = ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'];
+const EVENTS_PER_PAGE = 5;
+
+const STATUS_KO: Record<IssueStatus, string> = {
+  NEW: '신규',
+  REVIEWING: '검토 중',
+  ACTION_REQUIRED: '조치 필요',
+  RESOLVED: '완료',
+};
+const STATUS_EMOJI: Record<IssueStatus, string> = {
+  NEW: '🆕',
+  REVIEWING: '🔍',
+  ACTION_REQUIRED: '⚠️',
+  RESOLVED: '✅',
+};
 
 const INSTRUMENT_KO: Record<string, string> = {
   hrc: '열연강판 (HRC)',
@@ -39,16 +53,48 @@ function tradePolicyLabel(title: string): string {
 /** Extract target country from article title */
 function targetCountry(title: string): string {
   const t = title.toLowerCase();
-  if (t.includes('china') || t.includes('중국')) return '→ 중국';
-  if (t.includes('korea') || t.includes('한국')) return '→ 한국';
-  if (t.includes('india') || t.includes('인도')) return '→ 인도';
-  if (t.includes('eu ') || t.includes('europe') || t.includes('유럽')) return '→ EU';
-  if (t.includes('us ') || t.includes('u.s.') || t.includes('america') || t.includes('미국')) return '→ 미국';
-  if (t.includes('canada') || t.includes('캐나다')) return '→ 캐나다';
-  if (t.includes('japan') || t.includes('일본')) return '→ 일본';
-  if (t.includes('vietnam') || t.includes('베트남')) return '→ 베트남';
-  if (t.includes('turkey') || t.includes('türkiye') || t.includes('터키')) return '→ 터키';
+  if (t.includes('china') || t.includes('중국')) return '🇨🇳 중국';
+  if (t.includes('korea') || t.includes('한국')) return '🇰🇷 한국';
+  if (t.includes('india') || t.includes('인도')) return '🇮🇳 인도';
+  if (t.includes('eu ') || t.includes('europe') || t.includes('유럽')) return '🇪🇺 EU';
+  if (t.includes('us ') || t.includes('u.s.') || t.includes('america') || t.includes('미국')) return '🇺🇸 미국';
+  if (t.includes('canada') || t.includes('캐나다')) return '🇨🇦 캐나다';
+  if (t.includes('japan') || t.includes('일본')) return '🇯🇵 일본';
+  if (t.includes('vietnam') || t.includes('베트남')) return '🇻🇳 베트남';
+  if (t.includes('turkey') || t.includes('türkiye') || t.includes('터키')) return '🇹🇷 터키';
+  if (t.includes('saudi') || t.includes('사우디')) return '🇸🇦 사우디';
+  if (t.includes('uae') || t.includes('아랍에미리트')) return '🇦🇪 UAE';
+  if (t.includes('iran') || t.includes('이란')) return '🇮🇷 이란';
+  if (t.includes('indonesia') || t.includes('인도네시아')) return '🇮🇩 인도네시아';
+  if (t.includes('thailand') || t.includes('태국')) return '🇹🇭 태국';
   return '';
+}
+
+/** Rough Korean context from English article title — prominent topic tags */
+function articleContextKo(title: string): string {
+  const t = title.toLowerCase();
+  const tags: string[] = [];
+  // Material
+  if (t.includes('hrc') || t.includes('hot-rolled') || t.includes('hot rolled')) tags.push('열연');
+  if (t.includes('cold-rolled') || t.includes('cold rolled') || t.includes('crc')) tags.push('냉연');
+  if (t.includes('galvaniz') || t.includes('gi ') || t.includes('hot-dip')) tags.push('도금 (GI)');
+  if (t.includes('galvalume') || t.includes('zinc-alum')) tags.push('GL');
+  if (t.includes('prepaint') || t.includes('ppgi') || t.includes('color coat')) tags.push('컬러강판');
+  if (t.includes('zinc')) tags.push('아연');
+  if (t.includes('alumin')) tags.push('알루미늄');
+  if (t.includes('iron ore')) tags.push('철광석');
+  if (t.includes('coking coal')) tags.push('원료탄');
+  // Topic
+  if (t.includes('price') || t.includes('가격')) tags.push('가격');
+  if (t.includes('export') || t.includes('수출')) tags.push('수출');
+  if (t.includes('import') || t.includes('수입')) tags.push('수입');
+  if (t.includes('tariff') || t.includes('관세')) tags.push('관세');
+  if (t.includes('dumping') || t.includes('반덤핑')) tags.push('반덤핑');
+  if (t.includes('sanction') || t.includes('제재')) tags.push('제재');
+  if (t.includes('shipping') || t.includes('freight') || t.includes('해운')) tags.push('해운/물류');
+  if (t.includes('capacity') || t.includes('production') || t.includes('생산')) tags.push('생산');
+  if (t.includes('demand') || t.includes('수요')) tags.push('수요');
+  return tags.slice(0, 4).join(' · ');
 }
 
 function shanghaiToKst(stamp: string): string {
@@ -80,7 +126,11 @@ function sessionState(sourceTimestamp: string): { label: string; labelKo: string
   return { label: 'CLOSED', labelKo: '마감', tone: 'var(--color-muted)' };
 }
 
+/* ══════════════════════════════════════════════════════════════════
+ *  APP COMPONENT
+ * ══════════════════════════════════════════════════════════════════ */
 export function App() {
+  /* ── state ── */
   const [market, setMarket] = useState<MarketData | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -96,7 +146,19 @@ export function App() {
   const [expandedSignal, setExpandedSignal] = useState<string | null>(null);
   const [expandedSalesRow, setExpandedSalesRow] = useState<string | null>(null);
 
-  // Refs for values loadData reads but shouldn't trigger recreation
+  // NEW UI state
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('steel-dashboard-theme');
+      return saved === 'light' ? 'light' : 'dark';
+    } catch { return 'dark'; }
+  });
+  const [signalTab, setSignalTab] = useState<string>('ALL');
+  const [salesRiskTab, setSalesRiskTab] = useState<string>('ALL');
+  const [eventThemeTab, setEventThemeTab] = useState<string>('ALL');
+  const [eventPage, setEventPage] = useState(1);
+
+  /* ── refs ── */
   const refreshingRef = useRef(refreshing);
   refreshingRef.current = refreshing;
   const analysisRef = useRef(analysis);
@@ -108,7 +170,14 @@ export function App() {
   const signalsRef = useRef<HTMLDivElement>(null);
   const eventsRef = useRef<HTMLDivElement>(null);
 
-  /** Cache-busting fetch for JSON data files */
+  /* ── theme effect ── */
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
+    try { localStorage.setItem('steel-dashboard-theme', theme); } catch {}
+  }, [theme]);
+
+  /* ── data loading ── */
   const loadData = useCallback(async (isManual = false) => {
     if (refreshingRef.current) return;
     setRefreshing(true);
@@ -118,54 +187,43 @@ export function App() {
         fetch(`${BASE}data/market.json${bust}`).then((r) => r.json()),
         fetch(`${BASE}data/analysis.json${bust}`).then((r) => r.json()),
       ]);
-
-      // Check if data actually changed (compare generatedAt)
       const changed = !analysisRef.current || a.generatedAt !== analysisRef.current.generatedAt;
-
       setMarket(m);
       setAnalysis(a);
       setLastRefresh(new Date());
       if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
       }
-
-      // Auto-seed issues from critical signals on first visit
       try {
         const seeded = await seedIssuesIfEmpty(a.criticalSignals);
         setIssues(seeded);
       } catch (e) {
         setDbError(String(e));
       }
-
       if (isManual) {
         setToast(changed ? '✅ 새 데이터가 반영되었습니다' : 'ℹ️ 아직 새 데이터가 없습니다 (CI 대기 중)');
       }
       setLoadError(null);
     } catch (err) {
-      if (isManual) {
-        setToast('❌ 데이터 로드 실패');
-      }
+      if (isManual) setToast('❌ 데이터 로드 실패');
       if (!marketRef.current) setLoadError(String(err));
     } finally {
       setRefreshing(false);
     }
-  }, []); // stable — reads from refs, never recreated
+  }, []);
 
-  // Initial load
   useEffect(() => { loadData(); }, []);
-
-  // Auto-refresh every 5 minutes
   useEffect(() => {
     const id = setInterval(() => loadData(false), AUTO_REFRESH_MS);
     return () => clearInterval(id);
   }, [loadData]);
-
   useEffect(() => {
     if (!toast) return;
     const id = setTimeout(() => setToast(null), 3200);
     return () => clearTimeout(id);
   }, [toast]);
 
+  /* ── derived data ── */
   const hrc = market?.instruments.hrc;
   const impact = useMemo(
     () => analysis?.impacts.find((i) => i.id === selectedImpact) ?? analysis?.impacts[0] ?? null,
@@ -179,7 +237,6 @@ export function App() {
     return true;
   };
 
-  // Filtered views — ALL sections respond to filters
   const filteredCriticalSignals = useMemo(() => {
     if (!analysis) return [];
     if (!isFiltered) return analysis.criticalSignals;
@@ -201,11 +258,53 @@ export function App() {
     return analysis.eventClusters.filter((c) => matchFilter(c.regions, c.products));
   }, [analysis, filterRegion, filterProduct]);
 
+  /* ── tab-filtered views ── */
+  const signalsByTab = useMemo(() => {
+    if (signalTab === 'ALL') return filteredCriticalSignals;
+    if (signalTab === 'HIGH') return filteredCriticalSignals.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL');
+    if (signalTab === 'MEDIUM') return filteredCriticalSignals.filter((s) => s.severity === 'MEDIUM');
+    return filteredCriticalSignals.filter((s) => s.severity === 'LOW');
+  }, [filteredCriticalSignals, signalTab]);
+
+  const highCount = filteredCriticalSignals.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL').length;
+  const medCount = filteredCriticalSignals.filter((s) => s.severity === 'MEDIUM').length;
+  const lowCount = filteredCriticalSignals.filter((s) => s.severity === 'LOW').length;
+
+  // Sales Impact risk-type tabs (dynamically extracted)
+  const salesRiskTypes = useMemo(() => {
+    const types = new Set(filteredSalesImpact.map((r) => r.riskTypeKo ?? r.riskType));
+    return ['ALL', ...Array.from(types)];
+  }, [filteredSalesImpact]);
+
+  const salesByTab = useMemo(() => {
+    if (salesRiskTab === 'ALL') return filteredSalesImpact;
+    return filteredSalesImpact.filter((r) => (r.riskTypeKo ?? r.riskType) === salesRiskTab);
+  }, [filteredSalesImpact, salesRiskTab]);
+
+  // Event Radar risk-type tabs (dynamically extracted)
+  const eventRiskTypes = useMemo(() => {
+    const types = new Set(filteredEventClusters.map((c) => c.riskTypeKo ?? c.riskType));
+    return ['ALL', ...Array.from(types)];
+  }, [filteredEventClusters]);
+
+  const eventsByTab = useMemo(() => {
+    if (eventThemeTab === 'ALL') return filteredEventClusters;
+    return filteredEventClusters.filter((c) => (c.riskTypeKo ?? c.riskType) === eventThemeTab);
+  }, [filteredEventClusters, eventThemeTab]);
+
+  const totalEventPages = Math.max(1, Math.ceil(eventsByTab.length / EVENTS_PER_PAGE));
+  const clampedPage = Math.min(eventPage, totalEventPages);
+  const pagedEvents = eventsByTab.slice((clampedPage - 1) * EVENTS_PER_PAGE, clampedPage * EVENTS_PER_PAGE);
+
+  // Reset event page when tab changes
+  useEffect(() => { setEventPage(1); }, [eventThemeTab]);
+
+  /* ── issue handlers ── */
   async function onCreateIssue(target: Impact, region: string, action: string) {
     try {
       const created = await createIssue(target, region, action);
       setIssues(await listIssues());
-      setToast(created ? `Issue #${created.id} 생성됨` : '이미 열려 있는 Issue가 있습니다');
+      setToast(created ? `이슈 #${created.id} 생성됨` : '이미 열려 있는 이슈가 있습니다');
     } catch (err) {
       setDbError(String(err));
     }
@@ -221,6 +320,7 @@ export function App() {
     setIssues(await listIssues());
   }
 
+  /* ── loading / error states ── */
   if (loadError) {
     return (
       <div className="p-8 text-[13px]">
@@ -247,12 +347,15 @@ export function App() {
   const session = sessionState(hrc.sourceTimestamp);
   const collectedAgo = minutesSince(analysis.generatedAt);
   const stale = collectedAgo > 90;
-  const highCount = filteredCriticalSignals.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL').length;
-  const medCount = filteredCriticalSignals.filter((s) => s.severity === 'MEDIUM').length;
 
+  const activeIssues = issues.filter((i) => i.status !== 'RESOLVED');
+
+  /* ══════════════════════════════════════════════════════════════════
+   *  RENDER
+   * ══════════════════════════════════════════════════════════════════ */
   return (
     <div className="min-h-screen">
-      {/* ──────────────────────────────── HEADER ──────────────────────────────── */}
+      {/* ════════════════════════════ HEADER ════════════════════════════ */}
       <header className="border-b border-[var(--color-slate-line)] bg-[var(--color-panel)]">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3">
           <div className="flex items-center gap-3">
@@ -271,6 +374,16 @@ export function App() {
           </div>
 
           <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
+            {/* Theme toggle */}
+            <button
+              className="theme-toggle"
+              onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
+            >
+              <span style={{ fontSize: '14px' }}>{theme === 'dark' ? '☀️' : '🌙'}</span>
+              {theme === 'dark' ? '라이트' : '다크'}
+            </button>
+
             <StatusChip label="MODE" value="PROTOTYPE" tone="var(--color-risk-med)" />
             <StatusChip label="HRC" value={session.labelKo} tone={session.tone} />
             <StatusChip
@@ -289,16 +402,14 @@ export function App() {
                 background: refreshing ? 'transparent' : 'rgba(79,195,247,0.08)',
                 cursor: refreshing ? 'wait' : 'pointer',
               }}
-              title="CI에서 수집된 최신 데이터를 다시 불러옵니다. 데이터 수집은 GitHub Actions에서 30분마다 자동 실행됩니다."
+              title="CI에서 수집된 최신 데이터를 다시 불러옵니다"
             >
-              <span className={refreshing ? 'animate-spin' : ''} style={{ display: 'inline-block' }}>
-                ↻
-              </span>
-              {refreshing ? '로딩 중...' : '데이터 갱신'}
+              <span className={refreshing ? 'animate-spin' : ''} style={{ display: 'inline-block' }}>↻</span>
+              {refreshing ? '로딩 중...' : '새로고침'}
             </button>
             <div className="num text-[var(--color-faint)] text-right">
               <div>수집 {fmtIso(analysis.generatedAt)}</div>
-              <div className="text-[9px]">수집 주기: 30분 (GitHub Actions CI/CD)</div>
+              <div className="text-[9px]">수집 주기: 30분 (GitHub Actions)</div>
             </div>
           </div>
         </div>
@@ -306,47 +417,27 @@ export function App() {
 
       <main className="mx-auto max-w-[1600px] space-y-4 p-4 md:p-5">
 
-        {/* ──────────────── HERO STAT CARDS ──────────────── */}
+        {/* ════════════════════════════ HERO STAT CARDS ════════════════════════════ */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="cursor-pointer" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <StatCard
-              label="위험 신호"
-              value={highCount}
-              sub={`HIGH 이상 ${highCount}건${isFiltered ? ' (필터)' : ''}`}
-              tone="high"
-            />
+            <StatCard label="위험 신호" value={highCount} sub={`HIGH 이상 ${highCount}건${isFiltered ? ' (필터)' : ''}`} tone="high" />
           </div>
           <div className="cursor-pointer" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <StatCard
-              label="주의 신호"
-              value={medCount}
-              sub={`MEDIUM ${medCount}건${isFiltered ? ' (필터)' : ''}`}
-              tone="med"
-            />
+            <StatCard label="주의 신호" value={medCount} sub={`MEDIUM ${medCount}건${isFiltered ? ' (필터)' : ''}`} tone="med" />
           </div>
           <div className="cursor-pointer" onClick={() => eventsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <StatCard
-              label="이벤트 클러스터"
-              value={filteredEventClusters.length}
-              sub={`뉴스 ${analysis.inputs.articlesRelevant}건 분석${isFiltered ? ' (필터)' : ''}`}
-              tone="steel"
-            />
+            <StatCard label="이벤트 클러스터" value={filteredEventClusters.length}
+              sub={`뉴스 ${analysis.inputs.articlesRelevant}건 분석${isFiltered ? ' (필터)' : ''}`} tone="steel" />
           </div>
-          <StatCard
-            label="활성 이슈"
-            value={issues.filter((i) => i.status !== 'RESOLVED').length}
-            sub={`전체 ${issues.length}건`}
-            tone={issues.some((i) => i.status === 'ACTION_REQUIRED') ? 'med' : 'steel'}
-          />
+          <StatCard label="활성 이슈" value={activeIssues.length} sub={`전체 ${issues.length}건`}
+            tone={issues.some((i) => i.status === 'ACTION_REQUIRED') ? 'med' : 'steel'} />
         </div>
 
-        {/* ──────────────── FILTER BAR ──────────────── */}
+        {/* ════════════════════════════ FILTER BAR ════════════════════════════ */}
         <div className="flex flex-wrap items-center gap-3 px-1">
           <span className="eyebrow">필터</span>
           {isFiltered && (
-            <span className="text-[10px] text-[var(--color-risk-med)] font-semibold">
-              ● 필터 적용 중 — 전체 대시보드에 반영
-            </span>
+            <span className="text-[10px] text-[var(--color-risk-med)] font-semibold">● 필터 적용 중 — 전체 대시보드에 반영</span>
           )}
           <div className="flex flex-wrap gap-1.5">
             <FilterChip label="전체 지역" active={filterRegion === 'ALL'} onClick={() => setFilterRegion('ALL')} />
@@ -363,7 +454,7 @@ export function App() {
           </div>
         </div>
 
-        {/* ──────────────── 01 MARKET PULSE ──────────────── */}
+        {/* ════════════════════════════ 01 MARKET PULSE ════════════════════════════ */}
         <Panel
           title="MARKET PULSE"
           titleKo="실시간 시장 현황"
@@ -373,9 +464,7 @@ export function App() {
             <>
               SHFE + Sina · {analysis.inputs.instrumentsCovered}개 선물
               {market.failures.length > 0 && (
-                <span className="ml-2 text-[var(--color-risk-high)]">
-                  {market.failures.length} FAILED
-                </span>
+                <span className="ml-2 text-[var(--color-risk-high)]">{market.failures.length} FAILED</span>
               )}
             </>
           }
@@ -404,9 +493,7 @@ export function App() {
                     <tr key={key}>
                       <td className="font-semibold whitespace-nowrap">
                         {INSTRUMENT_KO[key] ?? it.labelKo}
-                        <span className="ml-1.5 text-[10px] font-normal text-[var(--color-faint)]">
-                          {it.exchange}
-                        </span>
+                        <span className="ml-1.5 text-[10px] font-normal text-[var(--color-faint)]">{it.exchange}</span>
                       </td>
                       <td className="num text-[11px] text-[var(--color-muted)]">{it.contract}</td>
                       <td className="num text-right font-bold text-[var(--color-ink)]">{it.last?.toLocaleString()}</td>
@@ -414,12 +501,8 @@ export function App() {
                       <td className="text-right"><Pct value={it.change.m30} /></td>
                       <td className="text-right"><Pct value={it.change.m60} /></td>
                       <td className="text-right"><Pct value={it.change.m120} /></td>
-                      <td className="num text-right text-[var(--color-muted)]">
-                        {it.volume?.toLocaleString() ?? '—'}
-                      </td>
-                      <td className="num text-right text-[var(--color-muted)]">
-                        {it.openInterest?.toLocaleString() ?? '—'}
-                      </td>
+                      <td className="num text-right text-[var(--color-muted)]">{it.volume?.toLocaleString() ?? '—'}</td>
+                      <td className="num text-right text-[var(--color-muted)]">{it.openInterest?.toLocaleString() ?? '—'}</td>
                       <td className="text-[10px]">
                         <span
                           className="border px-1.5 py-px rounded-sm"
@@ -432,9 +515,7 @@ export function App() {
                           {it.exchange === 'SHFE' ? '공식' : '비공식'}
                         </span>
                       </td>
-                      <td className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">
-                        {it.sourceTimestamp}
-                      </td>
+                      <td className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">{it.sourceTimestamp}</td>
                     </tr>
                   );
                 })}
@@ -446,429 +527,434 @@ export function App() {
           </div>
         </Panel>
 
-        {/* ──────────────── 02 CRITICAL SIGNALS ──────────────── */}
+        {/* ════════════════════════════ 02+04 CRITICAL SIGNALS + RISK BRIEF (SIDE-BY-SIDE) ════════════════════════════ */}
         <div ref={signalsRef}>
-        <Panel
-          title="CRITICAL SIGNALS"
-          titleKo={`핵심 위험 신호 — 클릭하여 근거 확인${isFiltered ? ' (필터 적용)' : ''}`}
-          index="02"
-          glow={highCount > 0 ? 'high' : undefined}
-          meta={`${filteredCriticalSignals.length}건${isFiltered ? ` / 전체 ${analysis.criticalSignals.length}건` : '건 감지'} · 규칙 ${analysis.ruleCount}개`}
-        >
-          {filteredCriticalSignals.length === 0 ? (
-            <EmptyState text={isFiltered ? '선택한 필터 조건에 맞는 위험 신호가 없습니다. 필터를 변경해보세요.' : '현재 임계값을 넘은 위험 신호가 없습니다.'} />
-          ) : (
-            <div className="divide-y divide-[var(--color-slate-line)]">
-              {filteredCriticalSignals.map((sig) => {
-                const isExpanded = expandedSignal === sig.id;
-                return (
-                  <div key={sig.id}>
-                    <button
-                      onClick={() => {
-                        setExpandedSignal(isExpanded ? null : sig.id);
-                        setSelectedImpact(sig.id);
-                      }}
-                      className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--color-steel-soft)] ${
-                        isExpanded ? 'bg-[var(--color-steel-mid)]' : ''
-                      }`}
-                    >
-                      <SeverityTag severity={sig.severity} />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-baseline gap-x-2">
-                          <span className="text-[13px] font-semibold text-[var(--color-ink)]">
-                            {sig.ruleNameKo ?? sig.ruleName}
-                          </span>
-                          <Arrow direction={sig.direction} />
-                          <span className="text-[10px] text-[var(--color-faint)]">
-                            {sig.origin === 'MARKET_SIGNAL' ? '시장 신호' : '뉴스 클러스터'}
-                            {' · '}
-                            {sig.riskTypeKo ?? sig.riskType}
-                          </span>
-                        </div>
-                        <div className="mt-0.5 text-[11.5px] text-[var(--color-muted)]">{sig.fact}</div>
-                        {!isExpanded && sig.narrativeKo && (
-                          <div className="mt-1 text-[10.5px] text-[var(--color-steel)]">
-                            ▸ 클릭하여 근거 · 인과관계 · 조치 사항 확인
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        <ConfidenceTag confidence={sig.confidence} />
-                        <span className="text-[10px] text-[var(--color-faint)]">
-                          {sig.regions.slice(0, 3).join(' · ')}
-                        </span>
-                        <span className="text-[10px] text-[var(--color-faint)]">
-                          {sig.products.slice(0, 4).join(' · ')}
-                        </span>
-                        <span className="text-[10px] mt-0.5" style={{ color: 'var(--color-steel)' }}>
-                          {isExpanded ? '▾ 접기' : '▸ 펼치기'}
-                        </span>
-                      </div>
-                    </button>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* ─── LEFT: Critical Signals ─── */}
+            <Panel
+              title="CRITICAL SIGNALS"
+              titleKo={`핵심 위험 신호${isFiltered ? ' (필터 적용)' : ''}`}
+              index="02"
+              glow={highCount > 0 ? 'high' : undefined}
+              meta={`${filteredCriticalSignals.length}건${isFiltered ? ` / 전체 ${analysis.criticalSignals.length}건` : ''} · 규칙 ${analysis.ruleCount}개`}
+            >
+              {/* Severity tabs */}
+              <div className="tab-bar">
+                <TabChip label="전체" count={filteredCriticalSignals.length} active={signalTab === 'ALL'}
+                  onClick={() => setSignalTab('ALL')} />
+                <TabChip label="🔴 HIGH" count={highCount} active={signalTab === 'HIGH'}
+                  onClick={() => setSignalTab('HIGH')} />
+                <TabChip label="🟡 MEDIUM" count={medCount} active={signalTab === 'MEDIUM'}
+                  onClick={() => setSignalTab('MEDIUM')} />
+                {lowCount > 0 && (
+                  <TabChip label="⚪ LOW" count={lowCount} active={signalTab === 'LOW'}
+                    onClick={() => setSignalTab('LOW')} />
+                )}
+              </div>
 
-                    {/* ── Expanded detail: WHY + EVIDENCE + ACTIONS ── */}
-                    {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 space-y-3 border-l-2 ml-4 border-[var(--color-steel)]"
-                        style={{ background: 'linear-gradient(90deg, rgba(79,195,247,0.04), transparent 50%)' }}>
-
-                        {sig.narrativeKo && (
-                          <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
-                            style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
-                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
-                              💡 왜 위험한가 — 영업 영향
-                            </div>
-                            {sig.narrativeKo}
-                          </div>
-                        )}
-
-                        <div>
-                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
-                            📰 인과 체인
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                            {(sig.chainKo ?? sig.chain).map((step: string, i: number) => (
-                              <span key={step} className="flex items-center gap-1">
-                                {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
-                                <span className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
-                                  i === (sig.chainKo ?? sig.chain).length - 1
-                                    ? 'font-semibold text-[var(--color-ink)] bg-[rgba(255,82,82,0.1)] border border-[rgba(255,82,82,0.3)]'
-                                    : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
-                                }`}>
-                                  {step}
-                                </span>
+              {signalsByTab.length === 0 ? (
+                <EmptyState text={
+                  signalTab !== 'ALL'
+                    ? `${signalTab} 등급 위험 신호가 없습니다.`
+                    : isFiltered
+                      ? '선택한 필터 조건에 맞는 위험 신호가 없습니다.'
+                      : '현재 임계값을 넘은 위험 신호가 없습니다.'
+                } />
+              ) : (
+                <div className="divide-y divide-[var(--color-slate-line)] max-h-[600px] overflow-y-auto">
+                  {signalsByTab.map((sig) => {
+                    const isExpanded = expandedSignal === sig.id;
+                    const isSelected = selectedImpact === sig.id;
+                    return (
+                      <div key={sig.id}>
+                        <button
+                          onMouseEnter={() => setSelectedImpact(sig.id)}
+                          onClick={() => {
+                            setExpandedSignal(isExpanded ? null : sig.id);
+                            setSelectedImpact(sig.id);
+                          }}
+                          className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--color-steel-soft)] ${
+                            isSelected ? 'bg-[var(--color-steel-mid)]' : ''
+                          }`}
+                        >
+                          <SeverityTag severity={sig.severity} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-baseline gap-x-2">
+                              <span className="text-[13px] font-semibold text-[var(--color-ink)]">
+                                {sig.ruleNameKo ?? sig.ruleName}
                               </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {sig.evidence && sig.evidence.length > 0 && (
-                          <div>
-                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
-                              📋 근거 기사 — {sig.evidence.length}건 (클릭하여 원문 확인)
+                              <Arrow direction={sig.direction} />
+                              <span className="text-[10px] text-[var(--color-faint)]">
+                                {sig.origin === 'MARKET_SIGNAL' ? '시장 신호' : '뉴스 클러스터'}
+                                {' · '}{sig.riskTypeKo ?? sig.riskType}
+                              </span>
                             </div>
-                            <ul className="space-y-2">
-                              {sig.evidence.map((e: any) => (
-                                <li key={e.id} className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
-                                  style={{ border: '1px solid var(--color-slate-line)' }}>
-                                  <a href={e.link} target="_blank" rel="noreferrer noopener"
-                                    className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
-                                    <span className="inline-block px-1 py-px mr-1 rounded-sm text-[9px] font-bold bg-[var(--color-surface)] text-[var(--color-muted)]">
-                                      {tradePolicyLabel(e.title)}
-                                    </span>
-                                    {targetCountry(e.title) && (
-                                      <span className="text-[10px] text-[var(--color-risk-med)] mr-1">{targetCountry(e.title)}</span>
-                                    )}
-                                    ↗ {e.title}
-                                  </a>
-                                  <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
-                                    {e.source} · {e.publishedAt.slice(0, 10)}
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
+                            <div className="mt-0.5 text-[11.5px] text-[var(--color-muted)]">{sig.fact}</div>
+                            {!isExpanded && (
+                              <div className="mt-1 text-[10.5px] text-[var(--color-steel)]">
+                                ▸ 클릭하여 근거 확인 · 마우스 올려서 브리프 보기
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex shrink-0 flex-col items-end gap-1">
+                            <ConfidenceTag confidence={sig.confidence} />
+                            <span className="text-[10px] text-[var(--color-faint)]">{sig.regions.slice(0, 3).join(' · ')}</span>
+                            <span className="text-[10px] text-[var(--color-faint)]">{sig.products.slice(0, 4).join(' · ')}</span>
+                          </div>
+                        </button>
+
+                        {/* Expanded: evidence articles + actions */}
+                        {isExpanded && (
+                          <div className="px-4 pb-4 pt-1 space-y-3 border-l-2 ml-4 border-[var(--color-steel)]"
+                            style={{ background: 'linear-gradient(90deg, var(--color-steel-soft), transparent 50%)' }}>
+
+                            {sig.evidence && sig.evidence.length > 0 && (
+                              <div>
+                                <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
+                                  📋 근거 기사 — {sig.evidence.length}건
+                                </div>
+                                <ul className="space-y-2">
+                                  {sig.evidence.map((e: any) => {
+                                    const ctx = articleContextKo(e.title);
+                                    const country = targetCountry(e.title);
+                                    return (
+                                      <li key={e.id} className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
+                                        style={{ border: '1px solid var(--color-slate-line)' }}>
+                                        {/* Korean context line (primary) */}
+                                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                                          <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
+                                            {tradePolicyLabel(e.title)}
+                                          </span>
+                                          {country && (
+                                            <span className="text-[10px] font-medium text-[var(--color-risk-med)]">{country}</span>
+                                          )}
+                                          {ctx && (
+                                            <span className="text-[10px] text-[var(--color-muted)]">{ctx}</span>
+                                          )}
+                                        </div>
+                                        {/* English original (link) */}
+                                        <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                          className="text-[11.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                          ↗ {e.title}
+                                        </a>
+                                        <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
+                                          {e.source} · {e.publishedAt.slice(0, 10)}
+                                        </div>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </div>
+                            )}
+
+                            <div>
+                              <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1.5 uppercase">
+                                ✅ 권장 조치
+                              </div>
+                              <ul className="space-y-1.5">
+                                {(sig.actionsKo?.length ? sig.actionsKo : sig.actions).map((a: string) => (
+                                  <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
+                                    <span>· {a}</span>
+                                    <button
+                                      className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                                      onClick={(ev) => { ev.stopPropagation(); onCreateIssue(sig, sig.regions[0], a); }}
+                                    >
+                                      + 이슈
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Panel>
 
-                        <div>
-                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1.5 uppercase">
-                            ✅ 권장 조치
-                          </div>
-                          <ul className="space-y-1.5">
-                            {(sig.actionsKo?.length ? sig.actionsKo : sig.actions).map((a: string) => (
-                              <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
-                                <span>· {a}</span>
-                                <button
-                                  className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                                  onClick={(ev) => { ev.stopPropagation(); onCreateIssue(sig, sig.regions[0], a); }}
-                                >
-                                  + 이슈 등록
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
+            {/* ─── RIGHT: Risk Brief (sticky, changes on hover/click) ─── */}
+            <div className="lg:sticky lg:top-4 lg:self-start">
+              <Panel
+                title="RISK BRIEF"
+                titleKo="위험 분석 브리프 — 왼쪽 신호에 마우스를 올리면 자동 변경됩니다"
+                index="04"
+                glow={impact?.severity === 'HIGH' || impact?.severity === 'CRITICAL' ? 'high' : impact?.severity === 'MEDIUM' ? 'med' : undefined}
+                meta={impact ? `${impact.ruleId} · ${impact.origin === 'MARKET_SIGNAL' ? '시장' : '뉴스'} · ${impact.riskTypeKo ?? impact.riskType}` : undefined}
+              >
+                {!impact ? (
+                  <EmptyState text="왼쪽 핵심 신호에 마우스를 올리거나 클릭하세요." />
+                ) : (
+                  <div className="space-y-3 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SeverityTag severity={impact.severity} />
+                      <ConfidenceTag confidence={impact.confidence} />
+                      <span className="text-[12px] font-semibold text-[var(--color-ink)]">
+                        {impact.ruleNameKo ?? impact.ruleName}
+                      </span>
+                    </div>
+
+                    {impact.narrativeKo && (
+                      <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
+                        style={{ background: 'linear-gradient(135deg, var(--color-risk-med-soft), var(--color-risk-high-soft))' }}>
+                        <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
+                          💡 왜 위험한가 — 영업 영향
                         </div>
+                        {impact.narrativeKo}
+                      </div>
+                    )}
+
+                    <Epistemic kind="FACT">
+                      {impact.fact}
+                      <div className="mt-1 text-[10px] text-[var(--color-faint)] num">
+                        {impact.factSource} · {impact.factTimestamp}
+                      </div>
+                    </Epistemic>
+
+                    <Epistemic kind="RULE">
+                      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                        {(impact.chainKo ?? impact.chain).map((step: string, i: number) => (
+                          <span key={step} className="flex items-center gap-1">
+                            {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
+                            <span className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
+                              i === (impact.chainKo ?? impact.chain).length - 1
+                                ? 'font-semibold text-[var(--color-ink)] bg-[var(--color-risk-high-soft)] border border-[var(--color-risk-high)]'
+                                : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
+                            }`}>
+                              {step}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                      {(impact.lagNoteKo ?? impact.lagNote) && (
+                        <div className="mt-1 text-[10.5px] text-[var(--color-faint)]">⏱ {impact.lagNoteKo ?? impact.lagNote}</div>
+                      )}
+                    </Epistemic>
+
+                    <Epistemic kind="INFERENCE">{impact.inference}</Epistemic>
+
+                    <Epistemic kind="ACTION">
+                      <ul className="space-y-1.5">
+                        {(impact.actionsKo?.length ? impact.actionsKo : impact.actions).map((a: string) => (
+                          <li key={a} className="flex items-start justify-between gap-2">
+                            <span>· {a}</span>
+                            <button
+                              className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                              onClick={() => onCreateIssue(impact, impact.regions[0], a)}
+                            >
+                              + 이슈
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </Epistemic>
+
+                    {impact.corroborationNote && (
+                      <div className="border border-dashed border-[var(--color-slate-line)] rounded px-3 py-2 text-[10.5px] text-[var(--color-muted)]">
+                        {impact.corroborationNote}
+                      </div>
+                    )}
+
+                    {impact.evidence && impact.evidence.length > 0 && (
+                      <div>
+                        <div className="eyebrow mb-1.5">근거 자료 · {impact.evidence.length}건</div>
+                        <ul className="space-y-1.5">
+                          {impact.evidence.slice(0, 4).map((e: any) => (
+                            <li key={e.id} className="text-[11px] leading-snug">
+                              <div className="flex flex-wrap items-center gap-1 mb-0.5">
+                                <span className="inline-block px-1 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
+                                  {tradePolicyLabel(e.title)}
+                                </span>
+                                {targetCountry(e.title) && (
+                                  <span className="text-[10px] text-[var(--color-risk-med)]">{targetCountry(e.title)}</span>
+                                )}
+                              </div>
+                              <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                className="text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2">
+                                ↗ {e.title}
+                              </a>
+                              <span className="ml-1 text-[10px] text-[var(--color-faint)] num">
+                                {e.source} · {e.publishedAt.slice(0, 10)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
                   </div>
-                );
-              })}
+                )}
+              </Panel>
             </div>
-          )}
-        </Panel>
+          </div>
         </div>
 
-        {/* ──────────────── 03 + 04 SALES IMPACT + RISK BRIEF ──────────────── */}
-        <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-          <Panel
-            title="SALES IMPACT"
-            titleKo={`판매 영향 분석${isFiltered ? ' (필터 적용)' : ''}`}
-            index="03"
-            meta={`${filteredSalesImpact.length}건${isFiltered ? ` / 전체 ${analysis.salesImpact.length}건` : ''}`}
-          >
-            <div className="overflow-x-auto">
-              <table className="grid">
-                <thead>
+        {/* ════════════════════════════ 03 SALES IMPACT (with risk-type tabs) ════════════════════════════ */}
+        <Panel
+          title="SALES IMPACT"
+          titleKo={`판매 영향 분석${isFiltered ? ' (필터 적용)' : ''} — 리스크 유형별 탭으로 분류`}
+          index="03"
+          meta={`${filteredSalesImpact.length}건${isFiltered ? ` / 전체 ${analysis.salesImpact.length}건` : ''}`}
+        >
+          {/* Risk-type tabs */}
+          <div className="tab-bar">
+            {salesRiskTypes.map((type) => {
+              const count = type === 'ALL' ? filteredSalesImpact.length : filteredSalesImpact.filter((r) => (r.riskTypeKo ?? r.riskType) === type).length;
+              return (
+                <TabChip key={type} label={type === 'ALL' ? '전체' : type} count={count}
+                  active={salesRiskTab === type} onClick={() => setSalesRiskTab(type)} />
+              );
+            })}
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="grid">
+              <thead>
+                <tr>
+                  <th>지역</th>
+                  <th>제품</th>
+                  <th>리스크 유형</th>
+                  <th>위험도</th>
+                  <th className="text-center">방향</th>
+                  <th>신뢰도</th>
+                  <th>필요 조치</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {salesByTab.length === 0 ? (
                   <tr>
-                    <th>지역</th>
-                    <th>제품</th>
-                    <th>위험도</th>
-                    <th className="text-center">방향</th>
-                    <th>신뢰도</th>
-                    <th>필요 조치</th>
-                    <th />
+                    <td colSpan={8} className="text-center text-[var(--color-faint)] py-6">
+                      {salesRiskTab !== 'ALL' ? `${salesRiskTab} 유형 리스크가 없습니다.` : '판매 영향 항목이 없습니다.'}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredSalesImpact.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="text-center text-[var(--color-faint)] py-6">
-                        {isFiltered ? '선택한 필터 조건에 맞는 항목이 없습니다.' : '판매 영향 항목이 없습니다.'}
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredSalesImpact.map((row) => {
-                      const target = analysis.impacts.find((i) => i.id === row.impactId);
-                      const isSalesExpanded = expandedSalesRow === row.id;
-                      return (
-                        <React.Fragment key={row.id}>
-                          <tr
-                            className={`cursor-pointer transition-colors ${isSalesExpanded ? 'bg-[var(--color-steel-mid)]' : 'hover:bg-[var(--color-steel-soft)]'}`}
-                            onClick={() => {
-                              setExpandedSalesRow(isSalesExpanded ? null : row.id);
-                              setSelectedImpact(row.impactId);
-                            }}
-                          >
-                            <td className="font-semibold whitespace-nowrap">{row.region}</td>
-                            <td className="text-[11px] text-[var(--color-muted)]">{row.products.join(' / ')}</td>
-                            <td className="whitespace-nowrap">
-                              <SeverityTag severity={row.severity} />
-                              <span className="ml-1.5 text-[11px] text-[var(--color-muted)]">{row.riskTypeKo ?? row.riskType}</span>
-                            </td>
-                            <td className="text-center"><Arrow direction={row.direction} /></td>
-                            <td><ConfidenceTag confidence={row.confidence} /></td>
-                            <td className="text-[11.5px] text-[var(--color-muted)]">
-                              {row.action}
-                              <div className="text-[10px] mt-0.5" style={{ color: 'var(--color-steel)' }}>
-                                {isSalesExpanded ? '▾ 근거 접기' : '▸ 근거 보기'}
-                              </div>
-                            </td>
-                            <td className="text-right whitespace-nowrap">
-                              <button
-                                className="border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                                onClick={(ev) => { ev.stopPropagation(); target && onCreateIssue(target, row.region, row.action); }}
-                                disabled={!target}
-                              >
-                                + 이슈
-                              </button>
-                            </td>
-                          </tr>
-                          {/* ── Inline drill-down for Sales Impact ── */}
-                          {isSalesExpanded && target && (
-                            <tr>
-                              <td colSpan={7} className="p-0 border-b-0">
-                                <div className="px-4 pb-4 pt-2 ml-4 space-y-3 border-l-2 border-[var(--color-steel)]"
-                                  style={{ background: 'linear-gradient(90deg, rgba(79,195,247,0.04), transparent 50%)' }}>
-
-                                  {target.narrativeKo && (
-                                    <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
-                                      style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
-                                      <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
-                                        💡 왜 위험한가 — {row.region} 시장
-                                      </div>
-                                      {target.narrativeKo}
+                ) : (
+                  salesByTab.map((row) => {
+                    const target = analysis.impacts.find((i) => i.id === row.impactId);
+                    const isSalesExpanded = expandedSalesRow === row.id;
+                    return (
+                      <React.Fragment key={row.id}>
+                        <tr
+                          className={`cursor-pointer transition-colors ${isSalesExpanded ? 'bg-[var(--color-steel-mid)]' : 'hover:bg-[var(--color-steel-soft)]'}`}
+                          onClick={() => {
+                            setExpandedSalesRow(isSalesExpanded ? null : row.id);
+                            setSelectedImpact(row.impactId);
+                          }}
+                        >
+                          <td className="font-semibold whitespace-nowrap">{row.region}</td>
+                          <td className="text-[11px] text-[var(--color-muted)]">{row.products.join(' / ')}</td>
+                          <td className="text-[11px]">
+                            <span className="inline-block px-1.5 py-px rounded-sm text-[10px] font-medium bg-[var(--color-surface)] border border-[var(--color-slate-line)]">
+                              {row.riskTypeKo ?? row.riskType}
+                            </span>
+                          </td>
+                          <td className="whitespace-nowrap"><SeverityTag severity={row.severity} /></td>
+                          <td className="text-center"><Arrow direction={row.direction} /></td>
+                          <td><ConfidenceTag confidence={row.confidence} /></td>
+                          <td className="text-[11.5px] text-[var(--color-muted)]">
+                            {row.action}
+                            <div className="text-[10px] mt-0.5" style={{ color: 'var(--color-steel)' }}>
+                              {isSalesExpanded ? '▾ 접기' : '▸ 근거 보기'}
+                            </div>
+                          </td>
+                          <td className="text-right whitespace-nowrap">
+                            <button
+                              className="border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                              onClick={(ev) => { ev.stopPropagation(); target && onCreateIssue(target, row.region, row.action); }}
+                              disabled={!target}
+                            >
+                              + 이슈
+                            </button>
+                          </td>
+                        </tr>
+                        {isSalesExpanded && target && (
+                          <tr>
+                            <td colSpan={8} className="p-0 border-b-0">
+                              <div className="px-4 pb-4 pt-2 ml-4 space-y-3 border-l-2 border-[var(--color-steel)]"
+                                style={{ background: 'linear-gradient(90deg, var(--color-steel-soft), transparent 50%)' }}>
+                                {target.narrativeKo && (
+                                  <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
+                                    style={{ background: 'linear-gradient(135deg, var(--color-risk-med-soft), var(--color-risk-high-soft))' }}>
+                                    <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
+                                      💡 왜 위험한가 — {row.region} 시장
                                     </div>
-                                  )}
-
+                                    {target.narrativeKo}
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">📰 인과 체인</div>
+                                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                                    {(target.chainKo ?? target.chain).map((step: string, i: number) => (
+                                      <span key={step} className="flex items-center gap-1">
+                                        {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
+                                        <span className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
+                                          i === (target.chainKo ?? target.chain).length - 1
+                                            ? 'font-semibold text-[var(--color-ink)] bg-[var(--color-risk-high-soft)] border border-[var(--color-risk-high)]'
+                                            : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
+                                        }`}>
+                                          {step}
+                                        </span>
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                {target.evidence && target.evidence.length > 0 && (
                                   <div>
                                     <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
-                                      📰 인과 체인
+                                      📋 근거 기사 — {target.evidence.length}건
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                                      {(target.chainKo ?? target.chain).map((step: string, i: number) => (
-                                        <span key={step} className="flex items-center gap-1">
-                                          {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
-                                          <span className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
-                                            i === (target.chainKo ?? target.chain).length - 1
-                                              ? 'font-semibold text-[var(--color-ink)] bg-[rgba(255,82,82,0.1)] border border-[rgba(255,82,82,0.3)]'
-                                              : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
-                                          }`}>
-                                            {step}
-                                          </span>
-                                        </span>
+                                    <ul className="space-y-1.5">
+                                      {target.evidence.slice(0, 4).map((e: any) => (
+                                        <li key={e.id} className="rounded-md px-3 py-1.5 transition-colors hover:bg-[var(--color-surface)]"
+                                          style={{ border: '1px solid var(--color-slate-line)' }}>
+                                          <div className="flex flex-wrap items-center gap-1 mb-0.5">
+                                            <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
+                                              {tradePolicyLabel(e.title)}
+                                            </span>
+                                            {targetCountry(e.title) && (
+                                              <span className="text-[10px] text-[var(--color-risk-med)]">{targetCountry(e.title)}</span>
+                                            )}
+                                          </div>
+                                          <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                            className="text-[11.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                            ↗ {e.title}
+                                          </a>
+                                          <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
+                                            {e.source} · {e.publishedAt.slice(0, 10)}
+                                          </div>
+                                        </li>
                                       ))}
-                                    </div>
+                                    </ul>
                                   </div>
-
-                                  {target.evidence && target.evidence.length > 0 && (
-                                    <div>
-                                      <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
-                                        📋 근거 기사 — {target.evidence.length}건
-                                      </div>
-                                      <ul className="space-y-1.5">
-                                        {target.evidence.slice(0, 4).map((e: any) => (
-                                          <li key={e.id} className="rounded-md px-3 py-1.5 transition-colors hover:bg-[var(--color-surface)]"
-                                            style={{ border: '1px solid var(--color-slate-line)' }}>
-                                            <a href={e.link} target="_blank" rel="noreferrer noopener"
-                                              className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
-                                              <span className="inline-block px-1 py-px mr-1 rounded-sm text-[9px] font-bold bg-[var(--color-surface)] text-[var(--color-muted)]">
-                                                {tradePolicyLabel(e.title)}
-                                              </span>
-                                              {targetCountry(e.title) && (
-                                                <span className="text-[10px] text-[var(--color-risk-med)] mr-1">{targetCountry(e.title)}</span>
-                                              )}
-                                              ↗ {e.title}
-                                            </a>
-                                            <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
-                                              {e.source} · {e.publishedAt.slice(0, 10)}
-                                            </div>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-
-                                  <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1 uppercase">
-                                    ✅ 권장 조치
-                                  </div>
-                                  <ul className="space-y-1">
-                                    {(target.actionsKo?.length ? target.actionsKo : target.actions).map((a: string) => (
-                                      <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
-                                        <span>· {a}</span>
-                                        <button
-                                          className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                                          onClick={(ev) => { ev.stopPropagation(); onCreateIssue(target, row.region, a); }}
-                                        >
-                                          + 이슈 등록
-                                        </button>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Panel>
-
-          <Panel
-            title="RISK BRIEF"
-            titleKo="위험 분석 브리프"
-            index="04"
-            glow={impact?.severity === 'HIGH' || impact?.severity === 'CRITICAL' ? 'high' : impact?.severity === 'MEDIUM' ? 'med' : undefined}
-            meta={impact ? `${impact.ruleId} · ${impact.origin === 'MARKET_SIGNAL' ? '시장' : '뉴스'} · ${impact.riskTypeKo ?? impact.riskType}` : undefined}
-          >
-            {!impact ? (
-              <EmptyState text="선택된 Impact가 없습니다. 위의 시그널을 클릭하세요." />
-            ) : (
-              <div className="space-y-3 p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <SeverityTag severity={impact.severity} />
-                  <ConfidenceTag confidence={impact.confidence} />
-                  <span className="text-[12px] font-semibold text-[var(--color-ink)]">
-                    {impact.ruleNameKo ?? impact.ruleName}
-                  </span>
-                </div>
-
-                {/* ── 왜 위험한가: 내러티브 ── */}
-                {impact.narrativeKo && (
-                  <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
-                    style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
-                    <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
-                      💡 왜 위험한가 — 영업 영향 요약
-                    </div>
-                    {impact.narrativeKo}
-                  </div>
+                                )}
+                                <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1 uppercase">✅ 권장 조치</div>
+                                <ul className="space-y-1">
+                                  {(target.actionsKo?.length ? target.actionsKo : target.actions).map((a: string) => (
+                                    <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
+                                      <span>· {a}</span>
+                                      <button
+                                        className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                                        onClick={(ev) => { ev.stopPropagation(); onCreateIssue(target, row.region, a); }}
+                                      >
+                                        + 이슈
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
                 )}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
 
-                <Epistemic kind="FACT">
-                  {impact.fact}
-                  <div className="mt-1 text-[10px] text-[var(--color-faint)] num">
-                    {impact.factSource} · {impact.factTimestamp}
-                  </div>
-                </Epistemic>
-
-                <Epistemic kind="RULE">
-                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                    {(impact.chainKo ?? impact.chain).map((step: string, i: number) => (
-                      <span key={step} className="flex items-center gap-1">
-                        {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
-                        <span
-                          className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
-                            i === (impact.chainKo ?? impact.chain).length - 1
-                              ? 'font-semibold text-[var(--color-ink)] bg-[rgba(255,82,82,0.1)] border border-[rgba(255,82,82,0.3)]'
-                              : 'text-[var(--color-muted)] bg-[var(--color-surface)]'
-                          }`}
-                        >
-                          {step}
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                  {(impact.lagNoteKo ?? impact.lagNote) && (
-                    <div className="mt-1 text-[10.5px] text-[var(--color-faint)]">
-                      ⏱ {impact.lagNoteKo ?? impact.lagNote}
-                    </div>
-                  )}
-                </Epistemic>
-
-                <Epistemic kind="INFERENCE">{impact.inference}</Epistemic>
-
-                <Epistemic kind="ACTION">
-                  <ul className="space-y-1.5">
-                    {(impact.actionsKo?.length ? impact.actionsKo : impact.actions).map((a: string) => (
-                      <li key={a} className="flex items-start justify-between gap-2">
-                        <span>· {a}</span>
-                        <button
-                          className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                          onClick={() => onCreateIssue(impact, impact.regions[0], a)}
-                        >
-                          + 이슈
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </Epistemic>
-
-                {impact.corroborationNote && (
-                  <div className="border border-dashed border-[var(--color-slate-line)] rounded px-3 py-2 text-[10.5px] text-[var(--color-muted)]">
-                    {impact.corroborationNote}
-                  </div>
-                )}
-
-                {impact.evidence && impact.evidence.length > 0 && (
-                  <div>
-                    <div className="eyebrow mb-1.5">근거 자료 · {impact.evidence.length}건</div>
-                    <ul className="space-y-1.5">
-                      {impact.evidence.slice(0, 4).map((e: any) => (
-                        <li key={e.id} className="text-[11px] leading-snug">
-                          <a
-                            href={e.link}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2"
-                          >
-                            {e.title}
-                          </a>
-                          <span className="ml-1 text-[10px] text-[var(--color-faint)] num">
-                            {e.source} · {e.publishedAt.slice(0, 10)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </Panel>
-        </div>
-
-        {/* ──────────────── 05 HRC INTRADAY ──────────────── */}
+        {/* ════════════════════════════ 05 HRC INTRADAY ════════════════════════════ */}
         <Panel
           title="HRC INTRADAY"
           titleKo="열연강판 장중 상세"
@@ -902,7 +988,7 @@ export function App() {
               </div>
             </dl>
             <div className="p-3">
-              <Chart bars={hrc.bars.slice(-160)} height={300} />
+              <Chart bars={hrc.bars.slice(-160)} height={300} theme={theme} />
               <div className="px-2 pt-1.5 text-[10px] text-[var(--color-faint)]">
                 밝은 거래량 = SHFE 공식 봉 · 어두운 거래량 = Sina 백필 · 세션 브레이크 구간 제외
               </div>
@@ -910,172 +996,198 @@ export function App() {
           </div>
         </Panel>
 
-        {/* ──────────────── 06 EVENT RADAR ──────────────── */}
+        {/* ════════════════════════════ 06 EVENT RADAR (tabs + pagination) ════════════════════════════ */}
         <div ref={eventsRef}>
-        <Panel
-          title="EVENT RADAR"
-          titleKo={`글로벌 이벤트 레이더${isFiltered ? ' (필터 적용)' : ''}`}
-          index="06"
-          meta={
-            <>
-              {filteredEventClusters.length}개 클러스터{isFiltered ? ` / 전체 ${analysis.eventClusters.length}개` : ''} · 관련 {analysis.inputs.articlesRelevant} /{' '}
-              전체 {analysis.inputs.articlesCollected}건
-            </>
-          }
-        >
-          <div className="divide-y divide-[var(--color-slate-line)]">
-            {filteredEventClusters.length === 0 && (
-              <EmptyState text={isFiltered ? '선택한 필터 조건에 맞는 이벤트가 없습니다.' : '감지된 이벤트가 없습니다.'} />
-            )}
-            {filteredEventClusters.map((c) => {
-              const relatedImpact = analysis.impacts.find((i: any) => i.ruleId === c.ruleId);
-              const isExpanded = expandedCluster === c.id;
-              return (
-                <div key={c.id}>
-                  <div
-                    className="px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-steel-soft)]"
-                    onClick={() => {
-                      setExpandedCluster(isExpanded ? null : c.id);
-                      setSelectedImpact(`IM_${c.ruleId}_EVENT`);
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <span
-                            className="border px-1.5 py-px text-[9.5px] rounded-sm font-medium"
-                            style={{
-                              borderColor: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.5)' : 'var(--color-slate-line)',
-                              color: c.status === 'ACTIVE' ? 'var(--color-risk-high)' : 'var(--color-muted)',
-                              background: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.08)' : 'transparent',
-                            }}
-                          >
-                            {c.status === 'ACTIVE' ? '🔴 활성' : c.status === 'OPEN' ? '🟡 감시' : c.status === 'COOLING' ? '⚪ 완화' : '종료'}
-                          </span>
-                          <ConfidenceTag confidence={c.confidence} />
-                          <span className="text-[10px] text-[var(--color-faint)]">
-                            {c.riskTypeKo ?? c.riskType} · {c.articleCount}건 / {c.publisherCount}매체
-                          </span>
+          <Panel
+            title="EVENT RADAR"
+            titleKo={`글로벌 이벤트 레이더${isFiltered ? ' (필터 적용)' : ''} — 리스크 유형별 분류 · 뉴스 기반 모니터링`}
+            index="06"
+            meta={
+              <>
+                {filteredEventClusters.length}개 클러스터{isFiltered ? ` / 전체 ${analysis.eventClusters.length}개` : ''} · 관련 {analysis.inputs.articlesRelevant} / 전체 {analysis.inputs.articlesCollected}건
+              </>
+            }
+          >
+            {/* Category tabs */}
+            <div className="tab-bar">
+              {eventRiskTypes.map((type) => {
+                const count = type === 'ALL' ? filteredEventClusters.length : filteredEventClusters.filter((c) => (c.riskTypeKo ?? c.riskType) === type).length;
+                return (
+                  <TabChip key={type} label={type === 'ALL' ? '전체' : type} count={count}
+                    active={eventThemeTab === type} onClick={() => setEventThemeTab(type)} />
+                );
+              })}
+            </div>
+
+            {/* Info bar */}
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--color-slate-line)] text-[10px] text-[var(--color-faint)]">
+              <span>
+                {eventThemeTab === 'ALL' ? '전체' : eventThemeTab} · {eventsByTab.length}건 중 {(clampedPage - 1) * EVENTS_PER_PAGE + 1}–{Math.min(clampedPage * EVENTS_PER_PAGE, eventsByTab.length)}
+              </span>
+              <span>
+                총 {totalEventPages}페이지
+              </span>
+            </div>
+
+            <div className="divide-y divide-[var(--color-slate-line)]">
+              {pagedEvents.length === 0 && (
+                <EmptyState text={eventThemeTab !== 'ALL' ? `${eventThemeTab} 카테고리에 해당하는 이벤트가 없습니다.` : '감지된 이벤트가 없습니다.'} />
+              )}
+              {pagedEvents.map((c) => {
+                const relatedImpact = analysis.impacts.find((i: any) => i.ruleId === c.ruleId);
+                const isExpanded = expandedCluster === c.id;
+                return (
+                  <div key={c.id}>
+                    <div
+                      className="px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-steel-soft)]"
+                      onClick={() => {
+                        setExpandedCluster(isExpanded ? null : c.id);
+                        setSelectedImpact(`IM_${c.ruleId}_EVENT`);
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <span
+                              className="border px-1.5 py-px text-[9.5px] rounded-sm font-medium"
+                              style={{
+                                borderColor: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.5)' : 'var(--color-slate-line)',
+                                color: c.status === 'ACTIVE' ? 'var(--color-risk-high)' : 'var(--color-muted)',
+                                background: c.status === 'ACTIVE' ? 'var(--color-risk-high-soft)' : 'transparent',
+                              }}
+                            >
+                              {c.status === 'ACTIVE' ? '🔴 활성' : c.status === 'OPEN' ? '🟡 감시' : c.status === 'COOLING' ? '⚪ 완화' : '종료'}
+                            </span>
+                            <ConfidenceTag confidence={c.confidence} />
+                            <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-medium bg-[var(--color-surface)] border border-[var(--color-slate-line)] text-[var(--color-muted)]">
+                              {c.riskTypeKo ?? c.riskType}
+                            </span>
+                            <span className="text-[10px] text-[var(--color-faint)]">
+                              {c.articleCount}건 / {c.publisherCount}매체
+                            </span>
+                          </div>
+                          <div className="text-[13px] font-semibold text-[var(--color-ink)] mb-1">
+                            {c.eventTypeKo ?? c.eventType}
+                          </div>
+                          {relatedImpact?.narrativeKo && (
+                            <div className="text-[11.5px] leading-[1.5] text-[var(--color-muted)] mb-1.5">
+                              {relatedImpact.narrativeKo}
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-1.5 text-[10px]">
+                            <span className="text-[var(--color-faint)]">영향 지역:</span>
+                            {c.regions.map((r: string) => (
+                              <span key={r} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">{r}</span>
+                            ))}
+                            <span className="text-[var(--color-faint)] ml-1">제품:</span>
+                            {c.products.slice(0, 4).map((p: string) => (
+                              <span key={p} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">{p}</span>
+                            ))}
+                          </div>
                         </div>
-                        <div className="text-[13px] font-semibold text-[var(--color-ink)] mb-1">
-                          {c.eventTypeKo ?? c.eventType}
+                        <div className="shrink-0 text-right">
+                          <div className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">최신 {c.latestUpdate.slice(0, 10)}</div>
+                          <div className="num text-[10px] text-[var(--color-faint)]">{c.ageHours}시간 전</div>
+                          <div className="text-[10px] mt-1" style={{ color: 'var(--color-steel)' }}>
+                            {isExpanded ? '▾ 접기' : '▸ 근거 기사 보기'}
+                          </div>
                         </div>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-1 ml-4 border-l-2 border-[var(--color-steel)] space-y-3"
+                        style={{ background: 'linear-gradient(90deg, var(--color-steel-soft), transparent 50%)' }}>
                         {relatedImpact?.narrativeKo && (
-                          <div className="text-[11.5px] leading-[1.5] text-[var(--color-muted)] mb-1.5">
+                          <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
+                            style={{ background: 'linear-gradient(135deg, var(--color-risk-med-soft), var(--color-risk-high-soft))' }}>
+                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
+                              💡 이 이벤트가 왜 위험한가
+                            </div>
                             {relatedImpact.narrativeKo}
                           </div>
                         )}
-                        <div className="flex flex-wrap gap-1.5 text-[10px]">
-                          <span className="text-[var(--color-faint)]">영향 지역:</span>
-                          {c.regions.map((r: string) => (
-                            <span key={r} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
-                              {r}
-                            </span>
-                          ))}
-                          <span className="text-[var(--color-faint)] ml-1">제품:</span>
-                          {c.products.slice(0, 4).map((p: string) => (
-                            <span key={p} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">
-                              {p}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <div className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">
-                          최신 {c.latestUpdate.slice(0, 10)}
-                        </div>
-                        <div className="num text-[10px] text-[var(--color-faint)]">
-                          {c.ageHours}시간 전
-                        </div>
-                        <div className="text-[10px] mt-1" style={{ color: 'var(--color-steel)' }}>
-                          {isExpanded ? '▾ 근거 접기' : '▸ 근거 기사 보기'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ── Expanded: source articles ── */}
-                  {isExpanded && (
-                    <div className="px-4 pb-4 pt-1 ml-4 border-l-2 border-[var(--color-steel)] space-y-3"
-                      style={{ background: 'linear-gradient(90deg, rgba(79,195,247,0.04), transparent 50%)' }}>
-
-                      {relatedImpact?.narrativeKo && (
-                        <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
-                          style={{ background: 'linear-gradient(135deg, rgba(255,171,64,0.1), rgba(255,82,82,0.06))' }}>
-                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
-                            💡 이 이벤트가 왜 위험한가
-                          </div>
-                          {relatedImpact.narrativeKo}
-                        </div>
-                      )}
-
-                      <div>
-                        <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
-                          📋 근거 기사 — 총 {c.articleCount}건 중 상위 {c.evidence.length}건 (클릭하여 원문 확인)
-                        </div>
-                        <ul className="space-y-1.5">
-                          {c.evidence.map((e: any) => (
-                            <li key={e.id}
-                              className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
-                              style={{ border: '1px solid var(--color-slate-line)' }}>
-                              <a href={e.link} target="_blank" rel="noreferrer noopener"
-                                className="text-[12px] font-medium text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
-                                <span className="inline-block px-1 py-px mr-1 rounded-sm text-[9px] font-bold bg-[var(--color-surface)] text-[var(--color-muted)]">
-                                  {tradePolicyLabel(e.title)}
-                                </span>
-                                {targetCountry(e.title) && (
-                                  <span className="text-[10px] text-[var(--color-risk-med)] mr-1">{targetCountry(e.title)}</span>
-                                )}
-                                ↗ {e.title}
-                              </a>
-                              <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
-                                {e.source} · {e.publishedAt.slice(0, 10)}
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                        <div className="mt-2 text-[10px] text-[var(--color-faint)]">
-                          이 클러스터는 {c.publisherCount}개 독립 매체가 보도했습니다. 매칭 키워드: {c.keywords.slice(0, 6).join(', ')}
-                        </div>
-                      </div>
-
-                      {relatedImpact && (
                         <div>
-                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1.5 uppercase">
-                            ✅ 권장 조치
+                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
+                            📋 근거 기사 — 총 {c.articleCount}건 중 상위 {c.evidence.length}건
                           </div>
                           <ul className="space-y-1.5">
-                            {(relatedImpact.actionsKo?.length ? relatedImpact.actionsKo : relatedImpact.actions).map((a: string) => (
-                              <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
-                                <span>· {a}</span>
-                                <button
-                                  className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                                  onClick={(ev) => { ev.stopPropagation(); onCreateIssue(relatedImpact, relatedImpact.regions[0], a); }}
-                                >
-                                  + 이슈 등록
-                                </button>
-                              </li>
-                            ))}
+                            {c.evidence.map((e: any) => {
+                              const ctx = articleContextKo(e.title);
+                              const country = targetCountry(e.title);
+                              return (
+                                <li key={e.id} className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
+                                  style={{ border: '1px solid var(--color-slate-line)' }}>
+                                  <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
+                                      {tradePolicyLabel(e.title)}
+                                    </span>
+                                    {country && <span className="text-[10px] font-medium text-[var(--color-risk-med)]">{country}</span>}
+                                    {ctx && <span className="text-[10px] text-[var(--color-muted)]">{ctx}</span>}
+                                  </div>
+                                  <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                    className="text-[11.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                    ↗ {e.title}
+                                  </a>
+                                  <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
+                                    {e.source} · {e.publishedAt.slice(0, 10)}
+                                  </div>
+                                </li>
+                              );
+                            })}
                           </ul>
+                          <div className="mt-2 text-[10px] text-[var(--color-faint)]">
+                            이 클러스터는 {c.publisherCount}개 독립 매체가 보도했습니다. 매칭 키워드: {c.keywords.slice(0, 6).join(', ')}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
+                        {relatedImpact && (
+                          <div>
+                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1.5 uppercase">✅ 권장 조치</div>
+                            <ul className="space-y-1.5">
+                              {(relatedImpact.actionsKo?.length ? relatedImpact.actionsKo : relatedImpact.actions).map((a: string) => (
+                                <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
+                                  <span>· {a}</span>
+                                  <button
+                                    className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                                    onClick={(ev) => { ev.stopPropagation(); onCreateIssue(relatedImpact, relatedImpact.regions[0], a); }}
+                                  >
+                                    + 이슈
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            {totalEventPages > 1 && (
+              <div className="flex items-center justify-center gap-1.5 px-4 py-3 border-t border-[var(--color-slate-line)]">
+                <button className="page-btn" disabled={clampedPage <= 1} onClick={() => setEventPage((p) => Math.max(1, p - 1))}>‹</button>
+                {Array.from({ length: totalEventPages }, (_, i) => i + 1).map((p) => (
+                  <button key={p} className={`page-btn ${p === clampedPage ? 'active' : ''}`} onClick={() => setEventPage(p)}>
+                    {p}
+                  </button>
+                ))}
+                <button className="page-btn" disabled={clampedPage >= totalEventPages} onClick={() => setEventPage((p) => Math.min(totalEventPages, p + 1))}>›</button>
+              </div>
+            )}
+          </Panel>
         </div>
 
-        {/* ──────────────── 07 ISSUE & ACTION ──────────────── */}
+        {/* ════════════════════════════ 07 조치 현황 추적기 (ISSUE & ACTION CENTER) ════════════════════════════ */}
         <Panel
-          title="ISSUE & ACTION CENTER"
-          titleKo="이슈 관리 및 조치"
+          title="ACTION TRACKER"
+          titleKo="조치 현황 추적기 — 위험 신호에 대한 대응 상태를 관리합니다"
           index="07"
           meta={
             <>
-              {issues.length}건 · PGlite (WASM PostgreSQL → IndexedDB)
+              {issues.length}건 · 미완료 {activeIssues.length}건
               {dbError && <span className="ml-2 text-[var(--color-risk-high)]">DB 오류</span>}
             </>
           }
@@ -1085,72 +1197,78 @@ export function App() {
               {dbError}
             </div>
           )}
+
+          {/* Purpose explanation */}
+          <div className="px-4 py-3 border-b border-[var(--color-slate-line)] text-[11.5px] text-[var(--color-muted)] bg-[var(--color-surface)]">
+            <strong className="text-[var(--color-ink)]">사용법:</strong>{' '}
+            위 Critical Signals, Sales Impact, Event Radar에서{' '}
+            <span className="inline-block px-1.5 py-px border border-[var(--color-slate-line)] rounded-sm text-[10px] text-[var(--color-steel)]">+ 이슈</span>
+            {' '}버튼을 클릭하면 해당 리스크가 이슈로 등록됩니다. 등록된 이슈의 진행 상태를 아래에서 관리하세요.
+          </div>
+
           {issues.length === 0 ? (
-            <EmptyState text="생성된 이슈가 없습니다. Sales Impact 또는 Risk Brief에서 [+ 이슈] 를 클릭하세요." />
+            <EmptyState text="등록된 이슈가 없습니다. 위험 신호에서 [+ 이슈] 를 클릭하여 추적을 시작하세요." />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="grid">
-                <thead>
-                  <tr>
-                    <th className="w-10">#</th>
-                    <th>이슈</th>
-                    <th>조치</th>
-                    <th>상태</th>
-                    <th>생성일 (KST)</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {issues.map((issue) => (
-                    <tr key={issue.id}>
-                      <td className="num text-[var(--color-faint)]">{issue.id}</td>
-                      <td>
-                        <div className="text-[12px] font-semibold text-[var(--color-ink)]">{issue.title}</div>
-                        <div className="text-[10px] text-[var(--color-faint)] num">{issue.rule_id}</div>
-                      </td>
-                      <td className="max-w-[340px] text-[11.5px] text-[var(--color-muted)]">{issue.action}</td>
-                      <td>
-                        <div className="flex flex-wrap gap-0.5">
-                          {STATUSES.map((s) => {
-                            const active = issue.status === s;
-                            const label = s === 'NEW' ? '신규' : s === 'REVIEWING' ? '검토' : s === 'ACTION_REQUIRED' ? '조치' : '완료';
-                            return (
-                              <button
-                                key={s}
-                                onClick={() => onStatus(issue.id, s)}
-                                className="border px-1.5 py-px text-[9px] tracking-[0.04em] rounded-sm transition-colors"
-                                style={
-                                  active
-                                    ? { borderColor: 'var(--color-steel)', background: 'var(--color-steel)', color: '#0c1219' }
-                                    : { borderColor: 'var(--color-slate-line)', color: 'var(--color-faint)' }
-                                }
-                              >
-                                {label}
+            <div className="p-4 space-y-4">
+              {/* Status summary bar */}
+              <div className="flex flex-wrap gap-3">
+                {STATUSES.map((s) => {
+                  const count = issues.filter((i) => i.status === s).length;
+                  return (
+                    <div key={s} className="flex items-center gap-1.5 text-[11px]">
+                      <span>{STATUS_EMOJI[s]}</span>
+                      <span className="text-[var(--color-muted)]">{STATUS_KO[s]}</span>
+                      <span className="num font-semibold text-[var(--color-ink)]">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Issue cards grouped by status */}
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                {STATUSES.map((status) => {
+                  const statusIssues = issues.filter((i) => i.status === status);
+                  if (statusIssues.length === 0) return null;
+                  return (
+                    <div key={status}>
+                      <div className="text-[10px] font-bold tracking-[0.1em] uppercase text-[var(--color-faint)] mb-2">
+                        {STATUS_EMOJI[status]} {STATUS_KO[status]} ({statusIssues.length})
+                      </div>
+                      <div className="space-y-2">
+                        {statusIssues.map((issue) => (
+                          <div key={issue.id} className="issue-card">
+                            <div className="flex items-start justify-between gap-2 mb-1.5">
+                              <div className="text-[12px] font-semibold text-[var(--color-ink)] leading-snug">{issue.title}</div>
+                              <span className="num text-[9px] text-[var(--color-faint)] shrink-0">#{issue.id}</span>
+                            </div>
+                            <div className="text-[10.5px] text-[var(--color-muted)] mb-2 leading-snug">{issue.action}</div>
+                            <div className="text-[9.5px] text-[var(--color-faint)] num mb-2">
+                              {issue.region} · {issue.rule_id} · {fmtIso(issue.created_at).slice(5)}
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {STATUSES.filter((s) => s !== status).map((s) => (
+                                <button key={s} onClick={() => onStatus(issue.id, s)}
+                                  className="border border-[var(--color-slate-line)] rounded-sm px-1.5 py-px text-[9px] text-[var(--color-muted)] hover:border-[var(--color-steel)] hover:text-[var(--color-steel)] transition-colors">
+                                  → {STATUS_KO[s]}
+                                </button>
+                              ))}
+                              <button onClick={() => onDelete(issue.id)}
+                                className="border border-[var(--color-slate-line)] rounded-sm px-1.5 py-px text-[9px] text-[var(--color-faint)] hover:text-[var(--color-risk-high)] hover:border-[var(--color-risk-high)] transition-colors ml-auto">
+                                삭제
                               </button>
-                            );
-                          })}
-                        </div>
-                      </td>
-                      <td className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">
-                        {fmtIso(issue.created_at)}
-                      </td>
-                      <td className="text-right">
-                        <button
-                          onClick={() => onDelete(issue.id)}
-                          className="text-[10px] text-[var(--color-faint)] hover:text-[var(--color-risk-high)] transition-colors"
-                        >
-                          삭제
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </Panel>
 
-        {/* ──────────────── FOOTER ──────────────── */}
+        {/* ════════════════════════════ FOOTER ════════════════════════════ */}
         <footer className="panel px-4 py-3 text-[10.5px] text-[var(--color-muted)]">
           <div className="eyebrow mb-1.5">데이터 출처 (DATA PROVENANCE)</div>
           <div className="grid gap-x-6 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -1169,9 +1287,9 @@ export function App() {
         </footer>
       </main>
 
-      {/* ──────────────── TOAST ──────────────── */}
+      {/* ════════════════════════════ TOAST ════════════════════════════ */}
       {toast && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 border border-[var(--color-steel)] bg-[var(--color-panel)] px-4 py-2 text-[11px] text-[var(--color-steel)] rounded-md shadow-lg shadow-black/40">
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 border border-[var(--color-steel)] bg-[var(--color-panel)] px-4 py-2 text-[11px] text-[var(--color-steel)] rounded-md shadow-lg shadow-black/20">
           {toast}
         </div>
       )}
@@ -1179,41 +1297,36 @@ export function App() {
   );
 }
 
-/* ──────────────── Sub-components ──────────────── */
+/* ══════════════════════════════════════════════════════════════════
+ *  SUB-COMPONENTS
+ * ══════════════════════════════════════════════════════════════════ */
 
 function StatusChip({ label, value, tone, pulse }: { label: string; value: string; tone: string; pulse?: boolean }) {
   return (
     <div className="flex items-center gap-1.5">
-      {pulse && (
-        <span className="pulse-dot block w-1.5 h-1.5 rounded-full" style={{ background: tone }} />
-      )}
+      {pulse && <span className="pulse-dot block w-1.5 h-1.5 rounded-full" style={{ background: tone }} />}
       <span className="eyebrow">{label}</span>
-      <span className="num font-semibold" style={{ color: tone }}>
-        {value}
-      </span>
+      <span className="num font-semibold" style={{ color: tone }}>{value}</span>
     </div>
   );
 }
 
 function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button className={`filter-chip ${active ? 'active' : ''}`} onClick={onClick}>
+    <button className={`filter-chip ${active ? 'active' : ''}`} onClick={onClick}>{label}</button>
+  );
+}
+
+function TabChip({ label, count, active, onClick }: { label: string; count: number; active: boolean; onClick: () => void }) {
+  return (
+    <button className={`tab-chip ${active ? 'active' : ''}`} onClick={onClick}>
       {label}
+      <span className="tab-count">{count}</span>
     </button>
   );
 }
 
-function Metric({
-  label,
-  value,
-  node,
-  strong,
-}: {
-  label: string;
-  value?: string;
-  node?: React.ReactNode;
-  strong?: boolean;
-}) {
+function Metric({ label, value, node, strong }: { label: string; value?: string; node?: React.ReactNode; strong?: boolean }) {
   return (
     <div>
       <dt className="eyebrow">{label}</dt>
