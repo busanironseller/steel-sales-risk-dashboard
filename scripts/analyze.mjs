@@ -305,8 +305,7 @@ function salesImpact(impacts) {
     }
   }
   return rows
-    .sort((a, b) => SEVERITY[b.severity] - SEVERITY[a.severity] || confidenceRank[b.confidence] - confidenceRank[a.confidence])
-    .slice(0, 20);
+    .sort((a, b) => SEVERITY[b.severity] - SEVERITY[a.severity] || confidenceRank[b.confidence] - confidenceRank[a.confidence]);
 }
 
 // ---------------------------------------------------------------- news digest

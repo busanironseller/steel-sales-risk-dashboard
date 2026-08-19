@@ -175,6 +175,26 @@ export interface Analysis {
   ruleCount: number;
 }
 
+export interface FxPair {
+  key: string;
+  from: string;
+  to: string;
+  label: string;
+  labelKo: string;
+  rate: number;
+  change1d: number | null;
+  change1w: number | null;
+  change1m: number | null;
+  spark: { date: string; value: number }[];
+}
+
+export interface FxData {
+  generatedAt: string;
+  source: string;
+  referenceDate: string;
+  pairs: FxPair[];
+}
+
 export type IssueStatus = 'NEW' | 'REVIEWING' | 'ACTION_REQUIRED' | 'RESOLVED';
 
 export interface Issue {

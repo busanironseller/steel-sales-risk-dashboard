@@ -7,7 +7,8 @@
   "scripts": {
     "collect:market": "node scripts/collect-market.mjs",
     "collect:news": "node scripts/collect-news.mjs",
-    "collect": "npm run collect:market && npm run collect:news",
+    "collect:fx": "node scripts/collect-fx.mjs",
+    "collect": "npm run collect:market && npm run collect:news && npm run collect:fx",
     "analyze": "node scripts/analyze.mjs",
     "refresh": "npm run collect && npm run analyze",
     "dev": "vite",

@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chart, type Timeframe } from './Chart';
+import { CostSimulator } from './CostSimulator';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
 import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
-import type { Analysis, Impact, Issue, IssueStatus, MarketData, NewsDigestItem } from './types';
+import type { Analysis, FxData, Impact, Issue, IssueStatus, MarketData, NewsDigestItem } from './types';
 
 const BASE = import.meta.env.BASE_URL;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
@@ -133,6 +134,7 @@ export function App() {
   /* ── state ── */
   const [market, setMarket] = useState<MarketData | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [fx, setFx] = useState<FxData | null>(null);
   const [issues, setIssues] = useState<Issue[]>([]);
   const [dbError, setDbError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -160,6 +162,7 @@ export function App() {
   const [chartTimeframe, setChartTimeframe] = useState<Timeframe>('30m');
   const [newsPage, setNewsPage] = useState(1);
   const [newsDateFilter, setNewsDateFilter] = useState<string>('');
+  const [simulatorOpen, setSimulatorOpen] = useState(false);
 
   /* ── refs ── */
   const refreshingRef = useRef(refreshing);
@@ -186,13 +189,15 @@ export function App() {
     setRefreshing(true);
     try {
       const bust = `?t=${Date.now()}`;
-      const [m, a] = await Promise.all([
+      const [m, a, fxRes] = await Promise.all([
         fetch(`${BASE}data/market.json${bust}`).then((r) => r.json()),
         fetch(`${BASE}data/analysis.json${bust}`).then((r) => r.json()),
+        fetch(`${BASE}data/fx.json${bust}`).then((r) => r.json()).catch(() => null),
       ]);
       const changed = !analysisRef.current || a.generatedAt !== analysisRef.current.generatedAt;
       setMarket(m);
       setAnalysis(a);
+      if (fxRes) setFx(fxRes);
       setLastRefresh(new Date());
       if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
@@ -443,6 +448,16 @@ export function App() {
           </div>
 
           <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
+            {/* Tools */}
+            <button
+              className="theme-toggle"
+              onClick={() => setSimulatorOpen(true)}
+              title="원재료 비중 시뮬레이터"
+            >
+              <span style={{ fontSize: '14px' }}>🧮</span>
+              원가 시뮬레이터
+            </button>
+
             {/* Theme toggle */}
             <button
               className="theme-toggle"
@@ -595,6 +610,55 @@ export function App() {
             30분 / 60분 / 120분은 완료된 30분봉 기준입니다 (세션 브레이크 제외). 거래소 시각은 Asia/Shanghai 기준.
           </div>
         </Panel>
+
+        {/* ════════════════════════════ FX MONITOR ════════════════════════════ */}
+        {fx && fx.pairs.length > 0 && (
+          <div className="panel overflow-x-auto">
+            <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-slate-line)]">
+              <span className="text-[10px] font-bold tracking-[0.1em] uppercase text-[var(--color-steel)]">💱 환율 모니터링</span>
+              <span className="text-[9px] text-[var(--color-faint)] num">
+                {fx.source} · 기준일 {fx.referenceDate}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 md:grid-cols-6 divide-x divide-[var(--color-slate-line)]">
+              {fx.pairs.map((pair) => (
+                <div key={pair.key} className="px-3 py-2.5 text-center">
+                  <div className="text-[10px] font-medium text-[var(--color-muted)] mb-0.5">{pair.labelKo}</div>
+                  <div className="num text-[14px] font-bold text-[var(--color-ink)]">
+                    {pair.rate.toLocaleString(undefined, {
+                      minimumFractionDigits: pair.key.includes('KRW') ? 2 : 4,
+                      maximumFractionDigits: pair.key.includes('KRW') ? 2 : 4,
+                    })}
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-0.5">
+                    <Pct value={pair.change1d} />
+                    {pair.change1w !== null && (
+                      <span className="text-[9px] text-[var(--color-faint)] num">주간 <Pct value={pair.change1w} /></span>
+                    )}
+                  </div>
+                  {/* Mini sparkline */}
+                  {pair.spark.length > 2 && (
+                    <svg viewBox={`0 0 ${pair.spark.length} 20`} className="w-full h-3 mt-1" preserveAspectRatio="none">
+                      <polyline
+                        points={pair.spark.map((s, i) => {
+                          const min = Math.min(...pair.spark.map((p) => p.value));
+                          const max = Math.max(...pair.spark.map((p) => p.value));
+                          const range = max - min || 1;
+                          return `${i},${20 - ((s.value - min) / range) * 18}`;
+                        }).join(' ')}
+                        fill="none"
+                        stroke="var(--color-steel)"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ════════════════════════════ 02+04 CRITICAL SIGNALS + RISK BRIEF (SIDE-BY-SIDE) ════════════════════════════ */}
         <div ref={signalsRef}>
@@ -1320,6 +1384,18 @@ export function App() {
           </p>
         </footer>
       </main>
+
+      {/* ════════════════════════════ COST SIMULATOR MODAL ════════════════════════════ */}
+      <CostSimulator
+        open={simulatorOpen}
+        onClose={() => setSimulatorOpen(false)}
+        marketPrices={{
+          hrc: hrc?.last,
+          zinc: market?.instruments.zinc?.last,
+          aluminium: market?.instruments.aluminium?.last,
+        }}
+        theme={theme}
+      />
 
       {/* ════════════════════════════ TOAST ════════════════════════════ */}
       {toast && (
