@@ -153,8 +153,8 @@ export function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
       const saved = localStorage.getItem('steel-dashboard-theme');
-      return saved === 'light' ? 'light' : 'dark';
-    } catch { return 'dark'; }
+      return saved === 'dark' ? 'dark' : 'light';
+    } catch { return 'light'; }
   });
   const [signalTab, setSignalTab] = useState<string>('ALL');
   const [salesRiskTab, setSalesRiskTab] = useState<string>('ALL');
@@ -435,95 +435,125 @@ export function App() {
   /* ══════════════════════════════════════════════════════════════════
    *  RENDER
    * ══════════════════════════════════════════════════════════════════ */
+  const NAV_SECTIONS = [
+    { id: 'sec-overview', label: '대시보드', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4' },
+    { id: 'sec-pulse', label: '시장 현황', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', count: String(PULSE_ORDER.length) },
+    { id: 'sec-signals', label: '위험 신호', icon: 'M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', count: String(highCount) },
+    { id: 'sec-sales', label: '판매 영향', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h6m0 0v-6a2 2 0 012-2h2a2 2 0 012 2v6' },
+    { id: 'sec-chart', label: '가격 차트', icon: 'M3 3v18h18M7 16l4-4 4 4 4-8' },
+    { id: 'sec-news', label: '뉴스 일간지', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2', count: String(analysis.newsDigest?.length ?? 0) },
+    { id: 'sec-issues', label: '이슈 추적', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+  ];
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 84, behavior: 'smooth' });
+  };
+
   return (
-    <div className="min-h-screen">
-      {/* ════════════════════════════ HEADER ════════════════════════════ */}
-      <header className="border-b border-[var(--color-slate-line)] bg-[var(--color-panel)]">
-        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md flex items-center justify-center text-[16px] font-black"
-              style={{ background: 'linear-gradient(135deg, var(--color-steel), #7c4dff)', color: '#fff' }}>
-              S
-            </div>
-            <div>
-              <div className="text-[14px] font-bold tracking-[0.04em] text-[var(--color-ink)]">
-                STEEL SALES RISK INTELLIGENCE
-              </div>
-              <div className="text-[10px] text-[var(--color-faint)] tracking-[0.06em]">
-                도금 · 컬러강판 수출 조기경보 대시보드
-              </div>
-            </div>
-          </div>
-
-          <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
-            {/* Tools */}
-            <button
-              className="theme-toggle"
-              onClick={() => setSimulatorOpen(true)}
-              title="원재료 비중 시뮬레이터"
-            >
-              <span style={{ fontSize: '14px' }}>🧮</span>
-              원가 시뮬레이터
-            </button>
-
-            {/* Theme toggle */}
-            <button
-              className="theme-toggle"
-              onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-              title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-            >
-              <span style={{ fontSize: '14px' }}>{theme === 'dark' ? '☀️' : '🌙'}</span>
-              {theme === 'dark' ? '라이트' : '다크'}
-            </button>
-
-            <StatusChip label="MODE" value="PROTOTYPE" tone="var(--color-risk-med)" />
-            <StatusChip label="HRC" value={session.labelKo} tone={session.tone} />
-            <StatusChip
-              label="DATA"
-              value={stale ? `STALE · ${collectedAgo}분 전` : `${collectedAgo}분 전`}
-              tone={stale ? 'var(--color-risk-med)' : 'var(--color-ok)'}
-              pulse={!stale}
-            />
-            <button
-              onClick={() => loadData(true)}
-              disabled={refreshing}
-              className="flex items-center gap-1.5 border rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all"
-              style={{
-                borderColor: refreshing ? 'var(--color-slate-line)' : 'var(--color-steel)',
-                color: refreshing ? 'var(--color-faint)' : 'var(--color-steel)',
-                background: refreshing ? 'transparent' : 'rgba(79,195,247,0.08)',
-                cursor: refreshing ? 'wait' : 'pointer',
-              }}
-              title="CI에서 수집된 최신 데이터를 다시 불러옵니다"
-            >
-              <span className={refreshing ? 'animate-spin' : ''} style={{ display: 'inline-block' }}>↻</span>
-              {refreshing ? '로딩 중...' : '새로고침'}
-            </button>
-            <div className="num text-[var(--color-faint)] text-right">
-              <div>수집 {fmtIso(analysis.generatedAt)}</div>
-              <div className="text-[9px]">수집 주기: 30분 (GitHub Actions)</div>
-            </div>
+    <div style={{ display: 'flex', alignItems: 'flex-start', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
+      {/* ════════════════════════════ SIDEBAR ════════════════════════════ */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-side-fg)" strokeWidth="2" strokeLinejoin="round"><path d="M7 20 L14 5 L21 20 Z" /><path d="M3 20 L8.5 9.5 L13.5 20 Z" /></svg>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <div className="sidebar-brand">STEEL RISK</div>
+            <div className="sidebar-sub">SALES INTELLIGENCE</div>
           </div>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-[1600px] space-y-4 p-4 md:p-5">
-
-        {/* ════════════════════════════ HERO STAT CARDS ════════════════════════════ */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="cursor-pointer" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <StatCard label="위험 신호" value={highCount} sub={`HIGH 이상 ${highCount}건${isFiltered ? ' (필터)' : ''}`} tone="high" />
+        <nav className="sidebar-nav">
+          {NAV_SECTIONS.map((n) => (
+            <button key={n.id} className="sidebar-link" onClick={() => scrollToSection(n.id)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={n.icon} /></svg>
+              <span style={{ flex: 1 }}>{n.label}</span>
+              {n.count && <span className="nav-count" style={{ color: 'var(--color-side-fg-70)' }}>{n.count}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-kpi">
+          <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--color-side-fg-40)', textTransform: 'uppercase' as const }}>핵심 위험 신호</div>
+          <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--color-side-fg)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+            {highCount}<span style={{ fontSize: 14, color: 'var(--color-side-fg-40)', fontWeight: 500 }}> 건 HIGH+</span>
           </div>
-          <div className="cursor-pointer" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <StatCard label="주의 신호" value={medCount} sub={`MEDIUM ${medCount}건${isFiltered ? ' (필터)' : ''}`} tone="med" />
+          <div style={{ fontSize: 11, color: 'var(--color-side-fg-70)' }}>전체 신호 {filteredCriticalSignals.length}건 · 규칙 {analysis.ruleCount}개</div>
+          <div style={{ height: 4, borderRadius: 2, background: 'var(--color-side-track)', overflow: 'hidden', marginTop: 4 }}>
+            <div style={{ height: '100%', background: 'var(--color-side-fg)', borderRadius: 2, width: `${filteredCriticalSignals.length > 0 ? Math.min(100, (highCount / filteredCriticalSignals.length) * 100) : 0}%` }} />
           </div>
-          <div className="cursor-pointer" onClick={() => eventsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <StatCard label="뉴스 수집" value={(analysis.newsDigest ?? []).length}
-              sub={`${newsThemes.length - 1}개 테마 · ${analysis.inputs.articlesCollected}건 중${isFiltered ? ' (필터)' : ''}`} tone="steel" />
-          </div>
-          <StatCard label="활성 이슈" value={activeIssues.length} sub={`전체 ${issues.length}건`}
-            tone={issues.some((i) => i.status === 'ACTION_REQUIRED') ? 'med' : 'steel'} />
         </div>
+      </aside>
+
+      {/* ════════════════════════════ MAIN CONTENT ════════════════════════════ */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        {/* ── Sticky header ── */}
+        <header className="app-header">
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <h1 style={{ margin: 0, fontSize: 18, fontWeight: 600, lineHeight: 1.2 }}>리스크 대시보드</h1>
+            <div style={{ fontSize: 11, color: 'var(--color-faint)' }}>도금 · 컬러강판 수출 조기경보 — SHFE 선물 + 뉴스 기반 인과 분석</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10, marginRight: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ letterSpacing: '0.06em', color: 'var(--color-faint)', fontWeight: 500 }}>MODE</span>
+              <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>PROTOTYPE</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ letterSpacing: '0.06em', color: 'var(--color-faint)', fontWeight: 500 }}>HRC</span>
+              <span style={{ fontWeight: 600 }}>{session.labelKo}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-ink)', display: 'inline-block' }} />
+              <span style={{ letterSpacing: '0.06em', color: 'var(--color-faint)', fontWeight: 500 }}>DATA</span>
+              <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{collectedAgo}분 전</span>
+            </div>
+          </div>
+          <button
+            className="theme-toggle"
+            onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+            title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
+          >
+            {theme === 'dark'
+              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/></svg>
+              : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+            }
+          </button>
+          <button className="btn-secondary" onClick={() => setSimulatorOpen(true)}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="7.5" x2="16" y2="7.5"/></svg>
+            <span>원가 시뮬레이터</span>
+          </button>
+          <button
+            className="btn-primary"
+            onClick={() => loadData(true)}
+            disabled={refreshing}
+          >
+            {refreshing ? '로딩 중...' : '새로고침'}
+          </button>
+        </header>
+
+        {/* ── Content area ── */}
+        <div className="content-area">
+
+        {/* ════════════════════════════ KPI OVERVIEW ════════════════════════════ */}
+        <section id="sec-overview" className="kpi-grid">
+          <button className="kpi-card" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+            <div className="kpi-label">위험 신호</div>
+            <div className="kpi-value">{highCount}</div>
+            <div className="kpi-sub">HIGH 이상 {highCount}건{isFiltered ? ' (필터)' : ''}</div>
+          </button>
+          <button className="kpi-card" onClick={() => signalsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+            <div className="kpi-label">주의 신호</div>
+            <div className="kpi-value">{medCount}</div>
+            <div className="kpi-sub">MEDIUM {medCount}건{isFiltered ? ' (필터)' : ''}</div>
+          </button>
+          <button className="kpi-card" onClick={() => eventsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+            <div className="kpi-label">뉴스 수집</div>
+            <div className="kpi-value">{(analysis.newsDigest ?? []).length}</div>
+            <div className="kpi-sub">{newsThemes.length - 1}개 테마 · {analysis.inputs.articlesCollected}건 중{isFiltered ? ' (필터)' : ''}</div>
+          </button>
+          <div className="kpi-card">
+            <div className="kpi-label">활성 이슈</div>
+            <div className="kpi-value">{activeIssues.length}</div>
+            <div className="kpi-sub">전체 {issues.length}건</div>
+          </div>
+        </section>
 
         {/* ════════════════════════════ FILTER BAR ════════════════════════════ */}
         <div className="flex flex-wrap items-center gap-3 px-1">
@@ -548,6 +578,7 @@ export function App() {
 
         {/* ════════════════════════════ 01 MARKET PULSE ════════════════════════════ */}
         <Panel
+          id="sec-pulse"
           title="MARKET PULSE"
           titleKo="실시간 시장 현황"
           index="01"
@@ -619,9 +650,10 @@ export function App() {
           </div>
         </Panel>
 
-        {/* ════════════════════════════ FX MONITOR ════════════════════════════ */}
+        {/* ════════════════════════════ FX + FREIGHT (side-by-side) ════════════════════════════ */}
+        <div className="grid-fx-freight">
         {fx && fx.pairs.length > 0 && (
-          <div className="panel overflow-x-auto">
+          <div className="panel overflow-x-auto" style={{ margin: 0 }}>
             <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-slate-line)]">
               <span className="text-[10px] font-bold tracking-[0.1em] uppercase text-[var(--color-steel)]">💱 환율 모니터링</span>
               <span className="text-[9px] text-[var(--color-faint)] num">
@@ -668,9 +700,9 @@ export function App() {
           </div>
         )}
 
-        {/* ════════════════════════════ FREIGHT MONITOR ════════════════════════════ */}
+        {/* ── FREIGHT MONITOR ── */}
         {freight && freight.tickers.length > 0 && (
-          <div className="panel overflow-x-auto">
+          <div className="panel overflow-x-auto" style={{ margin: 0 }}>
             <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-slate-line)]">
               <span className="text-[10px] font-bold tracking-[0.1em] uppercase text-[var(--color-steel)]">🚢 해상운임 모니터링</span>
               <span className="text-[9px] text-[var(--color-faint)] num">
@@ -724,10 +756,11 @@ export function App() {
             </div>
           </div>
         )}
+        </div>{/* end FX+Freight grid */}
 
         {/* ════════════════════════════ 02+04 CRITICAL SIGNALS + RISK BRIEF (SIDE-BY-SIDE) ════════════════════════════ */}
-        <div ref={signalsRef}>
-          <div className="grid gap-4 lg:grid-cols-2">
+        <div ref={signalsRef} id="sec-signals">
+          <div className="grid-signals-brief">
             {/* ─── LEFT: Critical Signals ─── */}
             <Panel
               title="CRITICAL SIGNALS"
@@ -981,6 +1014,7 @@ export function App() {
 
         {/* ════════════════════════════ 03 SALES IMPACT (with risk-type tabs) ════════════════════════════ */}
         <Panel
+          id="sec-sales"
           title="SALES IMPACT"
           titleKo={`판매 영향 분석${isFiltered ? ' (필터 적용)' : ''} — 리스크 유형별 탭으로 분류`}
           index="03"
@@ -1141,6 +1175,7 @@ export function App() {
 
         {/* ════════════════════════════ 05 PRICE CHART (Multi-Instrument + Multi-Timeframe) ════════════════════════════ */}
         <Panel
+          id="sec-chart"
           title="PRICE CHART"
           titleKo={`${chartInstLabel} — ${chartStats?.label ?? '30분봉'}`}
           index="05"
@@ -1235,6 +1270,7 @@ export function App() {
         {/* ════════════════════════════ 06 NEWS DIGEST (글로벌 뉴스 일간지) ════════════════════════════ */}
         <div ref={eventsRef}>
           <Panel
+            id="sec-news"
             title="NEWS DIGEST"
             titleKo="글로벌 뉴스 일간지 — 철강 관련 거시·정책·시장 뉴스 종합"
             index="06"
@@ -1373,6 +1409,7 @@ export function App() {
 
         {/* ════════════════════════════ 07 조치 현황 추적기 (ISSUE & ACTION CENTER) ════════════════════════════ */}
         <Panel
+          id="sec-issues"
           title="ACTION TRACKER"
           titleKo="조치 현황 추적기 — 위험 신호에 대한 대응 상태를 관리합니다"
           index="07"
@@ -1476,7 +1513,8 @@ export function App() {
             그래프에 의한 가능성 제시이며 사실이 아닙니다. 수집에 실패한 항목은 값을 채우지 않고 실패로 표시합니다.
           </p>
         </footer>
-      </main>
+        </div>{/* end content area */}
+      </div>{/* end main column */}
 
       {/* ════════════════════════════ COST SIMULATOR MODAL ════════════════════════════ */}
       <CostSimulator

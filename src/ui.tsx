@@ -10,6 +10,7 @@ export function Panel({
   children,
   className = '',
   glow,
+  id,
 }: {
   title: string;
   titleKo?: string;
@@ -18,10 +19,11 @@ export function Panel({
   children: ReactNode;
   className?: string;
   glow?: 'high' | 'med' | 'steel';
+  id?: string;
 }) {
   const glowCls = glow === 'high' ? 'glow-high' : glow === 'med' ? 'glow-med' : glow === 'steel' ? 'glow-steel' : '';
   return (
-    <section className={`panel ${glowCls} ${className}`}>
+    <section id={id} className={`panel ${glowCls} ${className}`}>
       <header className="panel-head">
         <div>
           <h2 className="panel-title">
