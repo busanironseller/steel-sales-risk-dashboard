@@ -222,11 +222,11 @@ async function main() {
     }
   }
 
-  // Only HRC is charted. Everything else is a Market Pulse row, which needs just
-  // enough bars to compute the 120m change — keeping 240 of them would multiply
-  // the payload the scheduled collector rewrites every half hour.
+  // HRC, zinc, and aluminium get charted (instrument tabs).
+  // Everything else is a Market Pulse row — just enough bars for 120m metric.
+  const CHARTED = new Set(['hrc', 'zinc', 'aluminium']);
   for (const [key, inst] of Object.entries(instruments)) {
-    if (key === 'hrc') continue;
+    if (CHARTED.has(key)) continue;
     inst.bars = inst.bars.slice(-SECONDARY_BARS);
     inst.daily = [];
   }

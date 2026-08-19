@@ -160,6 +160,7 @@ export function App() {
   const [eventThemeTab, setEventThemeTab] = useState<string>('ALL');
   const [eventPage, setEventPage] = useState(1);
   const [chartTimeframe, setChartTimeframe] = useState<Timeframe>('30m');
+  const [chartInstrument, setChartInstrument] = useState<string>('hrc');
   const [newsPage, setNewsPage] = useState(1);
   const [newsDateFilter, setNewsDateFilter] = useState<string>('');
   const [simulatorOpen, setSimulatorOpen] = useState(false);
@@ -331,21 +332,25 @@ export function App() {
   const clampedNewsPage = Math.min(newsPage, totalNewsPages);
   const pagedNews = newsDigest.slice((clampedNewsPage - 1) * NEWS_PER_PAGE, clampedNewsPage * NEWS_PER_PAGE);
 
+  // Selected chart instrument
+  const chartInst = market?.instruments[chartInstrument] ?? hrc;
+  const chartInstLabel = INSTRUMENT_KO[chartInstrument] ?? chartInst?.labelKo ?? chartInstrument;
+
   // Chart timeframe stats
   const chartStats = useMemo(() => {
-    if (!hrc) return null;
+    if (!chartInst) return null;
     if (chartTimeframe === '30m') {
       return {
         label: '30분봉',
-        last: hrc.last,
-        change: hrc.change.today,
-        high: hrc.high,
-        low: hrc.low,
-        volume: hrc.volume,
-        oi: hrc.openInterest,
+        last: chartInst.last,
+        change: chartInst.change.today,
+        high: chartInst.high,
+        low: chartInst.low,
+        volume: chartInst.volume,
+        oi: chartInst.openInterest,
       };
     }
-    const daily = hrc.daily ?? [];
+    const daily = chartInst.daily ?? [];
     if (daily.length === 0) return null;
     const last = daily[daily.length - 1];
     const prev = daily.length >= 2 ? daily[daily.length - 2] : null;
@@ -371,7 +376,7 @@ export function App() {
       volume: periodVol,
       oi: last.oi,
     };
-  }, [hrc, chartTimeframe]);
+  }, [chartInst, chartTimeframe]);
 
   /* ── issue handlers ── */
   async function onCreateIssue(target: Impact, region: string, action: string) {
@@ -1074,69 +1079,97 @@ export function App() {
           </div>
         </Panel>
 
-        {/* ════════════════════════════ 05 HRC CHART (Multi-Timeframe) ════════════════════════════ */}
+        {/* ════════════════════════════ 05 PRICE CHART (Multi-Instrument + Multi-Timeframe) ════════════════════════════ */}
         <Panel
-          title="HRC CHART"
-          titleKo={`열연강판 차트 — ${chartStats?.label ?? '30분봉'}`}
+          title="PRICE CHART"
+          titleKo={`${chartInstLabel} — ${chartStats?.label ?? '30분봉'}`}
           index="05"
           glow="steel"
           meta={
-            <>
-              {hrc.contract} · 유동성 {hrc.liquidityScore?.toFixed(3)} ·{' '}
-              일봉 {(hrc.daily ?? []).length}개 · 30분봉 {hrc.bars.length}개
-            </>
+            chartInst ? (
+              <>
+                {chartInst.contract} · 일봉 {(chartInst.daily ?? []).length}개 · 30분봉 {chartInst.bars.length}개
+              </>
+            ) : undefined
           }
         >
-          {/* Timeframe tabs */}
-          <div className="tab-bar">
-            {([['30m', '30분봉'], ['daily', '일봉'], ['weekly', '주봉'], ['monthly', '월봉']] as const).map(([tf, label]) => (
-              <button key={tf}
-                className={`tab-chip ${chartTimeframe === tf ? 'active' : ''}`}
-                onClick={() => setChartTimeframe(tf as Timeframe)}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Instrument tabs */}
+          <div className="tab-bar" style={{ borderBottom: '1px solid var(--color-slate-line)' }}>
+            {(['hrc', 'zinc', 'aluminium'] as const).map((key) => {
+              const inst = market.instruments[key];
+              if (!inst) return null;
+              return (
+                <button key={key}
+                  className={`tab-chip ${chartInstrument === key ? 'active' : ''}`}
+                  onClick={() => { setChartInstrument(key); setChartTimeframe('30m'); }}
+                >
+                  {INSTRUMENT_KO[key] ?? inst.labelKo}
+                  <span className="ml-1 text-[9px] num" style={{ color: 'var(--color-faint)' }}>
+                    {inst.last?.toLocaleString()}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          <div className="grid gap-0 lg:grid-cols-[280px_1fr]">
-            <dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-b border-[var(--color-slate-line)] p-4 lg:border-b-0 lg:border-r">
-              <Metric label="최종가" value={`${(chartStats?.last ?? hrc.last)?.toLocaleString()} ${hrc.unit}`} strong />
-              <Metric label={chartTimeframe === '30m' ? '당일 변동' : `${chartStats?.label ?? ''} 변동`}
-                node={<Pct value={chartStats?.change ?? hrc.change.today} />} strong />
-              {chartTimeframe === '30m' && (
-                <>
-                  <Metric label="30분" node={<Pct value={hrc.change.m30} />} />
-                  <Metric label="60분" node={<Pct value={hrc.change.m60} />} />
-                  <Metric label="120분" node={<Pct value={hrc.change.m120} />} />
-                  <Metric label="예상정산가" value={hrc.preSettlement?.toLocaleString() ?? '—'} />
-                </>
-              )}
-              <Metric label={chartTimeframe === '30m' ? '당일 고가' : `${chartStats?.label ?? ''} 고가`}
-                value={(chartStats?.high ?? hrc.high)?.toLocaleString() ?? '—'} />
-              <Metric label={chartTimeframe === '30m' ? '당일 저가' : `${chartStats?.label ?? ''} 저가`}
-                value={(chartStats?.low ?? hrc.low)?.toLocaleString() ?? '—'} />
-              <Metric label={chartTimeframe === '30m' ? '거래량' : `${chartStats?.label ?? ''} 거래량`}
-                value={(chartStats?.volume ?? hrc.volume)?.toLocaleString() ?? '—'} />
-              <Metric label="미결제약정" value={(chartStats?.oi ?? hrc.openInterest)?.toLocaleString() ?? '—'} />
-              <div className="col-span-2 mt-2 space-y-0.5 border-t border-[var(--color-slate-line)] pt-2 text-[10px] text-[var(--color-faint)]">
-                <Line k="거래소 시각" v={hrc.sourceTimestamp} />
-                <Line k="KST 시각" v={shanghaiToKst(hrc.sourceTimestamp)} />
-                <Line k="수집 시각" v={fmtIso(hrc.collectedAt)} />
-                <Line k="출처" v="SHFE 공개 지연 데이터" />
-                <Line k="히스토리" v={hrc.historySource ?? 'N/A'} />
-              </div>
-            </dl>
-            <div className="p-3">
-              <Chart bars={hrc.bars} daily={hrc.daily ?? []} height={320} theme={theme} timeframe={chartTimeframe} />
-              <div className="px-2 pt-1.5 text-[10px] text-[var(--color-faint)]">
-                {chartTimeframe === '30m'
-                  ? '밝은 거래량 = SHFE 공식 봉 · 어두운 거래량 = Sina 백필 · 세션 브레이크 구간 제외'
-                  : `${chartStats?.label ?? ''} 차트 — 일봉 데이터 기반 집계 · 각 캔들 변동률 표시`
-                }
+          {/* Timeframe tabs */}
+          <div className="tab-bar">
+            {([['30m', '30분봉'], ['daily', '일봉'], ['weekly', '주봉'], ['monthly', '월봉']] as const).map(([tf, label]) => {
+              const hasDailyData = (chartInst?.daily ?? []).length > 0;
+              const disabled = tf !== '30m' && !hasDailyData;
+              return (
+                <button key={tf}
+                  className={`tab-chip ${chartTimeframe === tf ? 'active' : ''}`}
+                  onClick={() => !disabled && setChartTimeframe(tf as Timeframe)}
+                  style={disabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+                  title={disabled ? '일봉 데이터 없음' : undefined}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          {chartInst && (
+            <div className="grid gap-0 lg:grid-cols-[280px_1fr]">
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-b border-[var(--color-slate-line)] p-4 lg:border-b-0 lg:border-r">
+                <Metric label="최종가" value={`${(chartStats?.last ?? chartInst.last)?.toLocaleString()} ${chartInst.unit}`} strong />
+                <Metric label={chartTimeframe === '30m' ? '당일 변동' : `${chartStats?.label ?? ''} 변동`}
+                  node={<Pct value={chartStats?.change ?? chartInst.change.today} />} strong />
+                {chartTimeframe === '30m' && (
+                  <>
+                    <Metric label="30분" node={<Pct value={chartInst.change.m30} />} />
+                    <Metric label="60분" node={<Pct value={chartInst.change.m60} />} />
+                    <Metric label="120분" node={<Pct value={chartInst.change.m120} />} />
+                    <Metric label="예상정산가" value={chartInst.preSettlement?.toLocaleString() ?? '—'} />
+                  </>
+                )}
+                <Metric label={chartTimeframe === '30m' ? '당일 고가' : `${chartStats?.label ?? ''} 고가`}
+                  value={(chartStats?.high ?? chartInst.high)?.toLocaleString() ?? '—'} />
+                <Metric label={chartTimeframe === '30m' ? '당일 저가' : `${chartStats?.label ?? ''} 저가`}
+                  value={(chartStats?.low ?? chartInst.low)?.toLocaleString() ?? '—'} />
+                <Metric label={chartTimeframe === '30m' ? '거래량' : `${chartStats?.label ?? ''} 거래량`}
+                  value={(chartStats?.volume ?? chartInst.volume)?.toLocaleString() ?? '—'} />
+                <Metric label="미결제약정" value={(chartStats?.oi ?? chartInst.openInterest)?.toLocaleString() ?? '—'} />
+                <div className="col-span-2 mt-2 space-y-0.5 border-t border-[var(--color-slate-line)] pt-2 text-[10px] text-[var(--color-faint)]">
+                  <Line k="거래소 시각" v={chartInst.sourceTimestamp} />
+                  <Line k="KST 시각" v={shanghaiToKst(chartInst.sourceTimestamp)} />
+                  <Line k="수집 시각" v={fmtIso(chartInst.collectedAt)} />
+                  <Line k="출처" v={chartInst.exchange === 'SHFE' ? 'SHFE 공개 지연 데이터' : 'Sina Finance (비공식)'} />
+                  <Line k="히스토리" v={chartInst.historySource ?? 'N/A'} />
+                </div>
+              </dl>
+              <div className="p-3">
+                <Chart bars={chartInst.bars} daily={chartInst.daily ?? []} height={320} theme={theme} timeframe={chartTimeframe} />
+                <div className="px-2 pt-1.5 text-[10px] text-[var(--color-faint)]">
+                  {chartTimeframe === '30m'
+                    ? '밝은 거래량 = SHFE 공식 봉 · 어두운 거래량 = Sina 백필 · 세션 브레이크 구간 제외'
+                    : `${chartStats?.label ?? ''} 차트 — 일봉 데이터 기반 집계 · 각 캔들 변동률 표시`
+                  }
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </Panel>
 
         {/* ════════════════════════════ 06 NEWS DIGEST (글로벌 뉴스 일간지) ════════════════════════════ */}
