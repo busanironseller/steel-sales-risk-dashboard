@@ -51,9 +51,22 @@ export interface MarketData {
 export interface Evidence {
   id: string;
   title: string;
+  titleKo?: string | null;
   source: string;
   publishedAt: string;
   link: string;
+}
+
+export interface NewsDigestItem {
+  id: string;
+  title: string;
+  titleKo?: string | null;
+  source: string;
+  publishedAt: string;
+  link: string;
+  theme: string;
+  domains: string[];
+  lang: string;
 }
 
 export interface EventCluster {
@@ -158,6 +171,7 @@ export interface Analysis {
   impacts: Impact[];
   criticalSignals: Impact[];
   salesImpact: SalesImpactRow[];
+  newsDigest?: NewsDigestItem[];
   ruleCount: number;
 }
 

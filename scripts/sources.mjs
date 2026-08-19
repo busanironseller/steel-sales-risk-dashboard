@@ -117,6 +117,24 @@ export const NEWS_QUERIES = [
     q: 'when:7d (관세 OR 무역전쟁 OR 호르무즈 OR 이란) (철강 OR 수출 OR 해운)' },
   { domain: 'korea_steel',   weight: 0.9, lang: 'ko',
     q: 'when:7d (포스코 OR 현대제철 OR 동국제강) (수출 OR 생산 OR 가격 OR 실적)' },
+
+  // ── Macro / Event Radar — broad news for daily briefing ──
+  { domain: 'macro_politics', weight: 0.5, lang: 'en',
+    q: 'when:7d (Trump OR "trade war" OR tariff OR "executive order") (steel OR metals OR trade OR manufacturing)' },
+  { domain: 'macro_politics', weight: 0.5, lang: 'en',
+    q: 'when:7d (China OR Xi OR PBOC OR "Belt and Road") (economy OR stimulus OR manufacturing OR export OR policy)' },
+  { domain: 'macro_economy', weight: 0.5, lang: 'en',
+    q: 'when:7d (PMI OR GDP OR inflation OR "interest rate" OR "central bank") (manufacturing OR steel OR construction)' },
+  { domain: 'macro_economy', weight: 0.5, lang: 'en',
+    q: 'when:7d ("supply chain" OR semiconductor OR EV OR "electric vehicle") (steel OR metals OR demand)' },
+  { domain: 'macro_japan', weight: 0.5, lang: 'en',
+    q: 'when:7d (Japan OR BOJ OR Nippon) (steel OR yen OR trade OR export OR economy)' },
+  { domain: 'macro_japan', weight: 0.5, lang: 'ko',
+    q: 'when:7d (일본 OR 엔화 OR 다카이치 OR 일본은행) (철강 OR 경제 OR 무역 OR 수출)' },
+  { domain: 'macro_kr_economy', weight: 0.6, lang: 'ko',
+    q: 'when:7d (환율 OR 원달러 OR 수출 OR 경기) (철강 OR 제조업 OR 산업)' },
+  { domain: 'macro_construction', weight: 0.5, lang: 'en',
+    q: 'when:7d (construction OR infrastructure OR housing OR "real estate") (steel OR demand OR investment) (Asia OR Middle East OR global)' },
 ];
 
 

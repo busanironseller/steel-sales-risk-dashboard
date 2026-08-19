@@ -147,7 +147,7 @@ function buildEventClusters(articles) {
         status,
         evidence: c.articles
           .slice(0, 6)
-          .map((a) => ({ id: a.id, title: a.title, source: a.source, publishedAt: a.publishedAt, link: a.link })),
+          .map((a) => ({ id: a.id, title: a.title, titleKo: a.titleKo ?? null, source: a.source, publishedAt: a.publishedAt, link: a.link })),
         articles: undefined,
       };
     })
@@ -309,6 +309,60 @@ function salesImpact(impacts) {
     .slice(0, 20);
 }
 
+// ---------------------------------------------------------------- news digest
+
+/** Map news domains to Korean theme labels for Event Radar digest. */
+const DOMAIN_THEME = {
+  steel_price: '원자재·가격',
+  raw_material: '원자재·가격',
+  crc_market: '원자재·가격',
+  gi_market: '원자재·가격',
+  gl_market: '원자재·가격',
+  coated_steel: '원자재·가격',
+  zinc_market: '원자재·가격',
+  aluminium_market: '원자재·가격',
+  trade_policy: '통상·관세',
+  eu_steel_trade: '통상·관세',
+  us_steel_trade: '통상·관세',
+  asia_steel_trade: '통상·관세',
+  china_supply: '중국 동향',
+  china_export_flood: '중국 동향',
+  competitor_turkey: '경쟁국 동향',
+  competitor_india: '경쟁국 동향',
+  competitor_vietnam: '경쟁국 동향',
+  gcc_steel_market: '중동·수요',
+  energy: '에너지·물류',
+  logistics: '에너지·물류',
+  geopolitics: '지정학',
+  korea_steel: '한국 철강',
+  macro_politics: '거시경제·정치',
+  macro_economy: '거시경제·정치',
+  macro_japan: '일본 경제',
+  macro_kr_economy: '한국 경제',
+  macro_construction: '건설·수요',
+};
+
+function buildNewsDigest(allArticles) {
+  const digest = [];
+  for (const article of allArticles) {
+    const theme = article.domains
+      .map((d) => DOMAIN_THEME[d])
+      .filter(Boolean)[0] ?? '기타';
+    digest.push({
+      id: article.id,
+      title: article.title,
+      titleKo: article.titleKo ?? null,
+      source: article.source,
+      publishedAt: article.publishedAt,
+      link: article.link,
+      theme,
+      domains: article.domains,
+      lang: article.lang,
+    });
+  }
+  return digest.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+}
+
 // ---------------------------------------------------------------- main
 
 async function main() {
@@ -325,6 +379,9 @@ async function main() {
   const clusters = buildEventClusters(scored);
   const impacts = reconcile([...impactsFromMarket(signals, market), ...impactsFromEvents(clusters)]);
   const critical = impacts.filter((i) => SEVERITY[i.severity] >= SEVERITY.MEDIUM);
+
+  // News digest for Event Radar: ALL articles, not just rule-matched
+  const newsDigest = buildNewsDigest(news.articles);
 
   const analysis = {
     generatedAt: new Date().toISOString(),
@@ -344,6 +401,7 @@ async function main() {
     impacts,
     criticalSignals: critical.slice(0, 10),
     salesImpact: salesImpact(impacts),
+    newsDigest,
     ruleCount: RULES.length,
   };
 

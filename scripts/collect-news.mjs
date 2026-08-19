@@ -17,6 +17,46 @@ const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
+/**
+ * Translate a string to Korean using Google Translate's free endpoint.
+ * Returns null on failure — never blocks the pipeline.
+ */
+async function translateToKo(text) {
+  if (!text || text.length < 3) return null;
+  // Skip if already Korean (title from ko-language queries)
+  if (/[가-힯]/.test(text.slice(0, 10))) return text;
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q=${encodeURIComponent(text.slice(0, 500))}`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': UA },
+      signal: AbortSignal.timeout(6_000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data[0]?.map((x) => x[0]).join('') || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Batch-translate titles with throttling (150ms between calls). */
+async function translateTitles(articles) {
+  let translated = 0;
+  let failed = 0;
+  for (const article of articles) {
+    const ko = await translateToKo(article.title);
+    if (ko) {
+      article.titleKo = ko;
+      translated++;
+    } else {
+      failed++;
+    }
+    // Throttle to avoid rate limiting
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  console.log(`  translate ${translated} ok / ${failed} failed`);
+}
+
 async function fetchText(url, { attempts = 3 } = {}) {
   let lastError;
   for (let i = 1; i <= attempts; i++) {
@@ -153,6 +193,10 @@ async function main() {
     id: `n${String(i + 1).padStart(4, '0')}`,
     ...rest,
   }));
+
+  // Translate article titles to Korean
+  console.log(`\ntranslating ${articles.length} titles to Korean...`);
+  await translateTitles(articles);
 
   await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
   await writeFile(

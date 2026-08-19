@@ -124,10 +124,11 @@ async function collectShfe(pid) {
     bars: mergeBars(history, official),
     officialBarCount: official.length,
     historySource,
+    // Keep ALL daily bars from Sina for multi-timeframe chart (weekly/monthly/yearly)
     daily: normalizeSinaBars(
       daily.map((d) => ({ ...d, d: `${d.d} 00:00:00` })),
       { source: 'SINA_BACKFILL' },
-    ).slice(-120),
+    ),
     quality: 'OK',
   };
 }

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Chart } from './Chart';
+import { Chart, type Timeframe } from './Chart';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
 import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
-import type { Analysis, Impact, Issue, IssueStatus, MarketData } from './types';
+import type { Analysis, Impact, Issue, IssueStatus, MarketData, NewsDigestItem } from './types';
 
 const BASE = import.meta.env.BASE_URL;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
@@ -157,6 +157,9 @@ export function App() {
   const [salesRiskTab, setSalesRiskTab] = useState<string>('ALL');
   const [eventThemeTab, setEventThemeTab] = useState<string>('ALL');
   const [eventPage, setEventPage] = useState(1);
+  const [chartTimeframe, setChartTimeframe] = useState<Timeframe>('30m');
+  const [newsPage, setNewsPage] = useState(1);
+  const [newsDateFilter, setNewsDateFilter] = useState<string>('');
 
   /* ── refs ── */
   const refreshingRef = useRef(refreshing);
@@ -296,8 +299,74 @@ export function App() {
   const clampedPage = Math.min(eventPage, totalEventPages);
   const pagedEvents = eventsByTab.slice((clampedPage - 1) * EVENTS_PER_PAGE, clampedPage * EVENTS_PER_PAGE);
 
-  // Reset event page when tab changes
+  // Reset pages when tabs change
   useEffect(() => { setEventPage(1); }, [eventThemeTab]);
+  useEffect(() => { setNewsPage(1); }, [newsDateFilter, eventThemeTab]);
+
+  // News digest for Event Radar
+  const NEWS_PER_PAGE = 8;
+  const newsDigest = useMemo(() => {
+    const items = analysis?.newsDigest ?? [];
+    let filtered = items;
+    if (eventThemeTab !== 'ALL') {
+      filtered = filtered.filter((n) => n.theme === eventThemeTab);
+    }
+    if (newsDateFilter) {
+      filtered = filtered.filter((n) => n.publishedAt.startsWith(newsDateFilter));
+    }
+    return filtered;
+  }, [analysis, eventThemeTab, newsDateFilter]);
+
+  const newsThemes = useMemo(() => {
+    const themes = new Set((analysis?.newsDigest ?? []).map((n) => n.theme));
+    return ['ALL', ...Array.from(themes)];
+  }, [analysis]);
+
+  const totalNewsPages = Math.max(1, Math.ceil(newsDigest.length / NEWS_PER_PAGE));
+  const clampedNewsPage = Math.min(newsPage, totalNewsPages);
+  const pagedNews = newsDigest.slice((clampedNewsPage - 1) * NEWS_PER_PAGE, clampedNewsPage * NEWS_PER_PAGE);
+
+  // Chart timeframe stats
+  const chartStats = useMemo(() => {
+    if (!hrc) return null;
+    if (chartTimeframe === '30m') {
+      return {
+        label: '30분봉',
+        last: hrc.last,
+        change: hrc.change.today,
+        high: hrc.high,
+        low: hrc.low,
+        volume: hrc.volume,
+        oi: hrc.openInterest,
+      };
+    }
+    const daily = hrc.daily ?? [];
+    if (daily.length === 0) return null;
+    const last = daily[daily.length - 1];
+    const prev = daily.length >= 2 ? daily[daily.length - 2] : null;
+    const change = prev ? ((last.c - prev.c) / prev.c) * 100 : null;
+
+    if (chartTimeframe === 'daily') {
+      return { label: '일봉', last: last.c, change, high: last.h, low: last.l, volume: last.v, oi: last.oi };
+    }
+    // Weekly/monthly: aggregate
+    const period = chartTimeframe === 'weekly' ? 5 : 22;
+    const slice = daily.slice(-period);
+    const periodHigh = Math.max(...slice.map((b) => b.h));
+    const periodLow = Math.min(...slice.map((b) => b.l));
+    const periodVol = slice.reduce((s, b) => s + (b.v ?? 0), 0);
+    const periodStart = slice[0];
+    const periodChange = periodStart ? ((last.c - periodStart.o) / periodStart.o) * 100 : null;
+    return {
+      label: chartTimeframe === 'weekly' ? '주봉' : '월봉',
+      last: last.c,
+      change: periodChange,
+      high: periodHigh,
+      low: periodLow,
+      volume: periodVol,
+      oi: last.oi,
+    };
+  }, [hrc, chartTimeframe]);
 
   /* ── issue handlers ── */
   async function onCreateIssue(target: Impact, region: string, action: string) {
@@ -426,8 +495,8 @@ export function App() {
             <StatCard label="주의 신호" value={medCount} sub={`MEDIUM ${medCount}건${isFiltered ? ' (필터)' : ''}`} tone="med" />
           </div>
           <div className="cursor-pointer" onClick={() => eventsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-            <StatCard label="이벤트 클러스터" value={filteredEventClusters.length}
-              sub={`뉴스 ${analysis.inputs.articlesRelevant}건 분석${isFiltered ? ' (필터)' : ''}`} tone="steel" />
+            <StatCard label="뉴스 수집" value={(analysis.newsDigest ?? []).length}
+              sub={`${newsThemes.length - 1}개 테마 · ${analysis.inputs.articlesCollected}건 중${isFiltered ? ' (필터)' : ''}`} tone="steel" />
           </div>
           <StatCard label="활성 이슈" value={activeIssues.length} sub={`전체 ${issues.length}건`}
             tone={issues.some((i) => i.status === 'ACTION_REQUIRED') ? 'med' : 'steel'} />
@@ -614,35 +683,31 @@ export function App() {
                                   📋 근거 기사 — {sig.evidence.length}건
                                 </div>
                                 <ul className="space-y-2">
-                                  {sig.evidence.map((e: any) => {
-                                    const ctx = articleContextKo(e.title);
-                                    const country = targetCountry(e.title);
-                                    return (
-                                      <li key={e.id} className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
-                                        style={{ border: '1px solid var(--color-slate-line)' }}>
-                                        {/* Korean context line (primary) */}
-                                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                          <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
-                                            {tradePolicyLabel(e.title)}
-                                          </span>
-                                          {country && (
-                                            <span className="text-[10px] font-medium text-[var(--color-risk-med)]">{country}</span>
-                                          )}
-                                          {ctx && (
-                                            <span className="text-[10px] text-[var(--color-muted)]">{ctx}</span>
-                                          )}
-                                        </div>
-                                        {/* English original (link) */}
-                                        <a href={e.link} target="_blank" rel="noreferrer noopener"
-                                          className="text-[11.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
-                                          ↗ {e.title}
-                                        </a>
-                                        <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
-                                          {e.source} · {e.publishedAt.slice(0, 10)}
-                                        </div>
-                                      </li>
-                                    );
-                                  })}
+                                  {sig.evidence.map((e: any) => (
+                                    <li key={e.id} className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
+                                      style={{ border: '1px solid var(--color-slate-line)' }}>
+                                      {/* Korean title (primary) */}
+                                      <div className="text-[12px] font-medium text-[var(--color-ink)] leading-snug mb-1">
+                                        {e.titleKo || articleContextKo(e.title) || e.title}
+                                      </div>
+                                      {/* English original (secondary link) */}
+                                      <a href={e.link} target="_blank" rel="noreferrer noopener"
+                                        className="text-[10.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                        ↗ {e.title}
+                                      </a>
+                                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[var(--color-faint)] num">
+                                        <span>{e.source}</span>
+                                        <span>·</span>
+                                        <span>{e.publishedAt.slice(0, 10)}</span>
+                                        <span className="inline-block px-1 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
+                                          {tradePolicyLabel(e.title)}
+                                        </span>
+                                        {targetCountry(e.title) && (
+                                          <span className="text-[9px] font-medium text-[var(--color-risk-med)]">{targetCountry(e.title)}</span>
+                                        )}
+                                      </div>
+                                    </li>
+                                  ))}
                                 </ul>
                               </div>
                             )}
@@ -759,24 +824,20 @@ export function App() {
                     {impact.evidence && impact.evidence.length > 0 && (
                       <div>
                         <div className="eyebrow mb-1.5">근거 자료 · {impact.evidence.length}건</div>
-                        <ul className="space-y-1.5">
+                        <ul className="space-y-2">
                           {impact.evidence.slice(0, 4).map((e: any) => (
-                            <li key={e.id} className="text-[11px] leading-snug">
-                              <div className="flex flex-wrap items-center gap-1 mb-0.5">
-                                <span className="inline-block px-1 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
-                                  {tradePolicyLabel(e.title)}
-                                </span>
-                                {targetCountry(e.title) && (
-                                  <span className="text-[10px] text-[var(--color-risk-med)]">{targetCountry(e.title)}</span>
-                                )}
+                            <li key={e.id} className="text-[11px] leading-snug rounded-md px-3 py-1.5"
+                              style={{ border: '1px solid var(--color-slate-line)' }}>
+                              <div className="text-[11.5px] font-medium text-[var(--color-ink)] mb-0.5">
+                                {e.titleKo || articleContextKo(e.title) || e.title}
                               </div>
                               <a href={e.link} target="_blank" rel="noreferrer noopener"
-                                className="text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2">
+                                className="text-[10px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2">
                                 ↗ {e.title}
                               </a>
-                              <span className="ml-1 text-[10px] text-[var(--color-faint)] num">
+                              <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
                                 {e.source} · {e.publishedAt.slice(0, 10)}
-                              </span>
+                              </div>
                             </li>
                           ))}
                         </ul>
@@ -907,16 +968,11 @@ export function App() {
                                       {target.evidence.slice(0, 4).map((e: any) => (
                                         <li key={e.id} className="rounded-md px-3 py-1.5 transition-colors hover:bg-[var(--color-surface)]"
                                           style={{ border: '1px solid var(--color-slate-line)' }}>
-                                          <div className="flex flex-wrap items-center gap-1 mb-0.5">
-                                            <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
-                                              {tradePolicyLabel(e.title)}
-                                            </span>
-                                            {targetCountry(e.title) && (
-                                              <span className="text-[10px] text-[var(--color-risk-med)]">{targetCountry(e.title)}</span>
-                                            )}
+                                          <div className="text-[11.5px] font-medium text-[var(--color-ink)] leading-snug mb-0.5">
+                                            {e.titleKo || articleContextKo(e.title) || e.title}
                                           </div>
                                           <a href={e.link} target="_blank" rel="noreferrer noopener"
-                                            className="text-[11.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
+                                            className="text-[10px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
                                             ↗ {e.title}
                                           </a>
                                           <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
@@ -954,31 +1010,51 @@ export function App() {
           </div>
         </Panel>
 
-        {/* ════════════════════════════ 05 HRC INTRADAY ════════════════════════════ */}
+        {/* ════════════════════════════ 05 HRC CHART (Multi-Timeframe) ════════════════════════════ */}
         <Panel
-          title="HRC INTRADAY"
-          titleKo="열연강판 장중 상세"
+          title="HRC CHART"
+          titleKo={`열연강판 차트 — ${chartStats?.label ?? '30분봉'}`}
           index="05"
           glow="steel"
           meta={
             <>
               {hrc.contract} · 유동성 {hrc.liquidityScore?.toFixed(3)} ·{' '}
-              {hrc.officialBarCount} 공식 + {hrc.bars.length - hrc.officialBarCount} 백필
+              일봉 {(hrc.daily ?? []).length}개 · 30분봉 {hrc.bars.length}개
             </>
           }
         >
+          {/* Timeframe tabs */}
+          <div className="tab-bar">
+            {([['30m', '30분봉'], ['daily', '일봉'], ['weekly', '주봉'], ['monthly', '월봉']] as const).map(([tf, label]) => (
+              <button key={tf}
+                className={`tab-chip ${chartTimeframe === tf ? 'active' : ''}`}
+                onClick={() => setChartTimeframe(tf as Timeframe)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           <div className="grid gap-0 lg:grid-cols-[280px_1fr]">
             <dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-b border-[var(--color-slate-line)] p-4 lg:border-b-0 lg:border-r">
-              <Metric label="최종가" value={`${hrc.last?.toLocaleString()} ${hrc.unit}`} strong />
-              <Metric label="당일 변동" node={<Pct value={hrc.change.today} />} strong />
-              <Metric label="30분" node={<Pct value={hrc.change.m30} />} />
-              <Metric label="60분" node={<Pct value={hrc.change.m60} />} />
-              <Metric label="120분" node={<Pct value={hrc.change.m120} />} />
-              <Metric label="예상정산가" value={hrc.preSettlement?.toLocaleString() ?? '—'} />
-              <Metric label="당일 고가" value={hrc.high?.toLocaleString() ?? '—'} />
-              <Metric label="당일 저가" value={hrc.low?.toLocaleString() ?? '—'} />
-              <Metric label="거래량" value={hrc.volume?.toLocaleString() ?? '—'} />
-              <Metric label="미결제약정" value={hrc.openInterest?.toLocaleString() ?? '—'} />
+              <Metric label="최종가" value={`${(chartStats?.last ?? hrc.last)?.toLocaleString()} ${hrc.unit}`} strong />
+              <Metric label={chartTimeframe === '30m' ? '당일 변동' : `${chartStats?.label ?? ''} 변동`}
+                node={<Pct value={chartStats?.change ?? hrc.change.today} />} strong />
+              {chartTimeframe === '30m' && (
+                <>
+                  <Metric label="30분" node={<Pct value={hrc.change.m30} />} />
+                  <Metric label="60분" node={<Pct value={hrc.change.m60} />} />
+                  <Metric label="120분" node={<Pct value={hrc.change.m120} />} />
+                  <Metric label="예상정산가" value={hrc.preSettlement?.toLocaleString() ?? '—'} />
+                </>
+              )}
+              <Metric label={chartTimeframe === '30m' ? '당일 고가' : `${chartStats?.label ?? ''} 고가`}
+                value={(chartStats?.high ?? hrc.high)?.toLocaleString() ?? '—'} />
+              <Metric label={chartTimeframe === '30m' ? '당일 저가' : `${chartStats?.label ?? ''} 저가`}
+                value={(chartStats?.low ?? hrc.low)?.toLocaleString() ?? '—'} />
+              <Metric label={chartTimeframe === '30m' ? '거래량' : `${chartStats?.label ?? ''} 거래량`}
+                value={(chartStats?.volume ?? hrc.volume)?.toLocaleString() ?? '—'} />
+              <Metric label="미결제약정" value={(chartStats?.oi ?? hrc.openInterest)?.toLocaleString() ?? '—'} />
               <div className="col-span-2 mt-2 space-y-0.5 border-t border-[var(--color-slate-line)] pt-2 text-[10px] text-[var(--color-faint)]">
                 <Line k="거래소 시각" v={hrc.sourceTimestamp} />
                 <Line k="KST 시각" v={shanghaiToKst(hrc.sourceTimestamp)} />
@@ -988,195 +1064,153 @@ export function App() {
               </div>
             </dl>
             <div className="p-3">
-              <Chart bars={hrc.bars.slice(-160)} height={300} theme={theme} />
+              <Chart bars={hrc.bars} daily={hrc.daily ?? []} height={320} theme={theme} timeframe={chartTimeframe} />
               <div className="px-2 pt-1.5 text-[10px] text-[var(--color-faint)]">
-                밝은 거래량 = SHFE 공식 봉 · 어두운 거래량 = Sina 백필 · 세션 브레이크 구간 제외
+                {chartTimeframe === '30m'
+                  ? '밝은 거래량 = SHFE 공식 봉 · 어두운 거래량 = Sina 백필 · 세션 브레이크 구간 제외'
+                  : `${chartStats?.label ?? ''} 차트 — 일봉 데이터 기반 집계 · 각 캔들 변동률 표시`
+                }
               </div>
             </div>
           </div>
         </Panel>
 
-        {/* ════════════════════════════ 06 EVENT RADAR (tabs + pagination) ════════════════════════════ */}
+        {/* ════════════════════════════ 06 NEWS DIGEST (글로벌 뉴스 일간지) ════════════════════════════ */}
         <div ref={eventsRef}>
           <Panel
-            title="EVENT RADAR"
-            titleKo={`글로벌 이벤트 레이더${isFiltered ? ' (필터 적용)' : ''} — 리스크 유형별 분류 · 뉴스 기반 모니터링`}
+            title="NEWS DIGEST"
+            titleKo="글로벌 뉴스 일간지 — 철강 관련 거시·정책·시장 뉴스 종합"
             index="06"
             meta={
               <>
-                {filteredEventClusters.length}개 클러스터{isFiltered ? ` / 전체 ${analysis.eventClusters.length}개` : ''} · 관련 {analysis.inputs.articlesRelevant} / 전체 {analysis.inputs.articlesCollected}건
+                {(analysis.newsDigest ?? []).length}건 수집 · {newsThemes.length - 1}개 테마 · 업데이트 {fmtIso(analysis.inputs.newsGeneratedAt)}
               </>
             }
           >
-            {/* Category tabs */}
-            <div className="tab-bar">
-              {eventRiskTypes.map((type) => {
-                const count = type === 'ALL' ? filteredEventClusters.length : filteredEventClusters.filter((c) => (c.riskTypeKo ?? c.riskType) === type).length;
+            {/* Theme tabs */}
+            <div className="tab-bar" style={{ flexWrap: 'wrap' }}>
+              {newsThemes.map((th) => {
+                const count = th === 'ALL'
+                  ? (analysis.newsDigest ?? []).length
+                  : (analysis.newsDigest ?? []).filter((n) => n.theme === th).length;
                 return (
-                  <TabChip key={type} label={type === 'ALL' ? '전체' : type} count={count}
-                    active={eventThemeTab === type} onClick={() => setEventThemeTab(type)} />
+                  <TabChip key={th} label={th === 'ALL' ? '📰 전체' : th} count={count}
+                    active={eventThemeTab === th} onClick={() => setEventThemeTab(th)} />
                 );
               })}
             </div>
 
-            {/* Info bar */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--color-slate-line)] text-[10px] text-[var(--color-faint)]">
-              <span>
-                {eventThemeTab === 'ALL' ? '전체' : eventThemeTab} · {eventsByTab.length}건 중 {(clampedPage - 1) * EVENTS_PER_PAGE + 1}–{Math.min(clampedPage * EVENTS_PER_PAGE, eventsByTab.length)}
-              </span>
-              <span>
-                총 {totalEventPages}페이지
-              </span>
+            {/* Date search + info bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-[var(--color-slate-line)]">
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] text-[var(--color-faint)]">📅 일자 검색</label>
+                <input
+                  type="date"
+                  value={newsDateFilter}
+                  onChange={(e) => setNewsDateFilter(e.target.value)}
+                  className="rounded-sm border border-[var(--color-slate-line)] bg-[var(--color-surface)] px-2 py-1 text-[11px] text-[var(--color-ink)]"
+                  style={{ colorScheme: theme }}
+                />
+                {newsDateFilter && (
+                  <button
+                    onClick={() => setNewsDateFilter('')}
+                    className="text-[10px] text-[var(--color-steel)] hover:underline"
+                  >
+                    ✕ 초기화
+                  </button>
+                )}
+              </div>
+              <div className="text-[10px] text-[var(--color-faint)] num">
+                {newsDigest.length}건{newsDateFilter ? ` (${newsDateFilter})` : ''} · 페이지 {clampedNewsPage}/{totalNewsPages}
+              </div>
             </div>
 
+            {/* News article list */}
             <div className="divide-y divide-[var(--color-slate-line)]">
-              {pagedEvents.length === 0 && (
-                <EmptyState text={eventThemeTab !== 'ALL' ? `${eventThemeTab} 카테고리에 해당하는 이벤트가 없습니다.` : '감지된 이벤트가 없습니다.'} />
-              )}
-              {pagedEvents.map((c) => {
-                const relatedImpact = analysis.impacts.find((i: any) => i.ruleId === c.ruleId);
-                const isExpanded = expandedCluster === c.id;
-                return (
-                  <div key={c.id}>
-                    <div
-                      className="px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-steel-soft)]"
-                      onClick={() => {
-                        setExpandedCluster(isExpanded ? null : c.id);
-                        setSelectedImpact(`IM_${c.ruleId}_EVENT`);
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <span
-                              className="border px-1.5 py-px text-[9.5px] rounded-sm font-medium"
-                              style={{
-                                borderColor: c.status === 'ACTIVE' ? 'rgba(255,82,82,0.5)' : 'var(--color-slate-line)',
-                                color: c.status === 'ACTIVE' ? 'var(--color-risk-high)' : 'var(--color-muted)',
-                                background: c.status === 'ACTIVE' ? 'var(--color-risk-high-soft)' : 'transparent',
-                              }}
-                            >
-                              {c.status === 'ACTIVE' ? '🔴 활성' : c.status === 'OPEN' ? '🟡 감시' : c.status === 'COOLING' ? '⚪ 완화' : '종료'}
-                            </span>
-                            <ConfidenceTag confidence={c.confidence} />
-                            <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-medium bg-[var(--color-surface)] border border-[var(--color-slate-line)] text-[var(--color-muted)]">
-                              {c.riskTypeKo ?? c.riskType}
-                            </span>
-                            <span className="text-[10px] text-[var(--color-faint)]">
-                              {c.articleCount}건 / {c.publisherCount}매체
-                            </span>
-                          </div>
-                          <div className="text-[13px] font-semibold text-[var(--color-ink)] mb-1">
-                            {c.eventTypeKo ?? c.eventType}
-                          </div>
-                          {relatedImpact?.narrativeKo && (
-                            <div className="text-[11.5px] leading-[1.5] text-[var(--color-muted)] mb-1.5">
-                              {relatedImpact.narrativeKo}
-                            </div>
+              {pagedNews.length === 0 ? (
+                <EmptyState text={
+                  newsDateFilter
+                    ? `${newsDateFilter} 해당 일자에 수집된 뉴스가 없습니다.`
+                    : eventThemeTab !== 'ALL'
+                      ? `${eventThemeTab} 테마에 해당하는 뉴스가 없습니다.`
+                      : '수집된 뉴스가 없습니다. npm run refresh로 데이터를 수집하세요.'
+                } />
+              ) : (
+                pagedNews.map((article) => (
+                  <div key={article.id} className="px-4 py-3 transition-colors hover:bg-[var(--color-steel-soft)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        {/* Theme badge */}
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                          <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)] border border-[var(--color-steel)]" style={{ opacity: 0.8 }}>
+                            {article.theme}
+                          </span>
+                          {article.lang === 'ko' && (
+                            <span className="text-[9px] px-1 py-px rounded-sm bg-[var(--color-surface)] text-[var(--color-faint)]">🇰🇷 한국어</span>
                           )}
-                          <div className="flex flex-wrap gap-1.5 text-[10px]">
-                            <span className="text-[var(--color-faint)]">영향 지역:</span>
-                            {c.regions.map((r: string) => (
-                              <span key={r} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">{r}</span>
-                            ))}
-                            <span className="text-[var(--color-faint)] ml-1">제품:</span>
-                            {c.products.slice(0, 4).map((p: string) => (
-                              <span key={p} className="px-1.5 py-px bg-[var(--color-surface)] text-[var(--color-muted)] rounded-sm">{p}</span>
-                            ))}
-                          </div>
+                          {article.domains.slice(0, 3).map((d) => (
+                            <span key={d} className="text-[9px] px-1 py-px rounded-sm bg-[var(--color-surface)] text-[var(--color-faint)]">{d}</span>
+                          ))}
                         </div>
-                        <div className="shrink-0 text-right">
-                          <div className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">최신 {c.latestUpdate.slice(0, 10)}</div>
-                          <div className="num text-[10px] text-[var(--color-faint)]">{c.ageHours}시간 전</div>
-                          <div className="text-[10px] mt-1" style={{ color: 'var(--color-steel)' }}>
-                            {isExpanded ? '▾ 접기' : '▸ 근거 기사 보기'}
-                          </div>
+                        {/* Korean title (primary) */}
+                        <div className="text-[13px] font-medium text-[var(--color-ink)] leading-snug mb-1">
+                          {article.titleKo || article.title}
                         </div>
+                        {/* English original as link (if Korean translation exists) */}
+                        {article.titleKo && article.titleKo !== article.title && (
+                          <a href={article.link} target="_blank" rel="noreferrer noopener"
+                            className="text-[10.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block mb-0.5">
+                            ↗ {article.title}
+                          </a>
+                        )}
+                        {/* If no Korean translation, title itself is the link */}
+                        {(!article.titleKo || article.titleKo === article.title) && (
+                          <a href={article.link} target="_blank" rel="noreferrer noopener"
+                            className="text-[10.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block mb-0.5">
+                            ↗ 원문 보기
+                          </a>
+                        )}
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <div className="num text-[10.5px] text-[var(--color-muted)] whitespace-nowrap">{article.publishedAt.slice(0, 10)}</div>
+                        <div className="text-[10px] text-[var(--color-faint)]">{article.source}</div>
                       </div>
                     </div>
-
-                    {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 ml-4 border-l-2 border-[var(--color-steel)] space-y-3"
-                        style={{ background: 'linear-gradient(90deg, var(--color-steel-soft), transparent 50%)' }}>
-                        {relatedImpact?.narrativeKo && (
-                          <div className="rounded-md px-3.5 py-2.5 text-[12px] leading-[1.6] text-[var(--color-ink)]"
-                            style={{ background: 'linear-gradient(135deg, var(--color-risk-med-soft), var(--color-risk-high-soft))' }}>
-                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-risk-med)] mb-1">
-                              💡 이 이벤트가 왜 위험한가
-                            </div>
-                            {relatedImpact.narrativeKo}
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-steel)] mb-1.5 uppercase">
-                            📋 근거 기사 — 총 {c.articleCount}건 중 상위 {c.evidence.length}건
-                          </div>
-                          <ul className="space-y-1.5">
-                            {c.evidence.map((e: any) => {
-                              const ctx = articleContextKo(e.title);
-                              const country = targetCountry(e.title);
-                              return (
-                                <li key={e.id} className="rounded-md px-3 py-2 transition-colors hover:bg-[var(--color-surface)]"
-                                  style={{ border: '1px solid var(--color-slate-line)' }}>
-                                  <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                    <span className="inline-block px-1.5 py-px rounded-sm text-[9px] font-bold bg-[var(--color-steel-soft)] text-[var(--color-steel)]">
-                                      {tradePolicyLabel(e.title)}
-                                    </span>
-                                    {country && <span className="text-[10px] font-medium text-[var(--color-risk-med)]">{country}</span>}
-                                    {ctx && <span className="text-[10px] text-[var(--color-muted)]">{ctx}</span>}
-                                  </div>
-                                  <a href={e.link} target="_blank" rel="noreferrer noopener"
-                                    className="text-[11.5px] text-[var(--color-steel)] hover:underline decoration-dotted underline-offset-2 leading-snug block">
-                                    ↗ {e.title}
-                                  </a>
-                                  <div className="mt-0.5 text-[10px] text-[var(--color-faint)] num">
-                                    {e.source} · {e.publishedAt.slice(0, 10)}
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                          <div className="mt-2 text-[10px] text-[var(--color-faint)]">
-                            이 클러스터는 {c.publisherCount}개 독립 매체가 보도했습니다. 매칭 키워드: {c.keywords.slice(0, 6).join(', ')}
-                          </div>
-                        </div>
-                        {relatedImpact && (
-                          <div>
-                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1.5 uppercase">✅ 권장 조치</div>
-                            <ul className="space-y-1.5">
-                              {(relatedImpact.actionsKo?.length ? relatedImpact.actionsKo : relatedImpact.actions).map((a: string) => (
-                                <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
-                                  <span>· {a}</span>
-                                  <button
-                                    className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                                    onClick={(ev) => { ev.stopPropagation(); onCreateIssue(relatedImpact, relatedImpact.regions[0], a); }}
-                                  >
-                                    + 이슈
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
-                );
-              })}
+                ))
+              )}
             </div>
 
             {/* Pagination */}
-            {totalEventPages > 1 && (
+            {totalNewsPages > 1 && (
               <div className="flex items-center justify-center gap-1.5 px-4 py-3 border-t border-[var(--color-slate-line)]">
-                <button className="page-btn" disabled={clampedPage <= 1} onClick={() => setEventPage((p) => Math.max(1, p - 1))}>‹</button>
-                {Array.from({ length: totalEventPages }, (_, i) => i + 1).map((p) => (
-                  <button key={p} className={`page-btn ${p === clampedPage ? 'active' : ''}`} onClick={() => setEventPage(p)}>
+                <button className="page-btn" disabled={clampedNewsPage <= 1}
+                  onClick={() => setNewsPage((p) => Math.max(1, p - 1))}>‹</button>
+                {Array.from({ length: Math.min(totalNewsPages, 10) }, (_, i) => {
+                  // Show pages around current page
+                  const half = 5;
+                  let start = Math.max(1, clampedNewsPage - half);
+                  const end = Math.min(totalNewsPages, start + 9);
+                  start = Math.max(1, end - 9);
+                  return start + i;
+                }).filter((p) => p <= totalNewsPages).map((p) => (
+                  <button key={p} className={`page-btn ${p === clampedNewsPage ? 'active' : ''}`}
+                    onClick={() => setNewsPage(p)}>
                     {p}
                   </button>
                 ))}
-                <button className="page-btn" disabled={clampedPage >= totalEventPages} onClick={() => setEventPage((p) => Math.min(totalEventPages, p + 1))}>›</button>
+                {totalNewsPages > 10 && clampedNewsPage < totalNewsPages - 5 && (
+                  <span className="text-[10px] text-[var(--color-faint)]">…{totalNewsPages}</span>
+                )}
+                <button className="page-btn" disabled={clampedNewsPage >= totalNewsPages}
+                  onClick={() => setNewsPage((p) => Math.min(totalNewsPages, p + 1))}>›</button>
               </div>
             )}
+
+            <div className="px-4 py-2 border-t border-[var(--color-slate-line)] text-[10px] text-[var(--color-faint)]">
+              💡 Google News RSS에서 수집된 뉴스의 메타데이터만 표시합니다. 본문은 원문 링크에서 확인하세요.
+              테마별 탭과 일자 검색을 활용하여 관심 분야의 뉴스를 확인할 수 있습니다.
+            </div>
           </Panel>
         </div>
 
