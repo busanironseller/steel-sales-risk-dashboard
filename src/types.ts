@@ -195,6 +195,34 @@ export interface FxData {
   pairs: FxPair[];
 }
 
+export interface FreightTicker {
+  symbol: string;
+  label: string;
+  labelKo: string;
+  category: 'bulk' | 'container' | 'tanker' | 'broad';
+  unit: string;
+  last: number;
+  lastDate: string;
+  change1d: number | null;
+  change1w: number | null;
+  change1m: number | null;
+  high52w: number;
+  low52w: number;
+  volume: number;
+  currency: string;
+  exchange: string;
+  bars: { date: string; open: number | null; high: number | null; low: number | null; close: number; volume: number }[];
+  spark: { date: string; value: number }[];
+}
+
+export interface FreightData {
+  generatedAt: string;
+  source: string;
+  note: string;
+  tickers: FreightTicker[];
+  failures: { symbol: string; error: string }[];
+}
+
 export type IssueStatus = 'NEW' | 'REVIEWING' | 'ACTION_REQUIRED' | 'RESOLVED';
 
 export interface Issue {

@@ -3,7 +3,7 @@ import { Chart, type Timeframe } from './Chart';
 import { CostSimulator } from './CostSimulator';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
 import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
-import type { Analysis, FxData, Impact, Issue, IssueStatus, MarketData, NewsDigestItem } from './types';
+import type { Analysis, FreightData, FxData, Impact, Issue, IssueStatus, MarketData, NewsDigestItem } from './types';
 
 const BASE = import.meta.env.BASE_URL;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
@@ -135,6 +135,7 @@ export function App() {
   const [market, setMarket] = useState<MarketData | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [fx, setFx] = useState<FxData | null>(null);
+  const [freight, setFreight] = useState<FreightData | null>(null);
   const [issues, setIssues] = useState<Issue[]>([]);
   const [dbError, setDbError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -190,15 +191,17 @@ export function App() {
     setRefreshing(true);
     try {
       const bust = `?t=${Date.now()}`;
-      const [m, a, fxRes] = await Promise.all([
+      const [m, a, fxRes, freightRes] = await Promise.all([
         fetch(`${BASE}data/market.json${bust}`).then((r) => r.json()),
         fetch(`${BASE}data/analysis.json${bust}`).then((r) => r.json()),
         fetch(`${BASE}data/fx.json${bust}`).then((r) => r.json()).catch(() => null),
+        fetch(`${BASE}data/freight.json${bust}`).then((r) => r.json()).catch(() => null),
       ]);
       const changed = !analysisRef.current || a.generatedAt !== analysisRef.current.generatedAt;
       setMarket(m);
       setAnalysis(a);
       if (fxRes) setFx(fxRes);
+      if (freightRes) setFreight(freightRes);
       setLastRefresh(new Date());
       if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
@@ -661,6 +664,63 @@ export function App() {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════ FREIGHT MONITOR ════════════════════════════ */}
+        {freight && freight.tickers.length > 0 && (
+          <div className="panel overflow-x-auto">
+            <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-slate-line)]">
+              <span className="text-[10px] font-bold tracking-[0.1em] uppercase text-[var(--color-steel)]">🚢 해상운임 모니터링</span>
+              <span className="text-[9px] text-[var(--color-faint)] num">
+                Yahoo Finance (ETF 기반) · {freight.tickers[0]?.lastDate ?? ''}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[var(--color-slate-line)]">
+              {freight.tickers.map((t) => {
+                const catEmoji = t.category === 'bulk' ? '📦' : t.category === 'container' ? '🚢' : t.category === 'tanker' ? '🛢️' : '🌊';
+                const catLabel = t.category === 'bulk' ? '벌크' : t.category === 'container' ? '컨테이너' : t.category === 'tanker' ? '탱커' : '종합';
+                return (
+                  <div key={t.symbol} className="px-3 py-2.5 text-center">
+                    <div className="text-[10px] font-medium text-[var(--color-muted)] mb-0.5">
+                      {catEmoji} {t.labelKo}
+                    </div>
+                    <div className="num text-[14px] font-bold text-[var(--color-ink)]">
+                      ${t.last.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <div className="flex items-center justify-center gap-2 mt-0.5">
+                      <Pct value={t.change1d} />
+                      {t.change1w !== null && (
+                        <span className="text-[9px] text-[var(--color-faint)] num">주간 <Pct value={t.change1w} /></span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-center gap-1.5 mt-0.5 text-[9px] text-[var(--color-faint)]">
+                      <span>{catLabel}</span>
+                      <span>·</span>
+                      <span>{t.symbol}</span>
+                    </div>
+                    {/* Mini sparkline */}
+                    {t.spark.length > 2 && (
+                      <svg viewBox={`0 0 ${t.spark.length} 20`} className="w-full h-3 mt-1" preserveAspectRatio="none">
+                        <polyline
+                          points={t.spark.map((s, i) => {
+                            const min = Math.min(...t.spark.map((p) => p.value));
+                            const max = Math.max(...t.spark.map((p) => p.value));
+                            const range = max - min || 1;
+                            return `${i},${20 - ((s.value - min) / range) * 18}`;
+                          }).join(' ')}
+                          fill="none"
+                          stroke="var(--color-steel)"
+                          strokeWidth="1.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
