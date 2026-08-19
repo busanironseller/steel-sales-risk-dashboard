@@ -2,9 +2,9 @@ name: Scheduled data collection
 
 on:
   schedule:
-    # Every 30 minutes during SHFE day + night sessions (01:00-15:00 UTC covers
-    # 09:00-23:00 Asia/Shanghai). Cron on GitHub Actions is best-effort, not exact.
-    - cron: '*/30 1-15 * * 1-5'
+    # Every 30 minutes, all day, every day. News and geopolitical events happen
+    # outside SHFE hours; the user checks the dashboard in KST mornings too.
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:

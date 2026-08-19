@@ -294,15 +294,15 @@ export const RULES = [
     directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
     actions: {
       UP: ['Recalculate GL/AL coating extras before issuing new offers',
-           'For Steelion AL: confirm Posco Steelion offer validity'],
+           'Check open GL/AL quotations for margin erosion at new aluminium level'],
       DOWN: ['GL/AL coating extras may be a competitive lever',
-             'Consider aggressive GL pricing in Southeast Asia (GL-preferred market)'],
+             'Consider GL pricing positioning in Southeast Asia (humidity → GL preference)'],
     },
     actionsKo: {
       UP: ['신규 GL/AL 오퍼 발행 전 코팅 엑스트라를 재계산하세요',
-           '스틸리온 AL: 포스코스틸리온 오퍼 유효성을 확인하세요'],
+           '미체결 GL/AL 견적의 마진 침식을 확인하세요'],
       DOWN: ['GL/AL 코팅 엑스트라 인하를 협상 카드로 활용하세요',
-             '동남아(GL 선호 시장)에서 공격적 GL 가격 포지셔닝을 검토하세요'],
+             '동남아(습도 → GL 선호)에서 GL 가격 포지셔닝을 검토하세요'],
     },
   },
 
@@ -544,7 +544,7 @@ export const RULES = [
       '미국 시장 물량/마진 트레이드오프',
     ],
     narrativeKo: {
-      UP: '미국은 쿼터제가 아닌 관세제(Section 232 등)를 운영합니다. 관세율 변동이 "뉴노멀" 비용으로 반영되므로, 관세 포함 가격이 먹히는지를 기준으로 판단해야 합니다. 현재 스틸리온 GL이 미국에서 잘 팔리고 있습니다.',
+      UP: '미국은 쿼터제가 아닌 관세제(Section 232 등)를 운영합니다. 관세율 변동이 수입 비용에 직접 반영되므로, 관세 포함 도착가(Landed Cost)가 현지 시장가 대비 경쟁력이 있는지를 기준으로 판단해야 합니다.',
     },
     products: ['CRC', 'GI', 'GL', 'COLOR'],
     regions: ['US'],
@@ -553,12 +553,11 @@ export const RULES = [
     directionFrom: () => 'UP',
     actions: [
       'Recalculate landed cost with updated tariff rates',
-      'Check if Steelion GL margins hold at new tariff level',
+      'Recalculate landed cost with tariff at the updated rate',
       'Compare tariff-inclusive price vs US domestic mills',
     ],
     actionsKo: [
-      '변경된 관세율로 미국 도착가를 재계산하세요',
-      '스틸리온 GL의 마진이 새 관세 수준에서도 유지되는지 확인하세요',
+      '변경된 관세율로 미국 도착가(Landed Cost)를 재계산하세요',
       '관세 포함 가격을 미국 내수 제철소 가격과 비교하세요',
     ],
   },
@@ -595,12 +594,12 @@ export const RULES = [
     directionFrom: () => 'UP',
     actions: [
       'Identify if the trade remedy targets Korea-origin or competitor origins',
-      'If competitor-targeting: assess opportunity for Korea/Steelion products',
+      'If competitor-targeting: assess opportunity for Korea-origin products',
       'Check GL/AL demand in affected ASEAN countries',
     ],
     actionsKo: [
       '무역 구제 대상이 한국산인지 경쟁 오리진인지 확인하세요',
-      '경쟁 오리진 대상이면 한국산/스틸리온 제품의 기회를 검토하세요',
+      '경쟁 오리진 대상이면 한국산 제품의 진출 기회를 검토하세요',
       '영향 받는 ASEAN 국가의 GL/AL 수요를 확인하세요',
     ],
   },
@@ -640,12 +639,12 @@ export const RULES = [
     actions: [
       'Monitor China FOB offer prices in target regions',
       'GCC: assess if sourcing Chinese material ($50/t premium vs direct) is viable',
-      'Asia: check if Steelion AL/GL can maintain price premium over Chinese alternatives',
+      'Asia: check if Korea-origin GL/AL can maintain price premium over Chinese alternatives',
     ],
     actionsKo: [
       '목표 시장별 중국 FOB 오퍼 가격을 모니터링하세요',
       'GCC: 중국산 소싱(다이렉트 대비 톤당 $50 추가) 가능 여부를 검토하세요',
-      '동남아: 스틸리온 AL/GL이 중국산 대비 프리미엄을 유지할 수 있는지 확인하세요',
+      '동남아: 한국산 GL/AL이 중국산 대비 프리미엄을 유지할 수 있는지 확인하세요',
     ],
   },
 
