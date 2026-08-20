@@ -2,30 +2,47 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Chart, type Timeframe } from './Chart';
 import { CostSimulator } from './CostSimulator';
 import { Panel, SeverityTag, ConfidenceTag, Arrow, Pct, Epistemic, StatCard } from './ui';
-import { createIssue, deleteIssue, listIssues, updateIssueStatus, seedIssuesIfEmpty } from './db';
-import type { Analysis, FreightData, FxData, Impact, Issue, IssueStatus, MarketData, NewsDigestItem } from './types';
+import type { Analysis, FreightData, FxData, Impact, MarketData, NewsDigestItem } from './types';
 
 const BASE = import.meta.env.BASE_URL;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
 const KST = 'Asia/Seoul';
 const PULSE_ORDER = ['hrc', 'rebar', 'zinc', 'aluminium', 'ironOre', 'cokingCoal'];
-const STATUSES: IssueStatus[] = ['NEW', 'REVIEWING', 'ACTION_REQUIRED', 'RESOLVED'];
 const ALL_REGIONS = ['China', 'Asia', 'Korea Export', 'Europe', 'GCC', 'US'];
 const ALL_PRODUCTS = ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'];
 const EVENTS_PER_PAGE = 5;
+const SALES_PREVIEW = 3;
 
-const STATUS_KO: Record<IssueStatus, string> = {
-  NEW: '신규',
-  REVIEWING: '검토 중',
-  ACTION_REQUIRED: '조치 필요',
-  RESOLVED: '완료',
+/** Maps news feed domains → related products. Empty = all products. */
+const DOMAIN_PRODUCTS: Record<string, string[]> = {
+  crc_market: ['CRC'],
+  gi_market: ['GI', 'PPGI'],
+  gl_market: ['GL'],
+  coated_steel: ['GI', 'GL', 'PPGI', 'COLOR'],
+  zinc_market: ['GI', 'PPGI'],
+  aluminium_market: ['GL', 'COLOR'],
+  eu_steel_trade: ['CRC', 'GI', 'PPGI', 'COLOR'],
+  us_steel_trade: ['CRC', 'GI', 'GL', 'COLOR'],
+  asia_steel_trade: ['GI', 'GL', 'COLOR'],
+  competitor_turkey: ['GI', 'CRC', 'COLOR'],
+  competitor_india: ['GI', 'CRC', 'GL', 'COLOR'],
+  competitor_vietnam: ['GI', 'GL', 'COLOR'],
+  gcc_steel_market: ['GI', 'GL', 'COLOR'],
 };
-const STATUS_EMOJI: Record<IssueStatus, string> = {
-  NEW: '🆕',
-  REVIEWING: '🔍',
-  ACTION_REQUIRED: '⚠️',
-  RESOLVED: '✅',
-};
+
+/* ── localStorage notification helpers ── */
+const DISMISSED_KEY = 'steel-risk-dismissed';
+
+function loadDismissed(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DISMISSED_KEY);
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveDismissed(ids: Set<string>) {
+  localStorage.setItem(DISMISSED_KEY, JSON.stringify([...ids]));
+}
 
 const INSTRUMENT_KO: Record<string, string> = {
   hrc: '열연강판 (HRC)',
@@ -140,8 +157,7 @@ export function App() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [fx, setFx] = useState<FxData | null>(null);
   const [freight, setFreight] = useState<FreightData | null>(null);
-  const [issues, setIssues] = useState<Issue[]>([]);
-  const [dbError, setDbError] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState<Set<string>>(loadDismissed);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedImpact, setSelectedImpact] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -211,12 +227,6 @@ export function App() {
       setLastRefresh(new Date());
       if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
-      }
-      try {
-        const seeded = await seedIssuesIfEmpty(a.criticalSignals);
-        setIssues(seeded);
-      } catch (e) {
-        setDbError(String(e));
       }
       if (isManual) {
         setToast(changed ? '✅ 새 데이터가 반영되었습니다' : 'ℹ️ 아직 새 데이터가 없습니다 (CI 대기 중)');
@@ -335,8 +345,17 @@ export function App() {
     if (newsDateFilter) {
       filtered = filtered.filter((n) => n.publishedAt.startsWith(newsDateFilter));
     }
+    // Product filter: keep articles whose domains relate to the selected product
+    if (filterProduct !== 'ALL') {
+      filtered = filtered.filter((n: any) => {
+        const domains: string[] = n.domains ?? [];
+        // Keep if any domain explicitly maps to this product, OR if all domains are general (no product mapping)
+        const mapped = domains.flatMap((d) => DOMAIN_PRODUCTS[d] ?? []);
+        return mapped.length === 0 || mapped.includes(filterProduct);
+      });
+    }
     return filtered;
-  }, [analysis, eventThemeTab, newsDateFilter]);
+  }, [analysis, eventThemeTab, newsDateFilter, filterProduct]);
 
   const newsThemes = useMemo(() => {
     const themes = new Set((analysis?.newsDigest ?? []).map((n) => n.theme));
@@ -393,25 +412,25 @@ export function App() {
     };
   }, [chartInst, chartTimeframe]);
 
-  /* ── issue handlers ── */
-  async function onCreateIssue(target: Impact, region: string, action: string) {
-    try {
-      const created = await createIssue(target, region, action);
-      setIssues(await listIssues());
-      setToast(created ? `이슈 #${created.id} 생성됨` : '이미 열려 있는 이슈가 있습니다');
-    } catch (err) {
-      setDbError(String(err));
-    }
+  /* ── notification dismiss handler ── */
+  function onDismiss(id: string) {
+    setDismissed((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      saveDismissed(next);
+      return next;
+    });
+    setToast('✅ 확인 처리됨');
   }
 
-  async function onStatus(id: number, status: IssueStatus) {
-    await updateIssueStatus(id, status);
-    setIssues(await listIssues());
-  }
-
-  async function onDelete(id: number) {
-    await deleteIssue(id);
-    setIssues(await listIssues());
+  function onDismissAll(ids: string[]) {
+    setDismissed((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      saveDismissed(next);
+      return next;
+    });
+    setToast('✅ 모든 알림을 확인했습니다');
   }
 
   /* ── loading / error states ── */
@@ -441,7 +460,10 @@ export function App() {
   const collectedAgo = minutesSince(analysis.generatedAt);
   const stale = collectedAgo > 90;
 
-  const activeIssues = issues.filter((i) => i.status !== 'RESOLVED');
+  /* Notifications: undismissed critical/high impacts */
+  const notices = analysis
+    ? analysis.impacts.filter((imp) => (imp.severity === 'CRITICAL' || imp.severity === 'HIGH') && !dismissed.has(imp.id))
+    : [];
 
   /* ══════════════════════════════════════════════════════════════════
    *  RENDER
@@ -453,7 +475,7 @@ export function App() {
     { id: 'sec-sales', label: '판매 영향', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h6m0 0v-6a2 2 0 012-2h2a2 2 0 012 2v6' },
     { id: 'sec-chart', label: '가격 차트', icon: 'M3 3v18h18M7 16l4-4 4 4 4-8' },
     { id: 'sec-news', label: '뉴스 일간지', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2', count: String(analysis.newsDigest?.length ?? 0) },
-    { id: 'sec-issues', label: '이슈 추적', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+    { id: 'sec-notices', label: '신규 알림', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', count: notices.length > 0 ? String(notices.length) : undefined },
   ];
 
   const scrollToSection = (id: string) => {
@@ -560,9 +582,9 @@ export function App() {
             <div className="kpi-sub">{newsThemes.length - 1}개 테마 · {analysis.inputs.articlesCollected}건 중{isFiltered ? ' (필터)' : ''}</div>
           </button>
           <div className="kpi-card">
-            <div className="kpi-label">활성 이슈</div>
-            <div className="kpi-value">{activeIssues.length}</div>
-            <div className="kpi-sub">전체 {issues.length}건</div>
+            <div className="kpi-label">신규 알림</div>
+            <div className="kpi-value">{notices.length}</div>
+            <div className="kpi-sub">미확인 알림{notices.length > 0 ? '' : ' 없음'}</div>
           </div>
         </section>
 
@@ -891,15 +913,7 @@ export function App() {
                               </div>
                               <ul className="space-y-1.5">
                                 {(sig.actionsKo?.length ? sig.actionsKo : sig.actions).map((a: string) => (
-                                  <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
-                                    <span>· {a}</span>
-                                    <button
-                                      className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                                      onClick={(ev) => { ev.stopPropagation(); onCreateIssue(sig, sig.regions[0], a); }}
-                                    >
-                                      + 이슈
-                                    </button>
-                                  </li>
+                                  <li key={a} className="text-[12px] text-[var(--color-ink)]">· {a}</li>
                                 ))}
                               </ul>
                             </div>
@@ -975,15 +989,7 @@ export function App() {
                     <Epistemic kind="ACTION">
                       <ul className="space-y-1.5">
                         {(impact.actionsKo?.length ? impact.actionsKo : impact.actions).map((a: string) => (
-                          <li key={a} className="flex items-start justify-between gap-2">
-                            <span>· {a}</span>
-                            <button
-                              className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                              onClick={() => onCreateIssue(impact, impact.regions[0], a)}
-                            >
-                              + 이슈
-                            </button>
-                          </li>
+                          <li key={a}>· {a}</li>
                         ))}
                       </ul>
                     </Epistemic>
@@ -1027,27 +1033,10 @@ export function App() {
         <Panel
           id="sec-sales"
           title="SALES IMPACT"
-          titleKo={`판매 영향 분석${isFiltered ? ' (필터 적용)' : ''} — 리스크 유형별 탭으로 분류`}
+          titleKo={`판매 영향 분석${isFiltered ? ' (필터 적용)' : ''} — ${filteredSalesImpact.length}건`}
           index="03"
-          meta={
-            <button
-              onClick={() => setSalesCollapsed((v) => !v)}
-              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-steel)] hover:text-[var(--color-ink)] transition-colors"
-            >
-              <span className="num">{filteredSalesImpact.length}건{isFiltered ? ` / ${analysis.salesImpact.length}건` : ''}</span>
-              <span>{salesCollapsed ? '▸ 펼치기' : '▾ 접기'}</span>
-            </button>
-          }
+          meta={`${filteredSalesImpact.length}건${isFiltered ? ` / 전체 ${analysis.salesImpact.length}건` : ''}`}
         >
-          {salesCollapsed ? (
-            <div
-              className="flex items-center justify-center py-6 text-[12px] text-[var(--color-muted)] cursor-pointer hover:text-[var(--color-ink)] transition-colors"
-              onClick={() => setSalesCollapsed(false)}
-            >
-              <span>판매 영향 {filteredSalesImpact.length}건 — 클릭하여 상세 보기</span>
-            </div>
-          ) : (
-          <>
           {/* Risk-type tabs */}
           <div className="tab-bar">
             {salesRiskTypes.map((type) => {
@@ -1060,7 +1049,17 @@ export function App() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="data-grid">
+            <table className="data-grid" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '7%' }} />
+                <col style={{ width: '17%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '8%' }} />
+                <col style={{ width: '5%' }} />
+                <col style={{ width: '8%' }} />
+                <col style={{ width: '36%' }} />
+                <col style={{ width: '7%' }} />
+              </colgroup>
               <thead>
                 <tr>
                   <th>지역</th>
@@ -1081,7 +1080,7 @@ export function App() {
                     </td>
                   </tr>
                 ) : (
-                  salesByTab.map((row) => {
+                  (salesCollapsed ? salesByTab.slice(0, SALES_PREVIEW) : salesByTab).map((row) => {
                     const target = analysis.impacts.find((i) => i.id === row.impactId);
                     const isSalesExpanded = expandedSalesRow === row.id;
                     return (
@@ -1109,15 +1108,7 @@ export function App() {
                               {isSalesExpanded ? '▾ 접기' : '▸ 근거 보기'}
                             </div>
                           </td>
-                          <td className="text-right whitespace-nowrap">
-                            <button
-                              className="border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                              onClick={(ev) => { ev.stopPropagation(); target && onCreateIssue(target, row.region, row.action); }}
-                              disabled={!target}
-                            >
-                              + 이슈
-                            </button>
-                          </td>
+                          <td></td>
                         </tr>
                         {isSalesExpanded && target && (
                           <tr>
@@ -1177,15 +1168,7 @@ export function App() {
                                 <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-ok)] mb-1 uppercase">✅ 권장 조치</div>
                                 <ul className="space-y-1">
                                   {(target.actionsKo?.length ? target.actionsKo : target.actions).map((a: string) => (
-                                    <li key={a} className="flex items-start justify-between gap-2 text-[12px] text-[var(--color-ink)]">
-                                      <span>· {a}</span>
-                                      <button
-                                        className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-2 py-0.5 text-[10px] text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
-                                        onClick={(ev) => { ev.stopPropagation(); onCreateIssue(target, row.region, a); }}
-                                      >
-                                        + 이슈
-                                      </button>
-                                    </li>
+                                    <li key={a} className="text-[12px] text-[var(--color-ink)]">· {a}</li>
                                   ))}
                                 </ul>
                               </div>
@@ -1199,7 +1182,16 @@ export function App() {
               </tbody>
             </table>
           </div>
-          </>
+          {/* Expand / Collapse button */}
+          {salesByTab.length > SALES_PREVIEW && (
+            <button
+              onClick={() => setSalesCollapsed((v) => !v)}
+              className="w-full py-2.5 text-center text-[11px] font-medium text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-[var(--color-steel-soft)] border-t border-[var(--color-slate-line)] transition-colors"
+            >
+              {salesCollapsed
+                ? `더 보기 (${salesByTab.length - SALES_PREVIEW}건 더)`
+                : '▴ 접기'}
+            </button>
           )}
         </Panel>
 
@@ -1437,92 +1429,67 @@ export function App() {
           </Panel>
         </div>
 
-        {/* ════════════════════════════ 07 조치 현황 추적기 (ISSUE & ACTION CENTER) ════════════════════════════ */}
+        {/* ════════════════════════════ 07 신규 알림 (NOTIFICATIONS) ════════════════════════════ */}
         <Panel
-          id="sec-issues"
-          title="ACTION TRACKER"
-          titleKo="조치 현황 추적기 — 위험 신호에 대한 대응 상태를 관리합니다"
+          id="sec-notices"
+          title="NOTIFICATIONS"
+          titleKo="신규 알림 — 확인이 필요한 주요 위험 신호를 표시합니다"
           index="07"
-          meta={
-            <>
-              {issues.length}건 · 미완료 {activeIssues.length}건
-              {dbError && <span className="ml-2 text-[var(--color-risk-high)]">DB 오류</span>}
-            </>
-          }
+          meta={<>{notices.length > 0 ? `${notices.length}건 미확인` : '모두 확인됨'}</>}
         >
-          {dbError && (
-            <div className="border-b border-[var(--color-slate-line)] bg-[var(--color-risk-high-soft)] px-4 py-2 text-[11px] text-[var(--color-risk-high)] num">
-              {dbError}
-            </div>
-          )}
-
-          {/* Purpose explanation */}
           <div className="px-4 py-3 border-b border-[var(--color-slate-line)] text-[11.5px] text-[var(--color-muted)] bg-[var(--color-surface)]">
-            <strong className="text-[var(--color-ink)]">사용법:</strong>{' '}
-            위 Critical Signals, Sales Impact, Event Radar에서{' '}
-            <span className="inline-block px-1.5 py-px border border-[var(--color-slate-line)] rounded-sm text-[10px] text-[var(--color-steel)]">+ 이슈</span>
-            {' '}버튼을 클릭하면 해당 리스크가 이슈로 등록됩니다. 등록된 이슈의 진행 상태를 아래에서 관리하세요.
+            <strong className="text-[var(--color-ink)]">안내:</strong>{' '}
+            분석 결과에서 감지된 HIGH/CRITICAL 위험 신호가 자동으로 표시됩니다.
+            확인한 항목은 <strong>확인</strong> 버튼으로 처리하면 목록에서 사라집니다.
           </div>
 
-          {issues.length === 0 ? (
-            <EmptyState text="등록된 이슈가 없습니다. 위험 신호에서 [+ 이슈] 를 클릭하여 추적을 시작하세요." />
+          {notices.length === 0 ? (
+            <EmptyState text="🎉 모든 알림을 확인했습니다. 새로운 위험 신호가 감지되면 여기에 표시됩니다." />
           ) : (
-            <div className="p-4 space-y-4">
-              {/* Status summary bar */}
-              <div className="flex flex-wrap gap-3">
-                {STATUSES.map((s) => {
-                  const count = issues.filter((i) => i.status === s).length;
-                  return (
-                    <div key={s} className="flex items-center gap-1.5 text-[11px]">
-                      <span>{STATUS_EMOJI[s]}</span>
-                      <span className="text-[var(--color-muted)]">{STATUS_KO[s]}</span>
-                      <span className="num font-semibold text-[var(--color-ink)]">{count}</span>
+            <>
+              <div className="divide-y divide-[var(--color-slate-line)]">
+                {notices.map((imp) => (
+                  <div key={imp.id} className="px-4 py-3 flex items-start gap-3 transition-colors hover:bg-[var(--color-steel-soft)]">
+                    <div className="shrink-0 mt-0.5">
+                      <SeverityTag severity={imp.severity} />
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Issue cards grouped by status */}
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                {STATUSES.map((status) => {
-                  const statusIssues = issues.filter((i) => i.status === status);
-                  if (statusIssues.length === 0) return null;
-                  return (
-                    <div key={status}>
-                      <div className="text-[10px] font-bold tracking-[0.1em] uppercase text-[var(--color-faint)] mb-2">
-                        {STATUS_EMOJI[status]} {STATUS_KO[status]} ({statusIssues.length})
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[12.5px] font-semibold text-[var(--color-ink)] leading-snug mb-1">
+                        {imp.riskTypeKo ?? imp.riskType}
                       </div>
-                      <div className="space-y-2">
-                        {statusIssues.map((issue) => (
-                          <div key={issue.id} className="issue-card">
-                            <div className="flex items-start justify-between gap-2 mb-1.5">
-                              <div className="text-[12px] font-semibold text-[var(--color-ink)] leading-snug">{issue.title}</div>
-                              <span className="num text-[9px] text-[var(--color-faint)] shrink-0">#{issue.id}</span>
-                            </div>
-                            <div className="text-[10.5px] text-[var(--color-muted)] mb-2 leading-snug">{issue.action}</div>
-                            <div className="text-[9.5px] text-[var(--color-faint)] num mb-2">
-                              {issue.region} · {issue.rule_id} · {fmtIso(issue.created_at).slice(5)}
-                            </div>
-                            <div className="flex flex-wrap gap-1">
-                              {STATUSES.filter((s) => s !== status).map((s) => (
-                                <button key={s} onClick={() => onStatus(issue.id, s)}
-                                  className="border border-[var(--color-slate-line)] rounded-sm px-1.5 py-px text-[9px] text-[var(--color-muted)] hover:border-[var(--color-steel)] hover:text-[var(--color-steel)] transition-colors">
-                                  → {STATUS_KO[s]}
-                                </button>
-                              ))}
-                              <button onClick={() => onDelete(issue.id)}
-                                className="border border-[var(--color-slate-line)] rounded-sm px-1.5 py-px text-[9px] text-[var(--color-faint)] hover:text-[var(--color-risk-high)] hover:border-[var(--color-risk-high)] transition-colors ml-auto">
-                                삭제
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="text-[11px] text-[var(--color-muted)] leading-relaxed mb-1.5">
+                        {imp.narrativeKo ?? imp.inference}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                        <span className="text-[var(--color-faint)]">{imp.products.join(' / ')}</span>
+                        <span className="text-[var(--color-faint)]">·</span>
+                        <span className="text-[var(--color-faint)]">{imp.regions.join(', ')}</span>
+                        {imp.actionsKo?.[0] && (
+                          <>
+                            <span className="text-[var(--color-faint)]">·</span>
+                            <span className="text-[var(--color-ok)]">💡 {imp.actionsKo[0]}</span>
+                          </>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
+                    <button
+                      onClick={() => onDismiss(imp.id)}
+                      className="shrink-0 border border-[var(--color-slate-line)] rounded-sm px-3 py-1 text-[10px] font-medium text-[var(--color-steel)] hover:border-[var(--color-steel)] hover:bg-[var(--color-steel-soft)] transition-colors"
+                    >
+                      확인
+                    </button>
+                  </div>
+                ))}
               </div>
-            </div>
+              {notices.length > 1 && (
+                <button
+                  onClick={() => onDismissAll(notices.map((n) => n.id))}
+                  className="w-full py-2.5 text-center text-[11px] font-medium text-[var(--color-steel)] hover:text-[var(--color-ink)] hover:bg-[var(--color-steel-soft)] border-t border-[var(--color-slate-line)] transition-colors"
+                >
+                  모두 확인 ({notices.length}건)
+                </button>
+              )}
+            </>
           )}
         </Panel>
 

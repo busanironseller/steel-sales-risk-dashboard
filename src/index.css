@@ -579,38 +579,6 @@ body * {
   cursor: not-allowed;
 }
 
-/* ── Issue kanban ── */
-.issue-card {
-  border: 1px solid var(--color-slate-line);
-  border-radius: 8px;
-  padding: 12px;
-  background: var(--color-surface);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.issue-card:hover {
-  border-color: var(--color-ink);
-}
-
-.issue-move-btn {
-  height: 20px;
-  padding: 0 7px;
-  border: 1px solid var(--color-slate-line);
-  border-radius: 5px;
-  background: var(--color-panel);
-  font-size: 9px;
-  color: var(--color-muted);
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.issue-move-btn:hover {
-  border-color: var(--color-ink);
-  color: var(--color-ink);
-}
-
 /* ── Toast ── */
 .toast {
   position: fixed;
