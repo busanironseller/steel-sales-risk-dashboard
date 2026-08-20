@@ -314,12 +314,13 @@ function salesImpact(impacts) {
 const DOMAIN_THEME = {
   steel_price: '원자재·가격',
   raw_material: '원자재·가격',
-  crc_market: '원자재·가격',
-  gi_market: '원자재·가격',
-  gl_market: '원자재·가격',
-  coated_steel: '원자재·가격',
   zinc_market: '원자재·가격',
   aluminium_market: '원자재·가격',
+  // ── Product-specific themes (own tabs in News Digest) ──
+  crc_market: 'CRC 시황',
+  gi_market: 'GI·도금 시황',
+  gl_market: 'GL·갈바 시황',
+  coated_steel: '컬러강판 시황',
   trade_policy: '통상·관세',
   eu_steel_trade: '통상·관세',
   us_steel_trade: '통상·관세',

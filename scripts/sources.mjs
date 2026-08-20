@@ -50,15 +50,32 @@ export const NEWS_QUERIES = [
   { domain: 'raw_material',  weight: 0.9, lang: 'en',
     q: 'when:7d ("iron ore" OR "coking coal" OR zinc OR aluminium) price (steel OR smelter)' },
 
-  // ── Product-specific domains ──
+  // ── Product-specific domains (each gets its own News Digest theme) ──
   { domain: 'crc_market',    weight: 1.0, lang: 'en',
     q: 'when:7d ("cold rolled" OR CRC OR "cold-rolled coil") steel (price OR export OR import)' },
+  { domain: 'crc_market',    weight: 0.9, lang: 'en',
+    q: 'when:7d ("cold rolled steel" OR "flat steel") (automotive OR appliance OR demand OR supply OR market)' },
+  { domain: 'crc_market',    weight: 0.9, lang: 'ko',
+    q: 'when:7d (냉연 OR 냉연코일 OR 냉연강판) (가격 OR 시황 OR 수출 OR 수요)' },
+
   { domain: 'gi_market',     weight: 1.0, lang: 'en',
-    q: 'when:7d (galvanized OR galvanised OR "hot-dip" OR "GI steel") (price OR export OR import OR tariff)' },
+    q: 'when:7d (galvanized OR galvanised OR "hot-dip") steel (price OR export OR import OR tariff OR market)' },
+  { domain: 'gi_market',     weight: 0.9, lang: 'en',
+    q: 'when:7d ("hot-dip galvanized" OR HDG OR "zinc coated") steel (mill OR construction OR demand)' },
+  { domain: 'gi_market',     weight: 0.9, lang: 'ko',
+    q: 'when:7d (도금강판 OR 아연도금 OR 용융도금) (가격 OR 시황 OR 수출 OR 수요)' },
+
   { domain: 'gl_market',     weight: 1.0, lang: 'en',
-    q: 'when:7d (galvalume OR "zinc-aluminium" OR "55% aluminium" OR "AZ150") steel' },
+    q: 'when:7d (galvalume OR "zinc-aluminium" OR "55% aluminium" OR "AZ150" OR aluzinc) steel' },
+  { domain: 'gl_market',     weight: 0.9, lang: 'en',
+    q: 'when:7d ("metal roofing" OR "steel roofing" OR "building panel") steel (market OR demand OR price)' },
+
   { domain: 'coated_steel',  weight: 1.0, lang: 'en',
-    q: 'when:7d ("prepainted steel" OR PPGI OR "color coated" OR "colour coated" OR "pre-painted")' },
+    q: 'when:7d ("prepainted steel" OR PPGI OR "color coated" OR "colour coated" OR "pre-painted") steel' },
+  { domain: 'coated_steel',  weight: 0.9, lang: 'en',
+    q: 'when:7d ("coil coating" OR "painted steel" OR "coated coil") (market OR price OR export OR production)' },
+  { domain: 'coated_steel',  weight: 0.9, lang: 'ko',
+    q: 'when:7d (컬러강판 OR 도장강판 OR 프리코트) (가격 OR 시황 OR 수출 OR 생산)' },
 
   // ── Coating metals (product-specific upstream) ──
   { domain: 'zinc_market',   weight: 0.9, lang: 'en',
