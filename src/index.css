@@ -688,12 +688,12 @@ body * {
 }
 
 /* ── Market Pulse table ── */
-table.grid {
+table.data-grid {
   width: 100%;
   border-collapse: collapse;
 }
 
-table.grid th {
+table.data-grid th {
   text-align: left;
   font-size: 10px;
   font-weight: 500;
@@ -705,22 +705,22 @@ table.grid th {
   white-space: nowrap;
 }
 
-table.grid td {
+table.data-grid td {
   padding: 10px 8px;
   border-bottom: 1px solid var(--color-ink-8);
   vertical-align: middle;
   font-size: 12.5px;
 }
 
-table.grid tbody tr:last-child td {
+table.data-grid tbody tr:last-child td {
   border-bottom: 0;
 }
 
-table.grid tbody tr {
+table.data-grid tbody tr {
   border-radius: 6px;
 }
 
-table.grid tbody tr:hover {
+table.data-grid tbody tr:hover {
   background: var(--color-ink-8);
 }
 

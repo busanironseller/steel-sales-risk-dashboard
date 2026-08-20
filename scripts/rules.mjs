@@ -109,10 +109,10 @@ export const RULES = [
              'Re-check CRC cost basis on recent quotations'],
     },
     actionsKo: {
-      UP: ['CRC 오퍼 유효 기간을 즉시 재확인하세요',
-           '최근 48시간 내 발행한 CRC 견적의 노출을 점검하세요'],
-      DOWN: ['신규 CRC 고정가 오퍼 발행을 보류하세요 — 바이어가 하락분 반영을 요구합니다',
-             '최근 CRC 견적의 원가 기준을 재점검하세요'],
+      UP: ['CRC 견적 유효 기간 점검 필요 — 원판 원가 상승으로 기발행 견적 손실 가능성',
+           '최근 48시간 내 발행 CRC 견적의 마진 노출 확인 권장'],
+      DOWN: ['신규 CRC 고정가 오퍼 발행 보류 권장 — 바이어의 하락분 반영 요구 가능성',
+             '최근 CRC 견적의 원가 기준 재점검 필요'],
     },
   },
 
@@ -153,11 +153,11 @@ export const RULES = [
              'Re-check cost basis on quotations issued in the last 48 hours'],
     },
     actionsKo: {
-      UP: ['미확정 GI/GL/컬러 제철소 오퍼의 유효 기간을 재확인하세요',
-           '미체결 견적의 재협상 노출을 점검하세요',
-           '오퍼 철회 전에 대기 중인 부킹을 우선 확정하세요'],
-      DOWN: ['신규 고정가 오퍼 발행을 보류하세요 — 바이어가 하락분 반영을 요구합니다',
-             '최근 48시간 내 발행한 견적의 원가 기준을 재점검하세요'],
+      UP: ['GI/GL/컬러 오퍼 유효 기간 점검 필요 — 원판 원가 상승 시 2~4주 내 반영',
+           '미체결 견적의 재협상 노출 확인 권장',
+           '오퍼 철회 가능성에 대비하여 대기 부킹 우선 확정 검토'],
+      DOWN: ['신규 고정가 오퍼 발행 보류 권장 — 바이어의 하락분 반영 요구 가능성',
+             '최근 발행 견적의 원가 기준 재점검 필요'],
     },
   },
 
@@ -186,7 +186,7 @@ export const RULES = [
     riskTypeKo: '제철소 오퍼',
     directionFrom: () => 'UP',
     actions: { UP: ['Reconfirm all open quotations against the new reference offer'] },
-    actionsKo: { UP: ['새 기준가 대비 모든 미체결 견적을 재확인하세요'] },
+    actionsKo: { UP: ['미체결 견적의 기준가 괴리 점검 필요 — 새 기준가 반영 여부 확인'] },
   },
 
   // R3: Iron ore / coking coal → upstream
@@ -221,8 +221,8 @@ export const RULES = [
       DOWN: ['Expect buyer pushback on offers priced off older raw-material costs'],
     },
     actionsKo: {
-      UP: ['다음 오퍼 사이클 전 중기 원가 상승 압력을 가격 팀에 알리세요'],
-      DOWN: ['이전 원재료 원가 기반 오퍼에 대한 바이어 저항을 예상하세요'],
+      UP: ['중기 원가 상승 가능성 — 다음 오퍼 사이클 전 가격 팀과 공유 권장'],
+      DOWN: ['바이어의 가격 인하 요구 가능성에 유의 — 기존 원재료 원가 기반 오퍼 재검토'],
     },
   },
 
@@ -258,10 +258,10 @@ export const RULES = [
              'Consider GI price positioning vs competitor origins'],
     },
     actionsKo: {
-      UP: ['신규 GI 오퍼 발행 전 코팅 엑스트라를 재계산하세요',
-           '미체결 GI/PPGI 견적의 마진 침식을 점검하세요'],
-      DOWN: ['GI 코팅 엑스트라 인하를 협상 카드로 활용하세요',
-             '경쟁 오리진 대비 GI 가격 포지셔닝을 검토하세요'],
+      UP: ['GI 코팅 엑스트라 재계산 필요 — 아연 원가 변동분 반영 확인',
+           '미체결 GI/PPGI 견적의 마진 침식 확인 권장'],
+      DOWN: ['GI 코팅 엑스트라 인하분을 협상 카드로 활용 가능',
+             '경쟁 오리진 대비 GI 가격 포지셔닝 검토 권장'],
     },
   },
 
@@ -299,10 +299,10 @@ export const RULES = [
              'Consider GL pricing positioning in Southeast Asia (humidity → GL preference)'],
     },
     actionsKo: {
-      UP: ['신규 GL/AL 오퍼 발행 전 코팅 엑스트라를 재계산하세요',
-           '미체결 GL/AL 견적의 마진 침식을 확인하세요'],
-      DOWN: ['GL/AL 코팅 엑스트라 인하를 협상 카드로 활용하세요',
-             '동남아(습도 → GL 선호)에서 GL 가격 포지셔닝을 검토하세요'],
+      UP: ['GL/AL 코팅 엑스트라 재계산 필요 — 알루미늄 원가 변동분 반영 확인',
+           '미체결 GL/AL 견적의 마진 침식 확인 권장'],
+      DOWN: ['GL/AL 코팅 엑스트라 인하분을 협상 카드로 활용 가능',
+             '동남아(습도 → GL 선호) GL 가격 포지셔닝 검토 권장'],
     },
   },
 
@@ -336,8 +336,8 @@ export const RULES = [
       DOWN: ['GL cost advantage vs GI may widen — useful in Asia negotiations'],
     },
     actionsKo: {
-      UP: ['GL 코팅 엑스트라 재계산 시 아연 성분 변동을 반영하세요'],
-      DOWN: ['GI 대비 GL 원가 우위가 확대될 수 있습니다 — 동남아 협상에 활용하세요'],
+      UP: ['GL 코팅 엑스트라에 아연 성분 변동분 반영 필요'],
+      DOWN: ['GI 대비 GL 원가 우위 확대 가능 — 동남아 협상에 유리한 포인트'],
     },
   },
 
@@ -370,7 +370,7 @@ export const RULES = [
     riskTypeKo: '운임',
     directionFrom: () => 'UP',
     actions: { UP: ['Request updated freight quotations before confirming CIF offers'] },
-    actionsKo: { UP: ['CIF 오퍼 확정 전 최신 운임 견적을 받으세요'] },
+    actionsKo: { UP: ['CIF 오퍼에 운임 상승분 반영 여부 확인 필요 — 유가 연동 운임 변동'] },
   },
 
   // R6: Strait disruption
@@ -411,9 +411,9 @@ export const RULES = [
       'Check ETD/ETA exposure on shipments routed via the affected corridor',
     ],
     actionsKo: [
-      '최신 운임 및 전쟁보험료 견적을 받으세요',
-      '유효 기간이 긴 유럽 향 오퍼를 재점검하세요',
-      '영향 항로 경유 선적의 ETD/ETA 노출을 확인하세요',
+      'CIF 가격에 운임·보험료 급등분이 반영되었는지 확인 필요',
+      '장기 유효 오퍼의 운임 전제 재검토 권장 — 발행 당시 대비 운임 변동 가능',
+      '영향 항로 경유 선적의 일정 변동 가능성에 유의',
     ],
   },
 
@@ -434,7 +434,7 @@ export const RULES = [
     riskTypeKo: '물류·해운',
     directionFrom: () => 'UP',
     actions: ['Verify ETD/ETA on affected shipments and notify customers early'],
-    actionsKo: ['영향 받는 선적의 ETD/ETA를 확인하고 바이어에게 사전 통보하세요'],
+    actionsKo: ['선적 지연 시 바이어 사전 통보 필요 — 체선료·계약 취소 리스크 방지'],
   },
 
   // ──────────────────── NEWS-TRIGGERED: TRADE POLICY (REGION-SPECIFIC) ────────────────────
@@ -475,9 +475,9 @@ export const RULES = [
       'Confirm mill certificates for EU destination',
     ],
     actionsKo: [
-      '현재 분기 잔여 쿼터 소진율을 확인하세요',
-      '한국산 vs 경쟁 오리진(터키·인도·베트남)의 CBAM 비용 영향을 비교하세요',
-      '유럽 목적지용 제철소 인증서(Mill Certificate)를 확인하세요',
+      '잔여 수입 쿼터 소진율 확인 필요 — 분기 쿼터 초과 시 추가 관세 부과',
+      '한국산 vs 경쟁 오리진의 CBAM 비용 비교 검토 권장',
+      'EU 목적지용 Mill Certificate 적합성 확인 권장',
     ],
   },
 
@@ -516,8 +516,8 @@ export const RULES = [
       'Evaluate sourcing from competitor-origin mills as alternative supply',
     ],
     actionsKo: [
-      '유럽 향 터키·인도·베트남 GI 오퍼 동향을 모니터링하세요',
-      '경쟁 오리진 MILL에서의 소싱을 대안 공급원으로 검토하세요',
+      '유럽 향 경쟁 오리진(터키·인도·베트남) GI 오퍼 동향 주시 필요',
+      '중국산 차단으로 인한 공백 수요 — 경쟁 오리진 MILL 소싱 기회 검토',
     ],
   },
 
@@ -557,8 +557,8 @@ export const RULES = [
       'Compare tariff-inclusive price vs US domestic mills',
     ],
     actionsKo: [
-      '변경된 관세율로 미국 도착가(Landed Cost)를 재계산하세요',
-      '관세 포함 가격을 미국 내수 제철소 가격과 비교하세요',
+      '변경 관세율 기준 Landed Cost 재계산 필요 — 수출 채산성 재검토',
+      '관세 포함 가격의 미국 내수가 대비 경쟁력 확인 권장',
     ],
   },
 
@@ -598,9 +598,9 @@ export const RULES = [
       'Check GL/AL demand in affected ASEAN countries',
     ],
     actionsKo: [
-      '무역 구제 대상이 한국산인지 경쟁 오리진인지 확인하세요',
-      '경쟁 오리진 대상이면 한국산 제품의 진출 기회를 검토하세요',
-      '영향 받는 ASEAN 국가의 GL/AL 수요를 확인하세요',
+      '무역 구제 대상 오리진 확인 필요 — 한국산 포함 여부에 따라 영향 상이',
+      '경쟁 오리진 대상 시 한국산 반사이익 가능성 검토 권장',
+      '해당 ASEAN 시장의 GL/AL 수요 변동 확인 필요',
     ],
   },
 
@@ -642,9 +642,9 @@ export const RULES = [
       'Asia: check if Korea-origin GL/AL can maintain price premium over Chinese alternatives',
     ],
     actionsKo: [
-      '목표 시장별 중국 FOB 오퍼 가격을 모니터링하세요',
-      'GCC: 중국산 소싱(다이렉트 대비 톤당 $50 추가) 가능 여부를 검토하세요',
-      '동남아: 한국산 GL/AL이 중국산 대비 프리미엄을 유지할 수 있는지 확인하세요',
+      '목표 시장별 중국산 FOB 가격 동향 주시 필요 — 가격 하방 압력 파악',
+      'GCC: 중국산 소싱 가능 여부 검토 (다이렉트 대비 톤당 약 $50 프리미엄 고려)',
+      '동남아: 한국산 GL/AL의 중국산 대비 품질 프리미엄 유지 여부 확인',
     ],
   },
 
@@ -681,8 +681,8 @@ export const RULES = [
       'Evaluate sourcing from Turkish mills as alternative or supplement',
     ],
     actionsKo: [
-      '유럽·중동 향 터키산 GI/CRC 오퍼 가격을 추적하세요',
-      '터키 MILL 소싱을 대안 또는 보완 공급으로 검토하세요',
+      '유럽·중동 향 터키산 GI/CRC 오퍼 동향 주시 필요',
+      '터키 MILL 소싱이 대안 공급으로 유효한지 검토 권장',
     ],
   },
 
@@ -719,8 +719,8 @@ export const RULES = [
       'Evaluate sourcing from Indian mills for target markets',
     ],
     actionsKo: [
-      '인도산 GI/CRC 오퍼 가격을 지역별로 추적하세요',
-      '목표 시장별 인도 MILL 소싱 가능성을 검토하세요',
+      '인도산 GI/CRC 오퍼 가격의 지역별 동향 주시 필요',
+      '목표 시장별 인도 MILL 소싱 가능성 검토 권장',
     ],
   },
 
@@ -757,8 +757,8 @@ export const RULES = [
       'Assess Vietnam MILL sourcing opportunity if competitive',
     ],
     actionsKo: [
-      '한국산 목표 시장과 겹치는 베트남 MILL 오퍼를 모니터링하세요',
-      '경쟁력이 있다면 베트남 MILL 소싱 기회를 검토하세요',
+      '한국산 목표 시장과 겹치는 베트남 MILL 오퍼 동향 주시 필요',
+      '가격 경쟁력 확인 시 베트남 MILL 소싱 기회 검토 권장',
     ],
   },
 
@@ -795,8 +795,8 @@ export const RULES = [
       'Assess if demand uplift justifies holding price vs aggressive pricing',
     ],
     actionsKo: [
-      '수요를 견인하는 프로젝트와 필요 제품 사양을 확인하세요',
-      '수요 증가가 가격 유지를 정당화하는지 vs 공격적 가격 전략이 필요한지 판단하세요',
+      '수요 견인 프로젝트의 제품 사양 확인 필요 — 목표 제품과 매칭 여부',
+      '수요 증가 시 가격 유지 vs 공격적 가격 전략 판단 필요',
     ],
   },
 
@@ -827,7 +827,7 @@ export const RULES = [
     riskTypeKo: '제재',
     directionFrom: () => 'UP',
     actions: ['Screen counterparties and banks on affected contracts before shipment'],
-    actionsKo: ['선적 전 영향 받는 계약의 거래처·은행 제재 스크리닝을 실시하세요'],
+    actionsKo: ['영향 계약의 거래처·은행 제재 리스트 스크리닝 필요 — 선적 전 확인 필수'],
   },
 ];
 

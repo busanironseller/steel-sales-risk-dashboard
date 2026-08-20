@@ -110,11 +110,15 @@ const fmtIso = (iso: string) =>
 
 const minutesSince = (iso: string) => Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
 
-function sessionState(sourceTimestamp: string): { label: string; labelKo: string; tone: string } {
-  const time = sourceTimestamp.split(' ')[1] ?? '';
-  const [h, m] = time.split(':').map(Number);
-  if (!Number.isFinite(h)) return { label: 'UNKNOWN', labelKo: '알 수 없음', tone: 'var(--color-faint)' };
+/** Checks CURRENT time in Asia/Shanghai to determine SHFE market session status in real-time. */
+function sessionState(): { label: string; labelKo: string; tone: string } {
+  const now = new Date();
+  const sh = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+  const h = sh.getHours();
+  const m = sh.getMinutes();
   const mins = h * 60 + m;
+  const dow = sh.getDay(); // 0=Sun, 6=Sat
+  if (dow === 0 || dow === 6) return { label: 'CLOSED', labelKo: '주말 휴장', tone: 'var(--color-muted)' };
   const inWindow = (a: string, b: string) => {
     const to = (s: string) => Number(s.split(':')[0]) * 60 + Number(s.split(':')[1]);
     return mins >= to(a) && mins < to(b);
@@ -123,7 +127,7 @@ function sessionState(sourceTimestamp: string): { label: string; labelKo: string
   if (inWindow('09:00', '10:15') || inWindow('10:30', '11:30') || inWindow('13:30', '15:00'))
     return { label: 'DAY', labelKo: '주간장', tone: 'var(--color-ok)' };
   if (inWindow('10:15', '10:30') || inWindow('11:30', '13:30'))
-    return { label: 'BREAK', labelKo: '휴장', tone: 'var(--color-risk-med)' };
+    return { label: 'BREAK', labelKo: '휴장 중', tone: 'var(--color-risk-med)' };
   return { label: 'CLOSED', labelKo: '마감', tone: 'var(--color-muted)' };
 }
 
@@ -165,6 +169,8 @@ export function App() {
   const [newsPage, setNewsPage] = useState(1);
   const [newsDateFilter, setNewsDateFilter] = useState<string>('');
   const [simulatorOpen, setSimulatorOpen] = useState(false);
+  const [salesCollapsed, setSalesCollapsed] = useState(true);
+  const [session, setSession] = useState(sessionState);
 
   /* ── refs ── */
   const refreshingRef = useRef(refreshing);
@@ -312,6 +318,12 @@ export function App() {
   useEffect(() => { setEventPage(1); }, [eventThemeTab]);
   useEffect(() => { setNewsPage(1); }, [newsDateFilter, eventThemeTab]);
 
+  // Auto-update SHFE session state every 60 seconds
+  useEffect(() => {
+    const id = setInterval(() => setSession(sessionState()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   // News digest for Event Radar
   const NEWS_PER_PAGE = 8;
   const newsDigest = useMemo(() => {
@@ -426,7 +438,6 @@ export function App() {
     );
   }
 
-  const session = sessionState(hrc.sourceTimestamp);
   const collectedAgo = minutesSince(analysis.generatedAt);
   const stale = collectedAgo > 90;
 
@@ -593,7 +604,7 @@ export function App() {
           }
         >
           <div className="overflow-x-auto">
-            <table className="grid">
+            <table className="data-grid">
               <thead>
                 <tr>
                   <th>품목</th>
@@ -1018,8 +1029,25 @@ export function App() {
           title="SALES IMPACT"
           titleKo={`판매 영향 분석${isFiltered ? ' (필터 적용)' : ''} — 리스크 유형별 탭으로 분류`}
           index="03"
-          meta={`${filteredSalesImpact.length}건${isFiltered ? ` / 전체 ${analysis.salesImpact.length}건` : ''}`}
+          meta={
+            <button
+              onClick={() => setSalesCollapsed((v) => !v)}
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-steel)] hover:text-[var(--color-ink)] transition-colors"
+            >
+              <span className="num">{filteredSalesImpact.length}건{isFiltered ? ` / ${analysis.salesImpact.length}건` : ''}</span>
+              <span>{salesCollapsed ? '▸ 펼치기' : '▾ 접기'}</span>
+            </button>
+          }
         >
+          {salesCollapsed ? (
+            <div
+              className="flex items-center justify-center py-6 text-[12px] text-[var(--color-muted)] cursor-pointer hover:text-[var(--color-ink)] transition-colors"
+              onClick={() => setSalesCollapsed(false)}
+            >
+              <span>판매 영향 {filteredSalesImpact.length}건 — 클릭하여 상세 보기</span>
+            </div>
+          ) : (
+          <>
           {/* Risk-type tabs */}
           <div className="tab-bar">
             {salesRiskTypes.map((type) => {
@@ -1032,7 +1060,7 @@ export function App() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="grid">
+            <table className="data-grid">
               <thead>
                 <tr>
                   <th>지역</th>
@@ -1171,6 +1199,8 @@ export function App() {
               </tbody>
             </table>
           </div>
+          </>
+          )}
         </Panel>
 
         {/* ════════════════════════════ 05 PRICE CHART (Multi-Instrument + Multi-Timeframe) ════════════════════════════ */}
