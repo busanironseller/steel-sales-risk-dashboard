@@ -183,7 +183,7 @@ function sessionState(): { label: string; labelKo: string; tone: string } {
   if (inWindow('09:00', '10:15') || inWindow('10:30', '11:30') || inWindow('13:30', '15:00'))
     return { label: 'DAY', labelKo: '주간장', tone: 'var(--color-ok)' };
   if (inWindow('10:15', '10:30') || inWindow('11:30', '13:30'))
-    return { label: 'BREAK', labelKo: '휴장 중', tone: 'var(--color-risk-med)' };
+    return { label: 'BREAK', labelKo: '점심 휴식', tone: 'var(--color-risk-med)' };
   return { label: 'CLOSED', labelKo: '마감', tone: 'var(--color-muted)' };
 }
 
