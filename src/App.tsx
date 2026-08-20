@@ -11,7 +11,7 @@ const PULSE_ORDER = ['hrc', 'rebar', 'zinc', 'aluminium', 'ironOre', 'cokingCoal
 const ALL_REGIONS = ['China', 'Asia', 'Korea Export', 'Europe', 'GCC', 'US'];
 const ALL_PRODUCTS = ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'];
 const EVENTS_PER_PAGE = 5;
-const SALES_PREVIEW = 3;
+const SALES_PREVIEW = 5;
 
 /** Maps news feed domains → related products. Empty = all products. */
 const DOMAIN_PRODUCTS: Record<string, string[]> = {
@@ -317,6 +317,32 @@ export function App() {
     if (salesRiskTab === 'ALL') return filteredSalesImpact;
     return filteredSalesImpact.filter((r) => (r.riskTypeKo ?? r.riskType) === salesRiskTab);
   }, [filteredSalesImpact, salesRiskTab]);
+
+  /** Diversified preview: pick 1 row per unique riskType (round-robin by severity),
+   *  so the collapsed preview shows diverse risk categories instead of
+   *  repeating the same top-ranked signal across multiple regions. */
+  const salesPreview = useMemo(() => {
+    if (salesByTab.length <= SALES_PREVIEW) return salesByTab;
+    const seen = new Set<string>();
+    const picked: typeof salesByTab = [];
+    // Pass 1: one per riskType (highest severity first since salesByTab is sorted)
+    for (const row of salesByTab) {
+      if (picked.length >= SALES_PREVIEW) break;
+      const key = row.riskTypeKo ?? row.riskType;
+      if (!seen.has(key)) {
+        seen.add(key);
+        picked.push(row);
+      }
+    }
+    // Pass 2: fill remaining slots if fewer riskTypes than SALES_PREVIEW
+    if (picked.length < SALES_PREVIEW) {
+      for (const row of salesByTab) {
+        if (picked.length >= SALES_PREVIEW) break;
+        if (!picked.includes(row)) picked.push(row);
+      }
+    }
+    return picked;
+  }, [salesByTab]);
 
   // Event Radar risk-type tabs (dynamically extracted)
   const eventRiskTypes = useMemo(() => {
@@ -1082,7 +1108,7 @@ export function App() {
                     </td>
                   </tr>
                 ) : (
-                  (salesCollapsed ? salesByTab.slice(0, SALES_PREVIEW) : salesByTab).map((row) => {
+                  (salesCollapsed ? salesPreview : salesByTab).map((row) => {
                     const target = analysis.impacts.find((i) => i.id === row.impactId);
                     const isSalesExpanded = expandedSalesRow === row.id;
                     return (
