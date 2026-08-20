@@ -276,6 +276,8 @@ export function App() {
 
       if (isManual) {
         setToast(changed ? '✅ 새 데이터가 반영되었습니다' : 'ℹ️ 아직 새 데이터가 없습니다 (CI 대기 중)');
+      } else if (changed) {
+        setToast('🔄 데이터 자동 갱신됨');
       }
       setLoadError(null);
     } catch (err) {
@@ -290,6 +292,18 @@ export function App() {
   useEffect(() => {
     const id = setInterval(() => loadData(false), AUTO_REFRESH_MS);
     return () => clearInterval(id);
+  }, [loadData]);
+
+  /* ── auto-refresh on tab return (browsers throttle timers in background tabs) ── */
+  useEffect(() => {
+    let lastHidden = 0;
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') { lastHidden = Date.now(); return; }
+      // If tab was hidden for > 60 s, refresh immediately
+      if (Date.now() - lastHidden > 60_000) loadData(false);
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
   }, [loadData]);
   useEffect(() => {
     if (!toast) return;
@@ -400,9 +414,13 @@ export function App() {
   useEffect(() => { setEventPage(1); }, [eventThemeTab]);
   useEffect(() => { setNewsPage(1); }, [newsDateFilter, eventThemeTab]);
 
-  // Auto-update SHFE session state every 60 seconds
+  // Auto-update SHFE session state + "분 전" counter every 60 seconds
+  const [_tick, setTick] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setSession(sessionState()), 60_000);
+    const id = setInterval(() => {
+      setSession(sessionState());
+      setTick((t) => t + 1);    // force "분 전" recalc
+    }, 60_000);
     return () => clearInterval(id);
   }, []);
 
