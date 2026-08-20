@@ -7,7 +7,7 @@
  *   GI:  CRC + zinc coating (pure zinc ~275 g/m² for Z275)
  *   GL:  CRC + zinc-aluminium alloy coating (55% Al, 43.5% Zn, 1.5% Si)
  *   AL:  CRC + aluminium coating (Type 1: ~100% Al)
- *   PPGI/COLOR: GI or GL + paint (primer + top coat)
+ *   COLOR: GI or GL + paint (primer + top coat)
  */
 import React, { useMemo, useState } from 'react';
 
@@ -69,9 +69,9 @@ const PRODUCTS: ProductDef[] = [
     processingLabel: '도금라인 가공비',
   },
   {
-    key: 'PPGI',
-    label: 'PPGI / COLOR (Pre-Painted)',
-    labelKo: '컬러강판 (PPGI/COLOR)',
+    key: 'COLOR',
+    label: 'COLOR (Pre-Painted)',
+    labelKo: '컬러강판 (COLOR)',
     substrate: 'GI',
     coatingWeight: 0,
     coatingMix: {},
@@ -127,7 +127,7 @@ function calcProductCost(product: ProductDef, prices: PriceInputs, thickness = 0
     breakdown.push({ label: 'HRC 원판', value: prices.hrc });
     breakdown.push({ label: 'CRC 프리미엄', value: prices.crcPremium });
   } else {
-    // GI substrate for PPGI
+    // GI substrate for COLOR
     const giProduct = PRODUCTS.find((p) => p.key === 'GI')!;
     const giCost = calcProductCost(giProduct, prices, thickness);
     baseCost = giCost.total;
@@ -343,7 +343,7 @@ export function CostSimulator({ open, onClose, marketPrices, theme = 'dark' }: P
           <div>GI: Z275 (275 g/m², 양면) · 순수 아연 100%</div>
           <div>GL: AZ150 (150 g/m², 양면) · 55% Al + 43.5% Zn + 1.5% Si</div>
           <div>AL: AS120 (120 g/m², 양면) · 92% Al + 8% Si (Type 1)</div>
-          <div>PPGI: GI 기판 + 프라이머(5μm) + 탑코트(20μm)</div>
+          <div>COLOR: GI 기판 + 프라이머(5μm) + 탑코트(20μm)</div>
           <div className="mt-1 italic">
             ※ 시뮬레이션 수치이며 실제 원가와 차이가 있을 수 있습니다. 밀 브로셔 기준 도금량으로 계산합니다.
           </div>

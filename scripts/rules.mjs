@@ -25,16 +25,16 @@
  *   - GI:  FH + pure zinc dip. Cost = f(HRC, Zinc)
  *   - GL:  FH + 55 %Al–45 %Zn alloy dip. Cost = f(HRC, Zinc, Aluminium)
  *   - AL:  FH + aluminium dip. Specialty — only 3–4 mills worldwide. Cost = f(HRC, Aluminium)
- *   - COLOR (umbrella): any coated substrate + paint. PPGI ⊂ COLOR.
+ *   - COLOR (umbrella): any coated substrate + paint (PPGI, PPGL, PPAL etc.)
  */
 
-export const PRODUCTS = ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'];
+export const PRODUCTS = ['CRC', 'GI', 'GL', 'COLOR'];
 
 /** Steel value chain used to explain why a substrate move reaches coated products. */
 export const VALUE_CHAIN = [
-  ['HRC', 'CRC', 'FH', 'GI', 'PPGI'],
-  ['HRC', 'CRC', 'FH', 'GL', 'PPGL'],
-  ['HRC', 'CRC', 'FH', 'AL', 'PPAL'],
+  ['HRC', 'CRC', 'FH', 'GI', 'COLOR (PPGI)'],
+  ['HRC', 'CRC', 'FH', 'GL', 'COLOR (PPGL)'],
+  ['HRC', 'CRC', 'FH', 'AL', 'COLOR (PPAL)'],
 ];
 
 export const SEVERITY = { LOW: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4 };
@@ -138,7 +138,7 @@ export const RULES = [
       UP: 'HRC가 오르면 CRC→FH를 경유하여 GI/GL/컬러 제품의 원판 원가가 올라갑니다. 도금 제품은 HRC 가격이 2~4주 시차로 반영되므로, 현재 나간 도금·컬러 견적의 원가 기반을 재확인해야 합니다.',
       DOWN: 'HRC 하락 → CRC→FH 원가가 내려가면서 바이어가 도금·컬러 가격 인하를 기대합니다. 시차(2~4주)가 있으므로 성급한 가격 인하에 주의하세요.',
     },
-    products: ['GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['GI', 'GL', 'COLOR'],
     regions: ['China', 'Asia', 'Korea Export'],
     riskType: 'Substrate Cost',
     riskTypeKo: '원판(기판) 원가',
@@ -209,7 +209,7 @@ export const RULES = [
       UP: '철광석·원료탄이 오르면 → 일관제철소(고로) 생산 원가가 올라 → 수 주 후 HRC·CRC 오퍼에 반영됩니다. 당장은 아니지만 중기 원가 상승 신호입니다.',
       DOWN: '원재료 하락 → 바이어가 이전 원가 기반 오퍼에 저항합니다. 재협상 압력에 대비하세요.',
     },
-    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
     regions: ['China', 'Asia', 'Korea Export'],
     riskType: 'Raw Material',
     riskTypeKo: '원재료',
@@ -246,20 +246,20 @@ export const RULES = [
       UP: '아연이 오르면 GI 도금 원가가 직접 상승합니다. GI는 도금층이 순수 아연이므로 아연 가격 영향을 가장 크게 받습니다. 신규 GI 오퍼 발행 전 코팅 엑스트라 재계산이 필수입니다.',
       DOWN: '아연 하락 → GI 코팅 엑스트라를 경쟁 무기로 활용할 여지가 생깁니다. 가격 인하 카드로 활용하세요.',
     },
-    products: ['GI', 'PPGI'],
+    products: ['GI', 'COLOR'],
     regions: ['Korea Export', 'Asia', 'Europe', 'GCC'],
     riskType: 'Coating Cost',
     riskTypeKo: '도금 원가 (아연)',
     directionFrom: (pct) => (pct > 0 ? 'UP' : 'DOWN'),
     actions: {
       UP: ['Recalculate GI coating extras before issuing new offers',
-           'Check open GI/PPGI quotations for margin erosion'],
+           'Check open GI/COLOR quotations for margin erosion'],
       DOWN: ['GI coating extras may be a competitive lever on open negotiations',
              'Consider GI price positioning vs competitor origins'],
     },
     actionsKo: {
       UP: ['GI 코팅 엑스트라 재계산 필요 — 아연 원가 변동분 반영 확인',
-           '미체결 GI/PPGI 견적의 마진 침식 확인 권장'],
+           '미체결 GI/컬러 견적의 마진 침식 확인 권장'],
       DOWN: ['GI 코팅 엑스트라 인하분을 협상 카드로 활용 가능',
              '경쟁 오리진 대비 GI 가격 포지셔닝 검토 권장'],
     },
@@ -364,7 +364,7 @@ export const RULES = [
     narrativeKo: {
       UP: '유가가 오르면 → 벙커유·해상운임이 오르고 → CIF 가격이 올라 수출 경쟁력이 약화됩니다. 유럽·GCC 향 CIF 오퍼에 직접 영향합니다.',
     },
-    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
     regions: ['Europe', 'GCC', 'Korea Export'],
     riskType: 'Freight',
     riskTypeKo: '운임',
@@ -400,7 +400,7 @@ export const RULES = [
     narrativeKo: {
       UP: '호르무즈 해협·홍해에서 선박 공격이나 항로 차단이 발생하면 → 우회 항로로 운항 일수가 늘고 → 전쟁보험료(War Risk Premium)가 급등하며 → CIF 가격이 올라 유럽·GCC 향 수출 채산성이 악화됩니다.',
     },
-    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
     regions: ['Europe', 'GCC', 'Korea Export'],
     riskType: 'Logistics',
     riskTypeKo: '물류·해운',
@@ -428,7 +428,7 @@ export const RULES = [
     narrativeKo: {
       UP: '항만 파업·폐쇄가 발생하면 → 선적이 지연되고 → 체선료가 발생하며 → 바이어의 인도 일정이 어긋나 계약 취소 위험까지 이어질 수 있습니다.',
     },
-    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
     regions: ['Asia', 'Europe', 'US', 'GCC'],
     riskType: 'Logistics',
     riskTypeKo: '물류·해운',
@@ -464,7 +464,7 @@ export const RULES = [
     narrativeKo: {
       UP: 'EU가 세이프가드 쿼터를 조정하거나 CBAM 적용 범위를 변경하면 → 수입 가능 물량이나 탄소 비용이 바뀌고 → 한국산 vs 터키산·인도산·베트남산의 경쟁력이 재편됩니다. 유럽은 GI가 주력 시장입니다.',
     },
-    products: ['CRC', 'GI', 'PPGI', 'COLOR'],
+    products: ['CRC', 'GI', 'COLOR'],
     regions: ['Europe'],
     riskType: 'Trade Policy',
     riskTypeKo: '통상 정책 (EU)',
@@ -821,7 +821,7 @@ export const RULES = [
     narrativeKo: {
       UP: '제재·수출통제가 발동되면 → 해당 국가·기업과의 결제 채널이 막히고 → 선적 보험 확보가 어려워져 → 기존 계약 이행 자체가 불가능해질 수 있습니다.',
     },
-    products: ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'],
+    products: ['CRC', 'GI', 'GL', 'COLOR'],
     regions: ['Europe', 'GCC', 'US'],
     riskType: 'Sanction',
     riskTypeKo: '제재',

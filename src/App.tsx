@@ -9,25 +9,62 @@ const AUTO_REFRESH_MS = 5 * 60 * 1000;
 const KST = 'Asia/Seoul';
 const PULSE_ORDER = ['hrc', 'rebar', 'zinc', 'aluminium', 'ironOre', 'cokingCoal'];
 const ALL_REGIONS = ['China', 'Asia', 'Korea Export', 'Europe', 'GCC', 'US'];
-const ALL_PRODUCTS = ['CRC', 'GI', 'GL', 'PPGI', 'COLOR'];
+const ALL_PRODUCTS = ['CRC', 'GI', 'GL', 'COLOR'];
 const EVENTS_PER_PAGE = 5;
 const SALES_PREVIEW = 5;
 
-/** Maps news feed domains → related products. Empty = all products. */
+/**
+ * Maps EVERY news feed domain → relevant products.
+ *
+ * When a product filter is active, only articles from domains that include
+ * the selected product are shown. No unmapped domains exist — every domain
+ * has an explicit product scope so the filter always narrows the news.
+ *
+ * Product rationale:
+ *   CRC  — cold-rolled: affected by HRC, raw materials, general trade
+ *   GI   — zinc-coated: CRC risks + zinc price, GI-specific trade/competition
+ *   GL   — aluzinc-coated: CRC risks + aluminium price, SEA/US market focus
+ *   COLOR — painted (PPGI/PPGL etc.): inherits GI+GL risks, broadest scope
+ */
 const DOMAIN_PRODUCTS: Record<string, string[]> = {
+  // ── Product-specific feeds ──
   crc_market: ['CRC'],
-  gi_market: ['GI', 'PPGI'],
+  gi_market: ['GI'],
   gl_market: ['GL'],
-  coated_steel: ['GI', 'GL', 'PPGI', 'COLOR'],
-  zinc_market: ['GI', 'PPGI'],
+  coated_steel: ['GI', 'GL', 'COLOR'],
+  zinc_market: ['GI'],
   aluminium_market: ['GL', 'COLOR'],
-  eu_steel_trade: ['CRC', 'GI', 'PPGI', 'COLOR'],
-  us_steel_trade: ['CRC', 'GI', 'GL', 'COLOR'],
-  asia_steel_trade: ['GI', 'GL', 'COLOR'],
-  competitor_turkey: ['GI', 'CRC', 'COLOR'],
+
+  // ── Trade policy (region-specific, product by what's actually traded) ──
+  trade_policy: ['CRC', 'GI', 'GL', 'COLOR'],
+  eu_steel_trade: ['CRC', 'GI', 'COLOR'],        // EU: mainly GI/CRC/COLOR, GL uncommon
+  us_steel_trade: ['CRC', 'GI', 'GL', 'COLOR'],   // US: all products incl. GL
+  asia_steel_trade: ['GI', 'GL', 'COLOR'],          // ASEAN: coated products, no CRC
+
+  // ── Supply & competition ──
+  steel_price: ['CRC', 'GI', 'GL', 'COLOR'],
+  raw_material: ['CRC', 'GI', 'GL', 'COLOR'],
+  china_supply: ['CRC', 'GI', 'GL', 'COLOR'],
+  china_export_flood: ['CRC', 'GI', 'GL', 'COLOR'],
+  competitor_turkey: ['GI', 'CRC', 'COLOR'],        // Turkey: GI/CRC 주력, GL 거의 없음
   competitor_india: ['GI', 'CRC', 'GL', 'COLOR'],
-  competitor_vietnam: ['GI', 'GL', 'COLOR'],
-  gcc_steel_market: ['GI', 'GL', 'COLOR'],
+  competitor_vietnam: ['GI', 'GL', 'COLOR'],         // Vietnam: GI/GL, CRC 거의 없음
+  gcc_steel_market: ['GI', 'GL', 'COLOR'],           // GCC: 도금제품 주력, CRC 수요 적음
+
+  // ── Energy & logistics (all products shipped equally) ──
+  energy: ['CRC', 'GI', 'GL', 'COLOR'],
+  logistics: ['CRC', 'GI', 'GL', 'COLOR'],
+  geopolitics: ['CRC', 'GI', 'GL', 'COLOR'],
+
+  // ── Korean-language ──
+  korea_steel: ['CRC', 'GI', 'GL', 'COLOR'],
+
+  // ── Macro / Event Radar ──
+  macro_politics: ['CRC', 'GI', 'GL', 'COLOR'],
+  macro_economy: ['CRC', 'GI', 'GL', 'COLOR'],
+  macro_japan: ['CRC', 'GI', 'GL', 'COLOR'],
+  macro_kr_economy: ['CRC', 'GI', 'GL', 'COLOR'],
+  macro_construction: ['GI', 'GL', 'COLOR'],         // 건설 = 도금제품 주로 사용, CRC 직접 소비 적음
 };
 
 /* ── localStorage notification helpers ── */
@@ -384,9 +421,8 @@ export function App() {
     if (filterProduct !== 'ALL') {
       filtered = filtered.filter((n: any) => {
         const domains: string[] = n.domains ?? [];
-        // Keep if any domain explicitly maps to this product, OR if all domains are general (no product mapping)
-        const mapped = domains.flatMap((d) => DOMAIN_PRODUCTS[d] ?? []);
-        return mapped.length === 0 || mapped.includes(filterProduct);
+        // Keep only if at least one domain is mapped to the selected product
+        return domains.some((d) => (DOMAIN_PRODUCTS[d] ?? []).includes(filterProduct));
       });
     }
     return filtered;
