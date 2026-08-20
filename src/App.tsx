@@ -31,17 +31,19 @@ const DOMAIN_PRODUCTS: Record<string, string[]> = {
 };
 
 /* ── localStorage notification helpers ── */
-const DISMISSED_KEY = 'steel-risk-dismissed';
+const KNOWN_KEY = 'steel-risk-known';
 
-function loadDismissed(): Set<string> {
+/** Load impact IDs the user has already seen in previous sessions. */
+function loadKnown(): Set<string> {
   try {
-    const raw = localStorage.getItem(DISMISSED_KEY);
+    const raw = localStorage.getItem(KNOWN_KEY);
     return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
   } catch { return new Set(); }
 }
 
-function saveDismissed(ids: Set<string>) {
-  localStorage.setItem(DISMISSED_KEY, JSON.stringify([...ids]));
+/** Persist known IDs so next session treats them as old. */
+function saveKnown(ids: Set<string>) {
+  localStorage.setItem(KNOWN_KEY, JSON.stringify([...ids]));
 }
 
 const INSTRUMENT_KO: Record<string, string> = {
@@ -157,7 +159,8 @@ export function App() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [fx, setFx] = useState<FxData | null>(null);
   const [freight, setFreight] = useState<FreightData | null>(null);
-  const [dismissed, setDismissed] = useState<Set<string>>(loadDismissed);
+  const [previouslyKnown] = useState<Set<string>>(loadKnown);
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedImpact, setSelectedImpact] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -228,6 +231,12 @@ export function App() {
       if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
       }
+      // Mark ALL current impact IDs as known for next session
+      // (previouslyKnown state is NOT updated — only localStorage, so this session still sees new items)
+      const allKnown = loadKnown();
+      a.impacts.forEach((imp: { id: string }) => allKnown.add(imp.id));
+      saveKnown(allKnown);
+
       if (isManual) {
         setToast(changed ? '✅ 새 데이터가 반영되었습니다' : 'ℹ️ 아직 새 데이터가 없습니다 (CI 대기 중)');
       }
@@ -414,22 +423,12 @@ export function App() {
 
   /* ── notification dismiss handler ── */
   function onDismiss(id: string) {
-    setDismissed((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      saveDismissed(next);
-      return next;
-    });
+    setDismissed((prev) => { const next = new Set(prev); next.add(id); return next; });
     setToast('✅ 확인 처리됨');
   }
 
   function onDismissAll(ids: string[]) {
-    setDismissed((prev) => {
-      const next = new Set(prev);
-      ids.forEach((id) => next.add(id));
-      saveDismissed(next);
-      return next;
-    });
+    setDismissed(new Set(ids));
     setToast('✅ 모든 알림을 확인했습니다');
   }
 
@@ -460,9 +459,12 @@ export function App() {
   const collectedAgo = minutesSince(analysis.generatedAt);
   const stale = collectedAgo > 90;
 
-  /* Notifications: undismissed critical/high impacts */
+  /* Notifications: only impacts the user has NEVER seen before (not in previouslyKnown from prior sessions, not dismissed this session) */
   const notices = analysis
-    ? analysis.impacts.filter((imp) => (imp.severity === 'CRITICAL' || imp.severity === 'HIGH') && !dismissed.has(imp.id))
+    ? analysis.impacts.filter((imp) =>
+        (imp.severity === 'CRITICAL' || imp.severity === 'HIGH') &&
+        !previouslyKnown.has(imp.id) &&
+        !dismissed.has(imp.id))
     : [];
 
   /* ══════════════════════════════════════════════════════════════════
@@ -1439,12 +1441,12 @@ export function App() {
         >
           <div className="px-4 py-3 border-b border-[var(--color-slate-line)] text-[11.5px] text-[var(--color-muted)] bg-[var(--color-surface)]">
             <strong className="text-[var(--color-ink)]">안내:</strong>{' '}
-            분석 결과에서 감지된 HIGH/CRITICAL 위험 신호가 자동으로 표시됩니다.
-            확인한 항목은 <strong>확인</strong> 버튼으로 처리하면 목록에서 사라집니다.
+            이전 방문 이후 새로 감지된 HIGH/CRITICAL 위험 신호만 표시됩니다.
+            데이터가 갱신되어 새로운 리스크가 발생하면 여기에 알림이 나타납니다.
           </div>
 
           {notices.length === 0 ? (
-            <EmptyState text="🎉 모든 알림을 확인했습니다. 새로운 위험 신호가 감지되면 여기에 표시됩니다." />
+            <EmptyState text="✅ 새로운 알림이 없습니다. 데이터 갱신 후 신규 위험 신호가 감지되면 여기에 표시됩니다." />
           ) : (
             <>
               <div className="divide-y divide-[var(--color-slate-line)]">
