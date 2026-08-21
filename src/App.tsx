@@ -646,7 +646,7 @@ export function App() {
             <h1 style={{ margin: 0, fontSize: 18, fontWeight: 600, lineHeight: 1.2 }}>리스크 대시보드</h1>
             <div style={{ fontSize: 11, color: 'var(--color-faint)' }}>도금 · 컬러강판 수출 조기경보 — SHFE 선물 + 뉴스 기반 인과 분석</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10, marginRight: 6 }}>
+          <div className="header-meta" style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10, marginRight: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <span style={{ letterSpacing: '0.06em', color: 'var(--color-faint)', fontWeight: 500 }}>MODE</span>
               <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>PROTOTYPE</span>
@@ -760,7 +760,7 @@ export function App() {
         </section>
 
         {/* ════════════════════════════ FILTER BAR ════════════════════════════ */}
-        <div className="flex flex-wrap items-center gap-3 px-1">
+        <div className="filter-row flex flex-wrap items-center gap-3 px-1">
           <span className="eyebrow">필터</span>
           {isFiltered && (
             <span className="text-[10px] text-[var(--color-risk-med)] font-semibold">● 필터 적용 중 — 전체 대시보드에 반영</span>
@@ -1474,7 +1474,7 @@ export function App() {
             }
           >
             {/* Theme tabs */}
-            <div className="tab-bar" style={{ flexWrap: 'wrap' }}>
+            <div className="tab-bar news-theme-tabs">
               {newsThemes.map((th) => {
                 const count = th === 'ALL'
                   ? (analysis.newsDigest ?? []).length
@@ -1696,9 +1696,27 @@ export function App() {
         theme={theme}
       />
 
+      {/* ════════════════════════════ MOBILE BOTTOM NAV ════════════════════════════ */}
+      <nav className="mobile-bottom-nav">
+        {[
+          { id: 'sec-overview', label: '대시보드', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4' },
+          { id: 'sec-pulse', label: '시장', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+          { id: 'sec-signals', label: '신호', icon: 'M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', badge: highCount > 0 ? highCount : undefined },
+          { id: 'sec-chart', label: '차트', icon: 'M3 3v18h18M7 16l4-4 4 4 4-8' },
+          { id: 'sec-news', label: '뉴스', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2' },
+        ].map((n) => (
+          <button key={n.id} className="mobile-nav-btn" onClick={() => scrollToSection(n.id)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={n.icon} /></svg>
+            <span>{n.label}</span>
+            {n.badge && <span className="nav-badge">{n.badge}</span>}
+          </button>
+        ))}
+      </nav>
+
       {/* ════════════════════════════ TOAST ════════════════════════════ */}
       {toast && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 border border-[var(--color-steel)] bg-[var(--color-panel)] px-4 py-2 text-[11px] text-[var(--color-steel)] rounded-md shadow-lg shadow-black/20">
+        <div className="fixed left-1/2 -translate-x-1/2 border border-[var(--color-steel)] bg-[var(--color-panel)] px-4 py-2 text-[11px] text-[var(--color-steel)] rounded-md shadow-lg shadow-black/20"
+          style={{ bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))' }}>
           {toast}
         </div>
       )}
