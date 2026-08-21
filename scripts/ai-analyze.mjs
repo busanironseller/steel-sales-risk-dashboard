@@ -227,7 +227,9 @@ Each step must be marked:
 - Products: only use CRC, GI, GL, COLOR. If unknown, return [].
 - Regions: only use Europe, GCC, Asia, US, Korea Export. If unknown, return [].
 - Do NOT fill in unknown products/regions with "all". Empty [] is correct.
-- If evidence is headline-only, evidenceQuality MUST be 0 or 1.
+- If evidence is headline-only AND you cannot verify via search, evidenceQuality MUST be 0 or 1.
+- If article "Content:" text is provided, or you find specific facts via Google Search, you may score evidenceQuality 2 or 3 when concrete facts, data, or official statements are available.
+- When Google Search is available, use it to verify key claims and find additional context. Cite what you find as facts.
 - Count unconfirmed causal steps. More unconfirmed steps = lower causalStrength.
 
 ## Output
@@ -319,44 +321,76 @@ function geminiUrl(model) {
 /**
  * Call Gemini with model fallback. Returns { text, model } or null.
  */
-async function callGemini(prompt, { temperature = 0.3, maxTokens = 8192 } = {}) {
-  const body = JSON.stringify({
+async function callGemini(prompt, { temperature = 0.3, maxTokens = 8192, useGrounding = false } = {}) {
+  const reqBody = {
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: 'application/json',
       temperature,
       maxOutputTokens: maxTokens,
     },
-  });
+  };
+  // Google Search grounding: lets Gemini search for real-time context
+  if (useGrounding) reqBody.tools = [{ googleSearch: {} }];
+  let body = JSON.stringify(reqBody);
 
-  for (const model of GEMINI_MODELS) {
-    try {
-      const res = await fetch(geminiUrl(model), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body,
-        signal: AbortSignal.timeout(120_000),
-      });
+  const MAX_RETRIES = 3;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    let anyRateLimited = false;
+    let hardError = false;
+    for (const model of GEMINI_MODELS) {
+      try {
+        const res = await fetch(geminiUrl(model), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          signal: AbortSignal.timeout(120_000),
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return { text, model };
-        console.error(`  ai       ${model}: empty response`);
-        return null;
-      }
+        if (res.ok) {
+          const data = await res.json();
+          // Grounded responses may have text in different parts
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          const text = parts.map(p => p.text || '').join('');
+          if (text) return { text, model, grounded: !!data.candidates?.[0]?.groundingMetadata };
+          console.error(`  ai       ${model}: empty response`);
+          return null;
+        }
 
-      const status = res.status;
-      if (status === 503 || status === 429 || status === 404) {
-        console.log(`  ai       ${model} unavailable (${status}), trying next...`);
+        const status = res.status;
+        if (status === 429) {
+          anyRateLimited = true;
+          console.log(`  ai       ${model} rate-limited (429), trying next...`);
+          continue;
+        }
+        if (status === 503 || status === 404) {
+          console.log(`  ai       ${model} unavailable (${status}), trying next...`);
+          continue;
+        }
+        // If grounding caused the error, retry without it
+        if (useGrounding && status === 400) {
+          const errText = await res.text();
+          console.log(`  ai       ${model} grounding failed (400), retrying without grounding...`);
+          useGrounding = false;
+          reqBody.tools = undefined;
+          body = JSON.stringify(reqBody);
+          break; // break inner model loop to retry outer attempt loop
+        }
+        const errText = await res.text();
+        console.error(`  ai       ${model} error ${status}: ${errText.slice(0, 200)}`);
+        hardError = true;
+        break;
+      } catch (err) {
+        console.error(`  ai       ${model} failed: ${err.message}`);
         continue;
       }
-      const errText = await res.text();
-      console.error(`  ai       ${model} error ${status}: ${errText.slice(0, 200)}`);
-      return null;
-    } catch (err) {
-      console.error(`  ai       ${model} failed: ${err.message}`);
-      continue;
+    }
+    if (hardError) break;
+    // If any model was rate-limited and none succeeded, wait and retry
+    if (anyRateLimited && attempt < MAX_RETRIES) {
+      const wait = 15 * (attempt + 1); // 15s, 30s, 45s
+      console.log(`  ai       All models unavailable, waiting ${wait}s (retry ${attempt + 1}/${MAX_RETRIES})...`);
+      await new Promise(r => setTimeout(r, wait * 1000));
     }
   }
   return null;
@@ -433,6 +467,116 @@ function parseJson(text) {
   // 5. Log first 500 chars for debugging
   console.error('  ai       Raw response (first 500 chars):', text.slice(0, 500));
   throw new Error('Could not parse Gemini response as JSON');
+}
+
+// ────────────────────────────────────────────────── Article Text Extraction
+
+const FETCH_UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+  '(KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+
+/**
+ * Fetch and extract text from an article page.
+ * Skips Google News redirect URLs (they use encrypted JS-based redirects).
+ * Returns extracted text (max ~1500 chars) or null on failure.
+ */
+async function fetchArticleText(link) {
+  if (!link) return null;
+  // Google News URLs use encrypted JS redirects that can't be followed with fetch()
+  if (link.includes('news.google.com')) return null;
+  try {
+    const res = await fetch(link, {
+      headers: { 'User-Agent': FETCH_UA },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return null;
+
+    const html = await res.text();
+    // Some pages are huge — only look at first 200KB
+    const trimmedHtml = html.slice(0, 200_000);
+
+    return extractArticleText(trimmedHtml);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extract readable text from HTML.
+ * Targets common article containers, strips tags, trims to useful length.
+ */
+function extractArticleText(html) {
+  // Remove script, style, nav, header, footer, aside
+  let cleaned = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<aside[\s\S]*?<\/aside>/gi, '')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
+
+  // Try to find article body (common selectors via tag matching)
+  const articleMatch = cleaned.match(/<article[\s\S]*?<\/article>/i)
+    || cleaned.match(/<div[^>]*class="[^"]*article[^"]*"[\s\S]*?<\/div>/i)
+    || cleaned.match(/<div[^>]*class="[^"]*content[^"]*"[\s\S]*?<\/div>/i);
+
+  const source = articleMatch ? articleMatch[0] : cleaned;
+
+  // Extract paragraph text
+  const paragraphs = [...source.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
+    .map(m => m[1]
+      .replace(/<[^>]*>/g, '')
+      .replace(/&[a-z]+;/gi, ' ')
+      .replace(/&#\d+;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+    )
+    .filter(p => p.length > 30); // skip tiny fragments
+
+  if (paragraphs.length === 0) return null;
+
+  // Join paragraphs, limit to ~1500 chars
+  let text = paragraphs.join(' ');
+  if (text.length > 1500) text = text.slice(0, 1500) + '…';
+  return text;
+}
+
+/**
+ * Fetch article texts for candidate articles (parallel, rate-limited).
+ * Only fetches unique URLs, max concurrency = 5.
+ */
+async function fetchCandidateTexts(articles, candidateIndices) {
+  const uniqueIndices = [...new Set(candidateIndices)].filter(i => i >= 1 && i <= articles.length);
+  const textMap = new Map(); // index → text
+
+  // Process in batches of 5
+  const BATCH = 5;
+  let fetched = 0;
+  let success = 0;
+
+  for (let i = 0; i < uniqueIndices.length; i += BATCH) {
+    const batch = uniqueIndices.slice(i, i + BATCH);
+    const results = await Promise.allSettled(
+      batch.map(idx => fetchArticleText(articles[idx - 1]?.link))
+    );
+
+    for (let j = 0; j < batch.length; j++) {
+      fetched++;
+      const r = results[j];
+      if (r.status === 'fulfilled' && r.value) {
+        textMap.set(batch[j], r.value);
+        success++;
+      }
+    }
+
+    // Rate limit
+    if (i + BATCH < uniqueIndices.length) await new Promise(r => setTimeout(r, 500));
+  }
+
+  console.log(`  ai       FETCH: ${success}/${fetched} article texts extracted`);
+  return textMap;
 }
 
 // ────────────────────────────────────────────────── State Management
@@ -597,8 +741,8 @@ async function triage(articles, analyzedFingerprints) {
       console.error(`  ai       TRIAGE${chunkLabel}: parse error: ${err.message}`);
     }
 
-    // Brief pause between chunks to avoid rate limits
-    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 2000));
+    // Pause between chunks to respect free-tier RPM limit (~15 RPM)
+    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 5000));
   }
 
   const candidates = allCandidates.slice(0, 30);
@@ -608,14 +752,34 @@ async function triage(articles, analyzedFingerprints) {
 
 /**
  * STEP 2 — EVIDENCE ENRICHMENT
- * Build enriched context for each candidate from available article data.
+ * Fetches article texts for candidates and builds enriched context.
+ * Only fetches articles that passed TRIAGE (not all 400).
  */
-function enrichCandidates(candidates, articles) {
+async function enrichCandidates(candidates, articles) {
+  // Collect all unique article indices from all candidates
+  const allIndices = [...new Set(candidates.flatMap(c => c.articleIndices))];
+
+  // Check if any articles have non-Google-News URLs (fetchable)
+  const fetchableIndices = allIndices.filter(i => {
+    const link = articles[i - 1]?.link || '';
+    return link && !link.includes('news.google.com');
+  });
+
+  let textMap;
+  if (fetchableIndices.length > 0) {
+    console.log(`  ai       EVIDENCE: fetching text for ${fetchableIndices.length}/${allIndices.length} fetchable articles...`);
+    textMap = await fetchCandidateTexts(articles, fetchableIndices);
+  } else {
+    console.log(`  ai       EVIDENCE: ${allIndices.length} articles are Google News URLs (using search grounding instead)`);
+    textMap = new Map();
+  }
+
   return candidates.map(c => {
     const enrichedArticles = c.articleIndices
       .filter(idx => idx >= 1 && idx <= articles.length)
       .map(idx => {
         const a = articles[idx - 1];
+        const articleText = textMap.get(idx) || null;
         return {
           index: idx,
           title: a.title,
@@ -623,16 +787,19 @@ function enrichCandidates(candidates, articles) {
           source: a.source,
           publishedAt: a.publishedAt?.slice(0, 10),
           snippet: a.snippet || null,
+          articleText,       // full extracted article body
           domains: a.domains,
           fingerprint: a.articleFingerprint,
+          hasText: !!articleText,
           hasSnippet: !!a.snippet,
         };
       });
 
+    const hasFullText = enrichedArticles.some(a => a.hasText);
     return {
       ...c,
       enrichedArticles,
-      evidenceLevel: enrichedArticles.some(a => a.hasSnippet) ? 'snippet' : 'headline_only',
+      evidenceLevel: hasFullText ? 'full_text' : enrichedArticles.some(a => a.hasSnippet) ? 'snippet' : 'headline_only',
     };
   });
 }
@@ -693,7 +860,12 @@ async function analyze(enrichedCandidates) {
       const artDetails = c.enrichedArticles.map(a => {
         let line = `  [${a.index}] ${a.title}`;
         line += ` (${a.source}, ${a.publishedAt})`;
-        if (a.snippet) line += `\n       Snippet: ${a.snippet}`;
+        if (a.articleText) {
+          // Full article text available — much higher evidence quality
+          line += `\n       Content: ${a.articleText.slice(0, 800)}`;
+        } else if (a.snippet) {
+          line += `\n       Snippet: ${a.snippet}`;
+        }
         return line;
       }).join('\n');
 
@@ -707,8 +879,10 @@ ${artDetails}`;
 
     const prompt = ANALYST_PROMPT + `\n\n## Candidates for Deep Analysis${chunkLabel}\n\n` + candidateBlocks;
 
-    console.log(`  ai       ANALYST${chunkLabel}: analyzing ${chunk.length} candidates...`);
-    const result = await callGemini(prompt, { temperature: 0.3, maxTokens: 16384 });
+    // Enable Google Search grounding when evidence is headline-only (lets Gemini search for context)
+    const needsGrounding = chunk.some(c => c.evidenceLevel === 'headline_only');
+    console.log(`  ai       ANALYST${chunkLabel}: analyzing ${chunk.length} candidates...${needsGrounding ? ' (with search grounding)' : ''}`);
+    const result = await callGemini(prompt, { temperature: 0.3, maxTokens: 16384, useGrounding: needsGrounding });
     if (!result) {
       console.error(`  ai       ANALYST${chunkLabel}: Gemini call failed`);
       continue;
@@ -736,8 +910,8 @@ ${artDetails}`;
       console.error(`  ai       ANALYST${chunkLabel}: parse error: ${err.message}`);
     }
 
-    // Pause between chunks
-    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 2000));
+    // Pause between chunks to respect free-tier RPM limit
+    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 5000));
   }
 
   console.log(`  ai       ANALYST total: ${allAssessments.length} assessments from ${enrichedCandidates.length} candidates`);
@@ -1036,9 +1210,11 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
   }
 
   // ── STEP 2: EVIDENCE ENRICHMENT ──
-  const enrichedCandidates = enrichCandidates(triageResult.candidates, articles);
-  const enrichedCount = enrichedCandidates.filter(c => c.evidenceLevel !== 'headline_only').length;
-  console.log(`  ai       EVIDENCE: ${enrichedCount} enriched / ${enrichedCandidates.length - enrichedCount} headline-only`);
+  const enrichedCandidates = await enrichCandidates(triageResult.candidates, articles);
+  const fullTextCount = enrichedCandidates.filter(c => c.evidenceLevel === 'full_text').length;
+  const snippetCount = enrichedCandidates.filter(c => c.evidenceLevel === 'snippet').length;
+  const headlineCount = enrichedCandidates.length - fullTextCount - snippetCount;
+  console.log(`  ai       EVIDENCE: ${fullTextCount} full-text / ${snippetCount} snippet / ${headlineCount} headline-only`);
 
   // ── STEP 3: ANALYST ──
   const analystResult = await analyze(enrichedCandidates);
@@ -1091,7 +1267,7 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
   console.log(`  ai       ──── AI Pipeline Summary ────`);
   console.log(`  ai       NEWS     ${articles.length} total, ${metrics.newArticles} new`);
   console.log(`  ai       TRIAGE   ${metrics.triageCandidates} candidates`);
-  console.log(`  ai       EVIDENCE ${enrichedCount} enriched, ${enrichedCandidates.length - enrichedCount} headline-only`);
+  console.log(`  ai       EVIDENCE ${fullTextCount} full-text, ${snippetCount} snippet, ${headlineCount} headline-only`);
   console.log(`  ai       ANALYST  ${metrics.analystsProduced} assessments`);
   console.log(`  ai       CRITIC   ${metrics.criticDowngraded} downgraded`);
   console.log(`  ai       CASES    ${metrics.riskCasesNew} new, ${metrics.riskCasesUpdated} updated`);
