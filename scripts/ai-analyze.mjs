@@ -362,15 +362,77 @@ async function callGemini(prompt, { temperature = 0.3, maxTokens = 8192 } = {}) 
   return null;
 }
 
-/** Parse JSON from Gemini response, handling markdown wrappers. */
-function parseJson(text) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (match) return JSON.parse(match[1]);
-    throw new Error('Could not parse Gemini response as JSON');
+/**
+ * Extract all complete JSON objects from a potentially truncated JSON array.
+ * Handles: `[{...}, {... <truncated>` by salvaging all complete objects.
+ */
+function salvageJsonArray(text) {
+  const results = [];
+  let depth = 0;
+  let objStart = -1;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    // Skip string contents (including escaped quotes)
+    if (ch === '"') {
+      i++;
+      while (i < text.length && text[i] !== '"') {
+        if (text[i] === '\\') i++; // skip escaped char
+        i++;
+      }
+      continue;
+    }
+    if (ch === '{') {
+      if (depth === 0) objStart = i;
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+      if (depth === 0 && objStart >= 0) {
+        const slice = text.slice(objStart, i + 1);
+        try {
+          results.push(JSON.parse(slice));
+        } catch { /* malformed object, skip */ }
+        objStart = -1;
+      }
+    }
   }
+  return results;
+}
+
+/** Parse JSON from Gemini response, handling markdown wrappers and truncation. */
+function parseJson(text) {
+  // 1. Direct parse
+  try { return JSON.parse(text); } catch { /* continue */ }
+
+  // 2. Markdown code fence
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) try { return JSON.parse(fenceMatch[1]); } catch { /* continue */ }
+
+  // 3. Find the outermost JSON array or object
+  const arrStart = text.indexOf('[');
+  const objStart = text.indexOf('{');
+  const start = arrStart >= 0 && (objStart < 0 || arrStart < objStart) ? arrStart : objStart;
+  if (start >= 0) {
+    const isArr = text[start] === '[';
+    const closer = isArr ? ']' : '}';
+    const end = text.lastIndexOf(closer);
+    if (end > start) {
+      try { return JSON.parse(text.slice(start, end + 1)); } catch { /* continue */ }
+    }
+  }
+
+  // 4. Truncation recovery — extract all complete JSON objects from truncated array
+  if (arrStart >= 0) {
+    const salvaged = salvageJsonArray(text.slice(arrStart));
+    if (salvaged.length > 0) {
+      console.log(`  ai       Recovered ${salvaged.length} complete objects from truncated response`);
+      return salvaged;
+    }
+  }
+
+  // 5. Log first 500 chars for debugging
+  console.error('  ai       Raw response (first 500 chars):', text.slice(0, 500));
+  throw new Error('Could not parse Gemini response as JSON');
 }
 
 // ────────────────────────────────────────────────── State Management
@@ -468,9 +530,13 @@ function deriveLegacyDirection(vectors) {
 
 // ────────────────────────────────────────────────── PIPELINE STEPS
 
+/** Max articles per triage call — keeps both input and output within limits. */
+const TRIAGE_CHUNK_SIZE = 100;
+
 /**
  * STEP 1 — TRIAGE
  * High recall, low cost. Identifies candidates for deep analysis.
+ * Chunks articles to stay within Gemini's context window.
  */
 async function triage(articles, analyzedFingerprints) {
   // Identify new/changed articles
@@ -485,38 +551,59 @@ async function triage(articles, analyzedFingerprints) {
 
   console.log(`  ai       TRIAGE: ${newCount} new / ${articles.length - newCount} cached`);
 
-  // Build article list for triage (all articles, but mark new ones)
+  // Build compact article lines (no Korean titles — saves ~40% prompt size)
   const articleLines = articles.map((a, i) => {
     const isNew = !fpSet.has(a.articleFingerprint);
-    const snippetPart = a.snippet ? ` — ${a.snippet.slice(0, 100)}` : '';
-    return `[${i + 1}]${isNew ? ' [NEW]' : ''} ${a.title}${a.titleKo ? ' / ' + a.titleKo : ''} (${a.source}, ${a.publishedAt?.slice(0, 10)})${snippetPart}`;
+    const snippetPart = a.snippet ? ` — ${a.snippet.slice(0, 80)}` : '';
+    return `[${i + 1}]${isNew ? ' [NEW]' : ''} ${a.title} (${a.source}, ${a.publishedAt?.slice(0, 10)})${snippetPart}`;
   });
 
-  const prompt = TRIAGE_PROMPT + '\n\n## Articles (' + articles.length + ')\n\n' + articleLines.join('\n');
-
-  const result = await callGemini(prompt, { temperature: 0.2, maxTokens: 4096 });
-  if (!result) {
-    console.error('  ai       TRIAGE: Gemini call failed');
-    return { candidates: [], newCount, cacheHits: articles.length - newCount, model: null };
+  // Chunk articles if too many
+  const allCandidates = [];
+  let modelUsed = null;
+  const chunks = [];
+  for (let i = 0; i < articleLines.length; i += TRIAGE_CHUNK_SIZE) {
+    chunks.push({ lines: articleLines.slice(i, i + TRIAGE_CHUNK_SIZE), offset: i });
   }
 
-  try {
-    const raw = parseJson(result.text);
-    const parsed = TriageOutputSchema.safeParse(raw);
-    if (!parsed.success) {
-      console.error('  ai       TRIAGE: validation failed:', parsed.error.message?.slice(0, 200));
-      // Try to salvage what we can
-      const salvaged = (Array.isArray(raw) ? raw : []).filter(c => c?.articleIndices?.length > 0);
-      return { candidates: salvaged.slice(0, 30), newCount, cacheHits: articles.length - newCount, model: result.model };
+  for (const [ci, chunk] of chunks.entries()) {
+    const chunkLabel = chunks.length > 1 ? ` [chunk ${ci + 1}/${chunks.length}]` : '';
+    const prompt = TRIAGE_PROMPT
+      + `\n\n## Articles${chunkLabel} (${chunk.lines.length} of ${articles.length} total, indices ${chunk.offset + 1}-${chunk.offset + chunk.lines.length})\n\n`
+      + chunk.lines.join('\n');
+
+    const result = await callGemini(prompt, { temperature: 0.2, maxTokens: 8192 });
+    if (!result) {
+      console.error(`  ai       TRIAGE${chunkLabel}: Gemini call failed`);
+      continue;
+    }
+    modelUsed = result.model;
+
+    try {
+      const raw = parseJson(result.text);
+      const items = Array.isArray(raw) ? raw : [];
+      const parsed = TriageOutputSchema.safeParse(items);
+      if (parsed.success) {
+        const good = parsed.data.filter(c => c.needsDeepAnalysis);
+        allCandidates.push(...good);
+        console.log(`  ai       TRIAGE${chunkLabel}: ${good.length} candidates (model: ${result.model})`);
+      } else {
+        // Salvage what we can
+        const salvaged = items.filter(c => c?.articleIndices?.length > 0 && c?.needsDeepAnalysis !== false);
+        allCandidates.push(...salvaged);
+        console.log(`  ai       TRIAGE${chunkLabel}: validation partial — salvaged ${salvaged.length}`);
+      }
+    } catch (err) {
+      console.error(`  ai       TRIAGE${chunkLabel}: parse error: ${err.message}`);
     }
 
-    const candidates = parsed.data.filter(c => c.needsDeepAnalysis).slice(0, 30);
-    console.log(`  ai       TRIAGE: ${candidates.length} candidates from ${articles.length} articles (model: ${result.model})`);
-    return { candidates, newCount, cacheHits: articles.length - newCount, model: result.model };
-  } catch (err) {
-    console.error('  ai       TRIAGE: parse error:', err.message);
-    return { candidates: [], newCount, cacheHits: articles.length - newCount, model: result.model };
+    // Brief pause between chunks to avoid rate limits
+    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 2000));
   }
+
+  const candidates = allCandidates.slice(0, 30);
+  console.log(`  ai       TRIAGE total: ${candidates.length} candidates from ${articles.length} articles`);
+  return { candidates, newCount, cacheHits: articles.length - newCount, model: modelUsed };
 }
 
 /**
@@ -550,87 +637,111 @@ function enrichCandidates(candidates, articles) {
   });
 }
 
+/** Max candidates per analyst call — each produces ~500-800 tokens of output. */
+const ANALYST_CHUNK_SIZE = 8;
+
+/** Try to salvage an assessment object with missing/invalid fields. */
+function salvageAssessment(item) {
+  if (!item?.canonicalEventTitle) return null;
+  return {
+    canonicalEventTitle: item.canonicalEventTitle,
+    riskType: item.riskType || '기타',
+    facts: Array.isArray(item.facts) ? item.facts : [],
+    inferences: Array.isArray(item.inferences) ? item.inferences : [],
+    assumptions: Array.isArray(item.assumptions) ? item.assumptions : [],
+    missingEvidence: Array.isArray(item.missingEvidence) ? item.missingEvidence : [],
+    exposure: {
+      products: Array.isArray(item.exposure?.products) ? item.exposure.products.filter(p => ['CRC','GI','GL','COLOR'].includes(p)) : [],
+      regions: Array.isArray(item.exposure?.regions) ? item.exposure.regions.filter(r => ['Europe','GCC','Asia','US','Korea Export'].includes(r)) : [],
+      routes: item.exposure?.routes || [],
+      tradeMeasures: item.exposure?.tradeMeasures || [],
+    },
+    causalChain: Array.isArray(item.causalChain) ? item.causalChain : [],
+    impactVectors: item.impactVectors || {},
+    scores: item.scores || { evidenceQuality: 0, exposureProximity: 0, causalStrength: 0, businessMateriality: 0, urgency: 0 },
+    threat: item.threat || '',
+    opportunity: item.opportunity || '',
+    timeHorizon: item.timeHorizon || 'UNKNOWN',
+    watchSignals: Array.isArray(item.watchSignals) ? item.watchSignals : [],
+    counterScenario: item.counterScenario || '',
+    suggestedActions: Array.isArray(item.suggestedActions) ? item.suggestedActions : [],
+    evidenceIndices: Array.isArray(item.evidenceIndices) ? item.evidenceIndices : [],
+  };
+}
+
 /**
  * STEP 3 — ANALYST
  * Deep EEMMT analysis on enriched candidates.
+ * Chunks candidates to prevent output truncation.
  */
 async function analyze(enrichedCandidates) {
   if (enrichedCandidates.length === 0) return { assessments: [], model: null };
 
-  // Build candidate descriptions for the analyst
-  const candidateBlocks = enrichedCandidates.map((c, i) => {
-    const artDetails = c.enrichedArticles.map(a => {
-      let line = `  [${a.index}] ${a.title}`;
-      if (a.titleKo) line += ` / ${a.titleKo}`;
-      line += ` (${a.source}, ${a.publishedAt})`;
-      if (a.snippet) line += `\n       Snippet: ${a.snippet}`;
-      return line;
-    }).join('\n');
+  const allAssessments = [];
+  let modelUsed = null;
 
-    return `--- Candidate ${i + 1}: ${c.candidateType} ---
+  // Chunk candidates
+  const chunks = [];
+  for (let i = 0; i < enrichedCandidates.length; i += ANALYST_CHUNK_SIZE) {
+    chunks.push(enrichedCandidates.slice(i, i + ANALYST_CHUNK_SIZE));
+  }
+
+  for (const [ci, chunk] of chunks.entries()) {
+    const chunkLabel = chunks.length > 1 ? ` [batch ${ci + 1}/${chunks.length}]` : '';
+
+    const candidateBlocks = chunk.map((c, i) => {
+      const artDetails = c.enrichedArticles.map(a => {
+        let line = `  [${a.index}] ${a.title}`;
+        line += ` (${a.source}, ${a.publishedAt})`;
+        if (a.snippet) line += `\n       Snippet: ${a.snippet}`;
+        return line;
+      }).join('\n');
+
+      return `--- Candidate ${ci * ANALYST_CHUNK_SIZE + i + 1}: ${c.candidateType} ---
 Why it might matter: ${c.whyItMightMatter}
 Potential exposure: ${c.potentialExposure || 'unknown'}
 Evidence level: ${c.evidenceLevel}
 Articles:
 ${artDetails}`;
-  }).join('\n\n');
+    }).join('\n\n');
 
-  const prompt = ANALYST_PROMPT + '\n\n## Candidates for Deep Analysis\n\n' + candidateBlocks;
+    const prompt = ANALYST_PROMPT + `\n\n## Candidates for Deep Analysis${chunkLabel}\n\n` + candidateBlocks;
 
-  console.log(`  ai       ANALYST: analyzing ${enrichedCandidates.length} candidates...`);
-  const result = await callGemini(prompt, { temperature: 0.3, maxTokens: 12288 });
-  if (!result) {
-    console.error('  ai       ANALYST: Gemini call failed');
-    return { assessments: [], model: null };
-  }
+    console.log(`  ai       ANALYST${chunkLabel}: analyzing ${chunk.length} candidates...`);
+    const result = await callGemini(prompt, { temperature: 0.3, maxTokens: 16384 });
+    if (!result) {
+      console.error(`  ai       ANALYST${chunkLabel}: Gemini call failed`);
+      continue;
+    }
+    modelUsed = result.model;
 
-  try {
-    const raw = parseJson(result.text);
-    const items = Array.isArray(raw) ? raw : [raw];
+    try {
+      const raw = parseJson(result.text);
+      const items = Array.isArray(raw) ? raw : [raw];
 
-    // Validate each assessment individually (partial success is OK)
-    const assessments = [];
-    for (const item of items) {
-      const parsed = AnalystOutputSchema.safeParse(item);
-      if (parsed.success) {
-        assessments.push(parsed.data);
-      } else {
-        // Try to salvage with defaults
-        if (item?.canonicalEventTitle && item?.scores) {
-          assessments.push({
-            canonicalEventTitle: item.canonicalEventTitle,
-            riskType: item.riskType || '기타',
-            facts: item.facts || [],
-            inferences: item.inferences || [],
-            assumptions: item.assumptions || [],
-            missingEvidence: item.missingEvidence || [],
-            exposure: {
-              products: Array.isArray(item.exposure?.products) ? item.exposure.products.filter(p => ['CRC','GI','GL','COLOR'].includes(p)) : [],
-              regions: Array.isArray(item.exposure?.regions) ? item.exposure.regions.filter(r => ['Europe','GCC','Asia','US','Korea Export'].includes(r)) : [],
-              routes: item.exposure?.routes || [],
-              tradeMeasures: item.exposure?.tradeMeasures || [],
-            },
-            causalChain: item.causalChain || [],
-            impactVectors: item.impactVectors || {},
-            scores: item.scores,
-            threat: item.threat || '',
-            opportunity: item.opportunity || '',
-            timeHorizon: item.timeHorizon || 'UNKNOWN',
-            watchSignals: item.watchSignals || [],
-            counterScenario: item.counterScenario || '',
-            suggestedActions: item.suggestedActions || [],
-            evidenceIndices: item.evidenceIndices || [],
-          });
+      let validated = 0;
+      let salvaged = 0;
+      for (const item of items) {
+        const parsed = AnalystOutputSchema.safeParse(item);
+        if (parsed.success) {
+          allAssessments.push(parsed.data);
+          validated++;
+        } else {
+          const s = salvageAssessment(item);
+          if (s) { allAssessments.push(s); salvaged++; }
         }
       }
+      console.log(`  ai       ANALYST${chunkLabel}: ${validated} validated, ${salvaged} salvaged (model: ${result.model})`);
+    } catch (err) {
+      console.error(`  ai       ANALYST${chunkLabel}: parse error: ${err.message}`);
     }
 
-    console.log(`  ai       ANALYST: ${assessments.length} assessments produced (model: ${result.model})`);
-    return { assessments, model: result.model };
-  } catch (err) {
-    console.error('  ai       ANALYST: parse error:', err.message);
-    return { assessments: [], model: result.model };
+    // Pause between chunks
+    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 2000));
   }
+
+  console.log(`  ai       ANALYST total: ${allAssessments.length} assessments from ${enrichedCandidates.length} candidates`);
+  return { assessments: allAssessments, model: modelUsed };
 }
 
 /**
@@ -666,7 +777,7 @@ Counter-scenario: ${a.counterScenario}
   const prompt = CRITIC_PROMPT + '\n\n## Assessments to Review\n' + reviewBlocks;
 
   console.log(`  ai       CRITIC: reviewing ${highScoring.length} assessments...`);
-  const result = await callGemini(prompt, { temperature: 0.2, maxTokens: 4096 });
+  const result = await callGemini(prompt, { temperature: 0.2, maxTokens: 8192 });
   if (!result) {
     console.log('  ai       CRITIC: call failed — keeping original scores');
     return assessments;
@@ -911,14 +1022,16 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
   metrics.triageCandidates = triageResult.candidates.length;
   metrics.aiCallCount++;
 
-  if (triageResult.candidates.length === 0 && triageResult.newCount === 0) {
-    // No new articles — return existing risk cases as impacts
+  if (triageResult.candidates.length === 0) {
+    // Triage found nothing actionable — update fingerprints and return existing cases
+    state.analyzedFingerprints = articles.map(a => a.articleFingerprint).filter(Boolean).slice(0, 500);
+    await saveState(state);
     const existingCases = Object.values(state.riskCases || {}).filter(c => c.assessmentStatus !== 'IGNORE');
-    const impacts = existingCases.map(c => toImpact(c, articles, null));
+    const impacts = existingCases.map(c => toImpact(c, articles, triageResult.model));
     metrics.outputAlerts = existingCases.filter(c => c.assessmentStatus === 'ALERT').length;
     metrics.outputWatch = existingCases.filter(c => c.assessmentStatus === 'WATCH').length;
     metrics.outputInfo = existingCases.filter(c => c.assessmentStatus === 'INFO').length;
-    console.log('  ai       Using cached risk cases (no new articles)');
+    console.log(`  ai       No candidates found — returning ${existingCases.length} existing risk cases`);
     return { impacts, metrics };
   }
 
