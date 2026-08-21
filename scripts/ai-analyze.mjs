@@ -1,9 +1,12 @@
 /**
- * AI-powered news analysis using Google Gemini 2.5 Flash.
+ * AI-powered news analysis using Google Gemini.
  *
  * Reads all collected articles and asks the LLM to identify steel-business
  * risks that the deterministic rule engine might miss — geopolitical shifts,
  * indirect supply-chain effects, emerging demand signals, etc.
+ *
+ * Model fallback: tries gemini-3.7-flash first, falls back to 3.5-flash
+ * if 3.7 is unavailable (503/429/404).
  *
  * Returns Impact[] in the same shape as rule-engine impacts so they merge
  * seamlessly into the dashboard.
@@ -12,10 +15,10 @@
  */
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = 'gemini-3.5-flash';
+const GEMINI_MODELS = ['gemini-3.7-flash', 'gemini-3.5-flash'];
 
-function geminiUrl() {
-  return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+function geminiUrl(model) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 }
 
 /* ── Company context baked into the prompt ── */
@@ -84,7 +87,7 @@ ${COMPANY_CONTEXT}
 - JSON만 출력. 다른 텍스트 없이.`;
 
 /**
- * Call Gemini 2.5 Flash and return parsed AI risk assessments.
+ * Call Gemini with model fallback (3.7 → 3.5) and return parsed AI risk assessments.
  *
  * @param {Array} articles — full news article list from news.json
  * @param {Array} existingImpactIds — rule-engine impact IDs for dedup reference
@@ -109,35 +112,73 @@ export async function aiAnalyze(articles, existingImpactIds = []) {
   }
 
   const allRisks = [];
+  let activeModel = null; // once a model works, stick with it for remaining chunks
 
   for (let ci = 0; ci < chunks.length; ci++) {
     const chunk = chunks[ci];
     const userPrompt = `## 뉴스 기사 목록 (${chunk.length}건)\n\n${chunk.join('\n')}\n\n위 기사들에서 철강 수출 비즈니스에 영향을 줄 수 있는 리스크를 분석해주세요.`;
 
-    console.log(`  ai       chunk ${ci + 1}/${chunks.length} — ${chunk.length} articles → Gemini...`);
+    const body = JSON.stringify({
+      contents: [
+        { role: 'user', parts: [{ text: SYSTEM_PROMPT + '\n\n' + userPrompt }] },
+      ],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.3,
+        maxOutputTokens: 8192,
+      },
+    });
 
-    try {
-      const res = await fetch(geminiUrl(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            { role: 'user', parts: [{ text: SYSTEM_PROMPT + '\n\n' + userPrompt }] },
-          ],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.3,
-            maxOutputTokens: 8192,
-          },
-        }),
-      });
+    // Try models in priority order (or use the one that already worked)
+    const modelsToTry = activeModel ? [activeModel] : GEMINI_MODELS;
+    let res = null;
+    let usedModel = null;
 
-      if (!res.ok) {
+    for (const model of modelsToTry) {
+      console.log(`  ai       chunk ${ci + 1}/${chunks.length} — ${chunk.length} articles → ${model}...`);
+      try {
+        res = await fetch(geminiUrl(model), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+        });
+
+        if (res.ok) {
+          usedModel = model;
+          break;
+        }
+
+        const status = res.status;
+        if (status === 503 || status === 429 || status === 404) {
+          console.log(`  ai       ${model} unavailable (${status}), trying next...`);
+          res = null;
+          continue;
+        }
+
+        // Other errors (400, 401, etc.) — don't fallback, it's a real error
         const errText = await res.text();
-        console.error(`  ai       Gemini API error ${res.status}: ${errText.slice(0, 200)}`);
+        console.error(`  ai       ${model} error ${status}: ${errText.slice(0, 200)}`);
+        res = null;
+        break;
+      } catch (err) {
+        console.error(`  ai       ${model} network error: ${err.message}`);
+        res = null;
         continue;
       }
+    }
 
+    if (!res || !usedModel) {
+      console.error('  ai       All models failed for this chunk, skipping');
+      continue;
+    }
+
+    // Lock in the working model for remaining chunks
+    if (!activeModel) {
+      activeModel = usedModel;
+      console.log(`  ai       Using model: ${activeModel}`);
+    }
+
+    try {
       const data = await res.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) {
