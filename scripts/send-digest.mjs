@@ -5,9 +5,9 @@
  * Required env vars:
  *   GMAIL_USER         — sender Gmail address
  *   GMAIL_APP_PASSWORD — Gmail app password (16 chars, no spaces)
- *   DIGEST_TO          — recipient email
+ *   DIGEST_TO          — recipient email(s), comma-separated for multiple
  *
- * Run: GMAIL_USER=you@gmail.com GMAIL_APP_PASSWORD=xxxx DIGEST_TO=recipient@example.com node scripts/send-digest.mjs
+ * Run: GMAIL_USER=you@gmail.com GMAIL_APP_PASSWORD=xxxx DIGEST_TO=a@x.com,b@x.com node scripts/send-digest.mjs
  */
 import { readFile } from 'node:fs/promises';
 import { createTransport } from 'nodemailer';
@@ -251,10 +251,53 @@ function buildHtml() {
 </html>`;
 }
 
+/* ── Build plain-text version (helps avoid spam filters) ── */
+function buildPlainText() {
+  const { impacts, salesImpact, newsDigest, ruleCount } = analysis;
+  const highImpacts = impacts.filter((i) => i.severity === 'CRITICAL' || i.severity === 'HIGH');
+  const medImpacts = impacts.filter((i) => i.severity === 'MEDIUM');
+  const instruments = market.instruments || {};
+
+  let text = `철강 시황 일일 브리핑\n${dateStr} ${timeStr} KST 기준\n\n`;
+  text += `위험 신호 ${highImpacts.length}건 (HIGH+) / 주의 ${medImpacts.length}건 / 규칙 ${ruleCount}개 / 뉴스 ${newsDigest.length}건\n\n`;
+
+  text += `--- 시장 현황 ---\n`;
+  for (const { name, data } of [
+    { name: '열연(HRC)', data: instruments.hrc },
+    { name: '아연', data: instruments.zinc },
+    { name: '알루미늄', data: instruments.aluminium },
+    { name: '철광석', data: instruments.ironOre },
+    { name: '원료탄', data: instruments.cokingCoal },
+  ]) {
+    if (!data) continue;
+    text += `${name}: ${data.last?.toLocaleString() ?? '-'} (당일 ${pct(data.change?.today)}, 30분 ${pct(data.change?.m30)})\n`;
+  }
+
+  if (highImpacts.length > 0) {
+    text += `\n--- 핵심 위험 신호 ---\n`;
+    for (const imp of highImpacts) {
+      text += `[${imp.severity}] ${imp.ruleNameKo} - ${imp.fact}\n`;
+      text += `  제품: ${imp.products.join('/')} | 지역: ${imp.regions.join('/')}\n`;
+    }
+  }
+
+  text += `\n--- 판매 영향 상위 5건 ---\n`;
+  for (const s of salesImpact.slice(0, 5)) {
+    text += `${s.region} | ${s.products.join('/')} | ${s.severity} | ${s.action}\n`;
+  }
+
+  text += `\n대시보드: ${DASHBOARD_URL}\n`;
+  text += `\n본 메일은 철강 시황 분석 시스템에서 발송됩니다.\n`;
+  return text;
+}
+
 /* ── Send via Gmail SMTP ── */
 async function sendEmail() {
   const html = buildHtml();
-  const subject = `[Steel Risk] 일일 브리핑 — ${dateStr} | HIGH ${analysis.impacts.filter(i => i.severity === 'CRITICAL' || i.severity === 'HIGH').length}건`;
+  const text = buildPlainText();
+  const senderName = process.env.SENDER_NAME || '철강시황브리핑';
+  const highCount = analysis.impacts.filter(i => i.severity === 'CRITICAL' || i.severity === 'HIGH').length;
+  const subject = `철강 시황 브리핑 ${dateStr} - 위험신호 ${highCount}건`;
 
   console.log(`Sending digest to ${TO} from ${GMAIL_USER}...`);
   console.log(`Subject: ${subject}`);
@@ -268,10 +311,15 @@ async function sendEmail() {
   });
 
   const info = await transporter.sendMail({
-    from: `Steel Risk Dashboard <${GMAIL_USER}>`,
+    from: `${senderName} <${GMAIL_USER}>`,
     to: TO,
     subject,
     html,
+    text,  // plain-text alternative — reduces spam score
+    headers: {
+      'X-Priority': '3',        // normal priority (not bulk)
+      'X-Mailer': 'NodeMailer', // standard mailer tag
+    },
   });
 
   console.log(`✅ Email sent: messageId=${info.messageId}`);
