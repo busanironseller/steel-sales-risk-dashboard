@@ -1,0 +1,29 @@
+name: Daily email digest
+
+on:
+  schedule:
+    # 22:50 UTC = 07:50 KST next day (매일 아침 7시 50분 KST)
+    - cron: '50 22 * * *'
+  workflow_dispatch:          # 수동 실행도 가능
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Refresh data first so the digest uses the latest
+      - run: npm run refresh
+
+      - name: Send digest email
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DIGEST_TO: ${{ secrets.DIGEST_TO }}
+        run: node scripts/send-digest.mjs

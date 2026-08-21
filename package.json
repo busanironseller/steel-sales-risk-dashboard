@@ -12,6 +12,7 @@
     "collect": "npm run collect:market && npm run collect:news && npm run collect:fx && npm run collect:freight",
     "analyze": "node scripts/analyze.mjs",
     "refresh": "npm run collect && npm run analyze",
+    "digest": "node scripts/send-digest.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -31,6 +32,7 @@
   "dependencies": {
     "@electric-sql/pglite": "^0.5.5",
     "lightweight-charts": "^5.2.1",
+    "nodemailer": "^9.0.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.4.3"

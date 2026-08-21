@@ -1,0 +1,283 @@
+/**
+ * Daily email digest — reads the latest analysis.json and sends
+ * an HTML briefing to the configured recipient via Gmail SMTP.
+ *
+ * Required env vars:
+ *   GMAIL_USER         — sender Gmail address
+ *   GMAIL_APP_PASSWORD — Gmail app password (16 chars, no spaces)
+ *   DIGEST_TO          — recipient email
+ *
+ * Run: GMAIL_USER=you@gmail.com GMAIL_APP_PASSWORD=xxxx DIGEST_TO=recipient@example.com node scripts/send-digest.mjs
+ */
+import { readFile } from 'node:fs/promises';
+import { createTransport } from 'nodemailer';
+
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+const TO = process.env.DIGEST_TO;
+const DASHBOARD_URL = 'https://busanironseller.github.io/steel-sales-risk-dashboard/';
+
+if (!GMAIL_USER) { console.error('GMAIL_USER is required'); process.exit(1); }
+if (!GMAIL_APP_PASSWORD) { console.error('GMAIL_APP_PASSWORD is required'); process.exit(1); }
+if (!TO) { console.error('DIGEST_TO is required'); process.exit(1); }
+
+/* ── Load data ── */
+const analysis = JSON.parse(
+  await readFile(new URL('../public/data/analysis.json', import.meta.url), 'utf8'),
+);
+const market = JSON.parse(
+  await readFile(new URL('../public/data/market.json', import.meta.url), 'utf8'),
+);
+
+let fx = null;
+try {
+  fx = JSON.parse(
+    await readFile(new URL('../public/data/fx.json', import.meta.url), 'utf8'),
+  );
+} catch { /* fx optional */ }
+
+/* ── Helpers ── */
+const KST = 'Asia/Seoul';
+const now = new Date();
+const dateStr = now.toLocaleDateString('ko-KR', { timeZone: KST, year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+const timeStr = now.toLocaleTimeString('ko-KR', { timeZone: KST, hour: '2-digit', minute: '2-digit', hour12: false });
+
+const severityColor = { CRITICAL: '#dc2626', HIGH: '#ef4444', MEDIUM: '#f59e0b', LOW: '#6b7280' };
+const directionArrow = { UP: '▲', DOWN: '▼' };
+const directionKo = { UP: '상승', DOWN: '하락' };
+
+function pct(v) {
+  if (v == null) return '-';
+  const sign = v > 0 ? '+' : '';
+  return `${sign}${v.toFixed(2)}%`;
+}
+
+/* ── Build HTML ── */
+function buildHtml() {
+  const { impacts, criticalSignals, salesImpact, eventClusters, marketSignals, newsDigest, ruleCount } = analysis;
+  const highImpacts = impacts.filter((i) => i.severity === 'CRITICAL' || i.severity === 'HIGH');
+  const medImpacts = impacts.filter((i) => i.severity === 'MEDIUM');
+
+  // Market data
+  const instruments = market.instruments || {};
+  const hrc = instruments.hrc;
+  const zinc = instruments.zinc;
+  const al = instruments.aluminium;
+
+  // Top news (latest 10 unique titles)
+  const seenTitles = new Set();
+  const topNews = [];
+  for (const n of newsDigest) {
+    const title = n.titleKo || n.title;
+    if (seenTitles.has(title)) continue;
+    seenTitles.add(title);
+    topNews.push(n);
+    if (topNews.length >= 10) break;
+  }
+
+  return `
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<div style="max-width:640px;margin:0 auto;background:#ffffff;">
+
+  <!-- Header -->
+  <div style="background:#111827;color:#ffffff;padding:24px 28px;">
+    <div style="font-size:11px;letter-spacing:0.15em;color:#9ca3af;margin-bottom:4px;">STEEL RISK INTELLIGENCE</div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:6px;">📋 일일 리스크 브리핑</div>
+    <div style="font-size:13px;color:#d1d5db;">${dateStr} ${timeStr} KST 기준</div>
+  </div>
+
+  <!-- Summary Bar -->
+  <div style="display:flex;background:#1f2937;padding:14px 28px;gap:20px;">
+    <div style="text-align:center;flex:1;">
+      <div style="font-size:10px;color:#9ca3af;letter-spacing:0.08em;">위험 신호</div>
+      <div style="font-size:20px;font-weight:700;color:#ef4444;">${highImpacts.length}건</div>
+      <div style="font-size:10px;color:#9ca3af;">HIGH+</div>
+    </div>
+    <div style="text-align:center;flex:1;">
+      <div style="font-size:10px;color:#9ca3af;letter-spacing:0.08em;">주의 신호</div>
+      <div style="font-size:20px;font-weight:700;color:#f59e0b;">${medImpacts.length}건</div>
+      <div style="font-size:10px;color:#9ca3af;">MEDIUM</div>
+    </div>
+    <div style="text-align:center;flex:1;">
+      <div style="font-size:10px;color:#9ca3af;letter-spacing:0.08em;">적용 규칙</div>
+      <div style="font-size:20px;font-weight:700;color:#ffffff;">${ruleCount}개</div>
+    </div>
+    <div style="text-align:center;flex:1;">
+      <div style="font-size:10px;color:#9ca3af;letter-spacing:0.08em;">뉴스 수집</div>
+      <div style="font-size:20px;font-weight:700;color:#ffffff;">${newsDigest.length}건</div>
+    </div>
+  </div>
+
+  <!-- Section: Market Pulse -->
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">📈 시장 현황 (SHFE)</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr style="background:#f9fafb;color:#6b7280;">
+        <td style="padding:6px 8px;font-weight:600;">상품</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">최종가</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">당일</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">30분</td>
+      </tr>
+      ${[
+        { name: '열연(HRC)', data: hrc },
+        { name: '아연', data: zinc },
+        { name: '알루미늄', data: al },
+        { name: '철광석', data: instruments.ironOre },
+        { name: '원료탄', data: instruments.cokingCoal },
+      ].map(({ name, data }) => {
+        if (!data) return '';
+        const c = data.change || {};
+        const todayPct = c.today;
+        const m30Pct = c.m30;
+        const color = (v) => v > 0 ? '#dc2626' : v < 0 ? '#2563eb' : '#6b7280';
+        return `<tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:6px 8px;font-weight:500;">${name}</td>
+          <td style="padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums;">${data.last?.toLocaleString() ?? '-'}</td>
+          <td style="padding:6px 8px;text-align:right;color:${color(todayPct)};font-variant-numeric:tabular-nums;">${pct(todayPct)}</td>
+          <td style="padding:6px 8px;text-align:right;color:${color(m30Pct)};font-variant-numeric:tabular-nums;">${pct(m30Pct)}</td>
+        </tr>`;
+      }).join('')}
+    </table>
+  </div>
+
+  ${fx ? `
+  <!-- Section: FX -->
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">💱 환율</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr style="background:#f9fafb;color:#6b7280;">
+        <td style="padding:6px 8px;font-weight:600;">통화</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">현재</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">1일</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">1주</td>
+      </tr>
+      ${(fx.pairs || []).map((p) => {
+        const color = (v) => v > 0 ? '#dc2626' : v < 0 ? '#2563eb' : '#6b7280';
+        return `<tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:6px 8px;font-weight:500;">${p.labelKo || p.label}</td>
+          <td style="padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums;">${p.rate ?? '-'}</td>
+          <td style="padding:6px 8px;text-align:right;color:${color(p.change1d)};font-variant-numeric:tabular-nums;">${pct(p.change1d)}</td>
+          <td style="padding:6px 8px;text-align:right;color:${color(p.change1w)};font-variant-numeric:tabular-nums;">${pct(p.change1w)}</td>
+        </tr>`;
+      }).join('')}
+    </table>
+  </div>` : ''}
+
+  <!-- Section: Critical Signals -->
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">🚨 핵심 위험 신호 (${highImpacts.length}건)</div>
+    ${highImpacts.map((imp) => `
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="background:${severityColor[imp.severity]};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">${imp.severity}</span>
+        <span style="font-size:10px;color:#ef4444;font-weight:600;">${directionArrow[imp.direction] || ''} ${directionKo[imp.direction] || ''}</span>
+        <span style="font-size:10px;color:#6b7280;">${imp.riskTypeKo}</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">${imp.ruleNameKo}</div>
+      <div style="font-size:11px;color:#4b5563;margin-bottom:4px;">${imp.fact}</div>
+      <div style="font-size:10px;color:#6b7280;">
+        제품: ${imp.products.join(' · ')} | 지역: ${imp.regions.join(' · ')}
+      </div>
+    </div>`).join('')}
+
+    ${medImpacts.length > 0 ? `
+    <div style="font-size:13px;font-weight:700;color:#111827;margin-top:16px;margin-bottom:12px;">⚠️ 주의 신호 (${medImpacts.length}건)</div>
+    ${medImpacts.map((imp) => `
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="background:${severityColor[imp.severity]};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">${imp.severity}</span>
+        <span style="font-size:12px;font-weight:600;color:#111827;">${imp.ruleNameKo}</span>
+      </div>
+      <div style="font-size:11px;color:#4b5563;">${imp.fact}</div>
+    </div>`).join('')}` : ''}
+  </div>
+
+  <!-- Section: Sales Impact Top 5 -->
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">📊 판매 영향 요약 (상위 5건 / 총 ${salesImpact.length}건)</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f9fafb;color:#6b7280;">
+        <td style="padding:6px 8px;font-weight:600;">지역</td>
+        <td style="padding:6px 8px;font-weight:600;">제품</td>
+        <td style="padding:6px 8px;font-weight:600;">리스크</td>
+        <td style="padding:6px 8px;font-weight:600;">위험도</td>
+        <td style="padding:6px 8px;font-weight:600;">필요 조치</td>
+      </tr>
+      ${salesImpact.slice(0, 5).map((s) => `
+      <tr style="border-bottom:1px solid #f3f4f6;">
+        <td style="padding:6px 8px;">${s.region}</td>
+        <td style="padding:6px 8px;font-size:10px;">${s.products.join('/')}</td>
+        <td style="padding:6px 8px;">${s.riskTypeKo}</td>
+        <td style="padding:6px 8px;"><span style="background:${severityColor[s.severity]};color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;">${s.severity}</span></td>
+        <td style="padding:6px 8px;font-size:10px;">${s.action}</td>
+      </tr>`).join('')}
+    </table>
+  </div>
+
+  <!-- Section: Top News -->
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">📰 주요 뉴스 (최신 10건)</div>
+    ${topNews.map((n, i) => `
+    <div style="margin-bottom:8px;padding-bottom:8px;${i < topNews.length - 1 ? 'border-bottom:1px solid #f3f4f6;' : ''}">
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        <span style="background:#e5e7eb;color:#374151;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;">${n.theme}</span>
+        <div>
+          <a href="${n.link}" style="font-size:12px;color:#111827;text-decoration:none;font-weight:500;">${n.titleKo || n.title}</a>
+          <div style="font-size:10px;color:#9ca3af;margin-top:2px;">${n.source} · ${n.publishedAt}</div>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:20px 28px;background:#f9fafb;text-align:center;">
+    <a href="${DASHBOARD_URL}" style="display:inline-block;background:#111827;color:#ffffff;font-size:13px;font-weight:600;padding:10px 24px;border-radius:6px;text-decoration:none;">
+      대시보드 전체 보기 →
+    </a>
+    <div style="font-size:10px;color:#9ca3af;margin-top:12px;">
+      본 이메일은 Steel Sales Risk Intelligence Dashboard에서 자동 발송됩니다.<br/>
+      데이터 출처: SHFE (지연), Sina Finance (비공식), Google News RSS, Yahoo Finance
+    </div>
+    <div style="font-size:9px;color:#d1d5db;margin-top:8px;">
+      분석 생성: ${analysis.generatedAt} | 규칙 ${ruleCount}개 적용
+    </div>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+/* ── Send via Gmail SMTP ── */
+async function sendEmail() {
+  const html = buildHtml();
+  const subject = `[Steel Risk] 일일 브리핑 — ${dateStr} | HIGH ${analysis.impacts.filter(i => i.severity === 'CRITICAL' || i.severity === 'HIGH').length}건`;
+
+  console.log(`Sending digest to ${TO} from ${GMAIL_USER}...`);
+  console.log(`Subject: ${subject}`);
+
+  const transporter = createTransport({
+    service: 'gmail',
+    auth: {
+      user: GMAIL_USER,
+      pass: GMAIL_APP_PASSWORD,
+    },
+  });
+
+  const info = await transporter.sendMail({
+    from: `Steel Risk Dashboard <${GMAIL_USER}>`,
+    to: TO,
+    subject,
+    html,
+  });
+
+  console.log(`✅ Email sent: messageId=${info.messageId}`);
+}
+
+sendEmail().catch((err) => {
+  console.error('send-digest failed:', err);
+  process.exit(1);
+});
