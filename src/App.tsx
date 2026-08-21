@@ -83,6 +83,37 @@ function saveKnown(ids: Set<string>) {
   localStorage.setItem(KNOWN_KEY, JSON.stringify([...ids]));
 }
 
+/* ── data refresh history (localStorage) ── */
+const REFRESH_HISTORY_KEY = 'steel-risk-refresh-history';
+const MAX_HISTORY = 100;
+
+function loadRefreshHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(REFRESH_HISTORY_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch { return []; }
+}
+
+function addRefreshHistory(generatedAt: string) {
+  const hist = loadRefreshHistory();
+  if (hist[0] === generatedAt) return; // duplicate
+  hist.unshift(generatedAt);
+  if (hist.length > MAX_HISTORY) hist.length = MAX_HISTORY;
+  localStorage.setItem(REFRESH_HISTORY_KEY, JSON.stringify(hist));
+}
+
+/** Group ISO timestamps by KST date. */
+function groupHistoryByDate(hist: string[]): Record<string, string[]> {
+  const groups: Record<string, string[]> = {};
+  for (const iso of hist) {
+    const d = new Date(iso);
+    const dateStr = d.toLocaleDateString('ko-KR', { timeZone: KST, year: 'numeric', month: '2-digit', day: '2-digit' });
+    const timeStr = d.toLocaleTimeString('ko-KR', { timeZone: KST, hour: '2-digit', minute: '2-digit', hour12: false });
+    (groups[dateStr] ??= []).push(timeStr);
+  }
+  return groups;
+}
+
 const INSTRUMENT_KO: Record<string, string> = {
   hrc: '열연강판 (HRC)',
   rebar: '철근',
@@ -227,6 +258,7 @@ export function App() {
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const [salesCollapsed, setSalesCollapsed] = useState(true);
   const [session, setSession] = useState(sessionState);
+  const [showRefreshHistory, setShowRefreshHistory] = useState(false);
 
   /* ── refs ── */
   const refreshingRef = useRef(refreshing);
@@ -264,6 +296,7 @@ export function App() {
       setAnalysis(a);
       if (fxRes) setFx(fxRes);
       if (freightRes) setFreight(freightRes);
+      addRefreshHistory(a.generatedAt);
       setLastRefresh(new Date());
       if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
@@ -423,6 +456,14 @@ export function App() {
     }, 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // Close refresh history dropdown on outside click
+  useEffect(() => {
+    if (!showRefreshHistory) return;
+    const close = () => setShowRefreshHistory(false);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [showRefreshHistory]);
 
   // News digest for Event Radar
   const NEWS_PER_PAGE = 8;
@@ -614,10 +655,58 @@ export function App() {
               <span style={{ letterSpacing: '0.06em', color: 'var(--color-faint)', fontWeight: 500 }}>HRC</span>
               <span style={{ fontWeight: 600 }}>{session.labelKo}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-ink)', display: 'inline-block' }} />
-              <span style={{ letterSpacing: '0.06em', color: 'var(--color-faint)', fontWeight: 500 }}>DATA</span>
-              <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{collectedAgo}분 전</span>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowRefreshHistory((v) => !v); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: 'none', border: 'none', color: 'inherit', cursor: 'pointer',
+                  padding: '2px 6px', borderRadius: 4, fontSize: 'inherit', fontFamily: 'inherit',
+                }}
+                title="갱신 이력 보기"
+              >
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: stale ? 'var(--color-risk-high)' : 'var(--color-ok)', display: 'inline-block' }} />
+                <span style={{ letterSpacing: '0.06em', color: 'var(--color-faint)', fontWeight: 500 }}>DATA</span>
+                <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{collectedAgo}분 전</span>
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d={showRefreshHistory ? 'M1 5L4 2L7 5' : 'M1 3L4 6L7 3'} /></svg>
+              </button>
+              {showRefreshHistory && (() => {
+                const hist = loadRefreshHistory();
+                const grouped = groupHistoryByDate(hist);
+                const dates = Object.keys(grouped);
+                return (
+                  <div
+                    style={{
+                      position: 'absolute', top: '100%', right: 0, zIndex: 999,
+                      background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                      borderRadius: 8, padding: '10px 14px', minWidth: 220, maxHeight: 320, overflowY: 'auto',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.25)', fontSize: 11,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 12, color: 'var(--color-ink)' }}>
+                      📊 데이터 갱신 이력
+                    </div>
+                    {dates.length === 0 ? (
+                      <div style={{ color: 'var(--color-muted)' }}>아직 기록된 이력이 없습니다</div>
+                    ) : dates.map((date) => (
+                      <div key={date} style={{ marginBottom: 8 }}>
+                        <div style={{ fontWeight: 600, color: 'var(--color-faint)', marginBottom: 3, borderBottom: '1px solid var(--color-border)', paddingBottom: 2 }}>
+                          {date} ({grouped[date].length}회)
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 8px' }}>
+                          {grouped[date].map((time, i) => (
+                            <span key={i} style={{ color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 6, color: 'var(--color-muted)', fontSize: 10, lineHeight: 1.4 }}>
+                      GitHub Actions 무료 티어 cron은 30분 목표이나 실제 간격은 유동적입니다
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
           <button
