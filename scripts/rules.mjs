@@ -856,6 +856,12 @@ export const RELEVANCE_TERMS = {
     'turkey', 'india', 'vietnam', 'indonesia', 'posco', 'hyundai steel',
     'construction', 'infrastructure', 'vision 2030', 'neom',
     'galvalume', 'aluminized', 'zinc-aluminium',
+    // Geopolitical / global event terms (for AI analysis layer)
+    'taiwan', 'cross-strait', 'blockade', 'south china sea', 'east china sea',
+    'north korea', 'missile', 'nuclear', 'korean peninsula', 'nato', 'ukraine', 'russia',
+    'panama canal', 'malacca', 'earthquake', 'typhoon', 'flood', 'drought',
+    'currency crisis', 'devaluation', 'capital flight',
+    '양안', '대만', '봉쇄', '북한', '미사일', '한반도', '지진', '태풍', '환율급등',
   ],
   negative: [
     'fashion', 'collection', 'sneaker', 'jewelry', 'jewellery', 'watch', 'perfume',

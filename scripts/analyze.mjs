@@ -9,6 +9,7 @@
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { RULES, MARKET_THRESHOLDS, SEVERITY, RELEVANCE_TERMS, VALUE_CHAIN } from './rules.mjs';
+import { aiAnalyze } from './ai-analyze.mjs';
 
 const DATA = new URL('../public/data/', import.meta.url);
 const WINDOW_LABEL = { m30: '30분', m60: '60분', m120: '120분', today: '금일' };
@@ -334,6 +335,11 @@ const DOMAIN_THEME = {
   energy: '에너지·물류',
   logistics: '에너지·물류',
   geopolitics: '지정학',
+  geopolitics_asia: '지정학',
+  geopolitics_korea: '지정학',
+  geopolitics_global: '지정학',
+  natural_disaster: '자연재해·공급망',
+  currency_crisis: '환율·금융',
   korea_steel: '한국 철강',
   macro_politics: '거시경제·정치',
   macro_economy: '거시경제·정치',
@@ -377,8 +383,24 @@ async function main() {
 
   const signals = marketSignals(market);
   const clusters = buildEventClusters(scored);
-  const impacts = reconcile([...impactsFromMarket(signals, market), ...impactsFromEvents(clusters)]);
-  const critical = impacts.filter((i) => SEVERITY[i.severity] >= SEVERITY.MEDIUM);
+  const ruleImpacts = reconcile([...impactsFromMarket(signals, market), ...impactsFromEvents(clusters)]);
+
+  // AI analysis — Gemini reads ALL articles and identifies risks rules might miss
+  let aiImpacts = [];
+  try {
+    aiImpacts = await aiAnalyze(news.articles, ruleImpacts.map((i) => i.id));
+  } catch (err) {
+    console.error('  ai       AI analysis failed (non-fatal):', err.message);
+  }
+
+  // Merge: rule-based first, then AI insights (AI impacts keep lower priority in sort)
+  const allImpacts = [...ruleImpacts, ...aiImpacts];
+  // Re-sort by severity
+  allImpacts.sort(
+    (a, b) => SEVERITY[b.severity] - SEVERITY[a.severity] || (['HIGH', 'MEDIUM', 'LOW'].indexOf(a.confidence) - ['HIGH', 'MEDIUM', 'LOW'].indexOf(b.confidence)),
+  );
+
+  const critical = allImpacts.filter((i) => SEVERITY[i.severity] >= SEVERITY.MEDIUM);
 
   // News digest for Event Radar: ALL articles, not just rule-matched
   const newsDigest = buildNewsDigest(news.articles);
@@ -394,15 +416,17 @@ async function main() {
       instrumentsCovered: Object.keys(market.instruments).length,
       marketFailures: market.failures,
       newsFailures: news.failures,
+      aiInsightsCount: aiImpacts.length,
     },
     valueChain: VALUE_CHAIN,
     marketSignals: signals,
     eventClusters: clusters,
-    impacts,
-    criticalSignals: critical.slice(0, 10),
-    salesImpact: salesImpact(impacts),
+    impacts: allImpacts,
+    criticalSignals: critical.slice(0, 15),
+    salesImpact: salesImpact(allImpacts),
     newsDigest,
     ruleCount: RULES.length,
+    aiEnabled: aiImpacts.length > 0,
   };
 
   await writeFile(new URL('analysis.json', DATA), JSON.stringify(analysis));
@@ -412,7 +436,7 @@ async function main() {
   for (const s of signals) console.log(`             ${s.severity.padEnd(6)} ${s.instrument} ${s.pct.toFixed(2)}% (${s.windowLabel})`);
   console.log(`  clusters   ${clusters.length} event cluster(s)`);
   for (const c of clusters) console.log(`             ${c.confidence.padEnd(6)} ${c.eventType} — ${c.articleCount} articles / ${c.publisherCount} publishers`);
-  console.log(`  impacts    ${impacts.length} (critical: ${critical.length})`);
+  console.log(`  impacts    ${allImpacts.length} total (rules: ${ruleImpacts.length}, AI: ${aiImpacts.length}, critical: ${critical.length})`);
   console.log(`  salesImpact ${analysis.salesImpact.length} row(s)`);
   console.log('\nanalysis.json written');
 }

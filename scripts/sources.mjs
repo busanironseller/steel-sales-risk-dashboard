@@ -152,6 +152,26 @@ export const NEWS_QUERIES = [
     q: 'when:7d (환율 OR 원달러 OR 수출 OR 경기) (철강 OR 제조업 OR 산업)' },
   { domain: 'macro_construction', weight: 0.5, lang: 'en',
     q: 'when:7d (construction OR infrastructure OR housing OR "real estate") (steel OR demand OR investment) (Asia OR Middle East OR global)' },
+
+  // ── Geopolitical / Global event radar (AI analysis target) ──
+  { domain: 'geopolitics_asia', weight: 0.6, lang: 'en',
+    q: 'when:7d ("Taiwan Strait" OR "cross-strait" OR "South China Sea" OR "East China Sea") (military OR tension OR conflict OR blockade)' },
+  { domain: 'geopolitics_asia', weight: 0.6, lang: 'ko',
+    q: 'when:7d (양안 OR 대만해협 OR 남중국해 OR 동중국해) (군사 OR 긴장 OR 분쟁 OR 봉쇄)' },
+  { domain: 'geopolitics_korea', weight: 0.6, lang: 'en',
+    q: 'when:7d ("North Korea" OR "Korean peninsula") (missile OR nuclear OR tension OR military OR sanctions)' },
+  { domain: 'geopolitics_korea', weight: 0.6, lang: 'ko',
+    q: 'when:7d (북한 OR 한반도 OR 미사일 OR 핵) (긴장 OR 제재 OR 도발 OR 군사)' },
+  { domain: 'geopolitics_global', weight: 0.5, lang: 'en',
+    q: 'when:7d (Russia OR Ukraine OR NATO) (war OR sanctions OR energy OR gas OR oil)' },
+  { domain: 'geopolitics_global', weight: 0.5, lang: 'en',
+    q: 'when:7d ("Panama Canal" OR "Suez Canal" OR "Malacca Strait") (disruption OR drought OR delay OR closure)' },
+  { domain: 'natural_disaster', weight: 0.5, lang: 'en',
+    q: 'when:7d (earthquake OR typhoon OR flood OR drought) (supply chain OR port OR factory OR production OR shipping)' },
+  { domain: 'currency_crisis', weight: 0.5, lang: 'en',
+    q: 'when:7d ("currency crisis" OR devaluation OR "capital flight" OR "forex reserve") (emerging OR Asia OR Turkey OR trade)' },
+  { domain: 'currency_crisis', weight: 0.5, lang: 'ko',
+    q: 'when:7d (환율급등 OR 외환위기 OR 자본유출 OR 통화가치) (신흥국 OR 아시아 OR 수출)' },
 ];
 
 

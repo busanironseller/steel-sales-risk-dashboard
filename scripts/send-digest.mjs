@@ -54,9 +54,15 @@ function pct(v) {
 
 /* ── Build HTML ── */
 function buildHtml() {
-  const { impacts, criticalSignals, salesImpact, eventClusters, marketSignals, newsDigest, ruleCount } = analysis;
+  const { impacts, criticalSignals, salesImpact, eventClusters, marketSignals, newsDigest, aiEnabled } = analysis;
   const highImpacts = impacts.filter((i) => i.severity === 'CRITICAL' || i.severity === 'HIGH');
   const medImpacts = impacts.filter((i) => i.severity === 'MEDIUM');
+  const aiInsights = impacts.filter((i) => i.origin === 'AI_INSIGHT');
+
+  // Count today's new articles vs total (KST-based date)
+  const todayKST = new Date(now.toLocaleString('en-US', { timeZone: KST }));
+  const todayDateStr = `${todayKST.getFullYear()}-${String(todayKST.getMonth() + 1).padStart(2, '0')}-${String(todayKST.getDate()).padStart(2, '0')}`;
+  const newArticlesToday = newsDigest.filter((n) => (n.publishedAt || '').startsWith(todayDateStr)).length;
 
   // Market data
   const instruments = market.instruments || {};
@@ -102,12 +108,9 @@ function buildHtml() {
       <div style="font-size:10px;color:#9ca3af;">MEDIUM</div>
     </div>
     <div style="text-align:center;flex:1;">
-      <div style="font-size:10px;color:#9ca3af;letter-spacing:0.08em;">적용 규칙</div>
-      <div style="font-size:20px;font-weight:700;color:#ffffff;">${ruleCount}개</div>
-    </div>
-    <div style="text-align:center;flex:1;">
-      <div style="font-size:10px;color:#9ca3af;letter-spacing:0.08em;">뉴스 수집</div>
-      <div style="font-size:20px;font-weight:700;color:#ffffff;">${newsDigest.length}건</div>
+      <div style="font-size:10px;color:#9ca3af;letter-spacing:0.08em;">오늘 뉴스</div>
+      <div style="font-size:20px;font-weight:700;color:#ffffff;">+${newArticlesToday}건</div>
+      <div style="font-size:10px;color:#9ca3af;">총 ${newsDigest.length}건</div>
     </div>
   </div>
 
@@ -217,6 +220,28 @@ function buildHtml() {
     </table>
   </div>
 
+  ${aiInsights.length > 0 ? `
+  <!-- Section: AI Insights -->
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">🤖 AI 리스크 인사이트 (${aiInsights.length}건)</div>
+    <div style="font-size:10px;color:#9ca3af;margin-bottom:10px;">규칙 엔진이 포착하지 못하는 간접적·구조적 리스크를 AI가 분석했습니다.</div>
+    ${aiInsights.map((ai) => `
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="background:${severityColor[ai.severity] || '#6b7280'};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">${ai.severity}</span>
+        <span style="font-size:10px;color:#3b82f6;font-weight:600;">🤖 AI</span>
+        <span style="font-size:10px;color:#6b7280;">${ai.riskTypeKo}</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">${ai.ruleNameKo}</div>
+      ${ai.narrativeKo ? `<div style="font-size:11px;color:#4b5563;margin-bottom:4px;">${ai.narrativeKo}</div>` : ''}
+      ${ai.chainKo?.length ? `<div style="font-size:10px;color:#6b7280;margin-bottom:4px;">📎 ${ai.chainKo.join(' → ')}</div>` : ''}
+      <div style="font-size:10px;color:#6b7280;">
+        제품: ${ai.products.join(' · ')} | 지역: ${ai.regions.join(' · ')}
+      </div>
+      ${ai.actionsKo?.length ? `<div style="font-size:10px;color:#2563eb;margin-top:4px;">💡 ${ai.actionsKo[0]}</div>` : ''}
+    </div>`).join('')}
+  </div>` : ''}
+
   <!-- Section: Top News -->
   <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
     <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">📰 주요 뉴스 (최신 10건)</div>
@@ -242,7 +267,7 @@ function buildHtml() {
       데이터 출처: SHFE (지연), Sina Finance (비공식), Google News RSS, Yahoo Finance
     </div>
     <div style="font-size:9px;color:#d1d5db;margin-top:8px;">
-      분석 생성: ${analysis.generatedAt} | 규칙 ${ruleCount}개 적용
+      분석 생성: ${analysis.generatedAt}
     </div>
   </div>
 
@@ -253,13 +278,18 @@ function buildHtml() {
 
 /* ── Build plain-text version (helps avoid spam filters) ── */
 function buildPlainText() {
-  const { impacts, salesImpact, newsDigest, ruleCount } = analysis;
+  const { impacts, salesImpact, newsDigest } = analysis;
   const highImpacts = impacts.filter((i) => i.severity === 'CRITICAL' || i.severity === 'HIGH');
   const medImpacts = impacts.filter((i) => i.severity === 'MEDIUM');
   const instruments = market.instruments || {};
 
+  // Count today's new articles (KST)
+  const todayKST2 = new Date(now.toLocaleString('en-US', { timeZone: KST }));
+  const todayDateStr2 = `${todayKST2.getFullYear()}-${String(todayKST2.getMonth() + 1).padStart(2, '0')}-${String(todayKST2.getDate()).padStart(2, '0')}`;
+  const newToday = newsDigest.filter((n) => (n.publishedAt || '').startsWith(todayDateStr2)).length;
+
   let text = `철강 시황 일일 브리핑\n${dateStr} ${timeStr} KST 기준\n\n`;
-  text += `위험 신호 ${highImpacts.length}건 (HIGH+) / 주의 ${medImpacts.length}건 / 규칙 ${ruleCount}개 / 뉴스 ${newsDigest.length}건\n\n`;
+  text += `위험 신호 ${highImpacts.length}건 (HIGH+) / 주의 ${medImpacts.length}건 / 오늘 뉴스 +${newToday}건 (총 ${newsDigest.length}건)\n\n`;
 
   text += `--- 시장 현황 ---\n`;
   for (const { name, data } of [
@@ -284,6 +314,19 @@ function buildPlainText() {
   text += `\n--- 판매 영향 상위 5건 ---\n`;
   for (const s of salesImpact.slice(0, 5)) {
     text += `${s.region} | ${s.products.join('/')} | ${s.severity} | ${s.action}\n`;
+  }
+
+  // AI insights section
+  const aiInsights = impacts.filter((i) => i.origin === 'AI_INSIGHT');
+  if (aiInsights.length > 0) {
+    text += `\n--- AI 리스크 인사이트 (${aiInsights.length}건) ---\n`;
+    for (const ai of aiInsights) {
+      text += `[${ai.severity}] ${ai.ruleNameKo}\n`;
+      if (ai.narrativeKo) text += `  ${ai.narrativeKo}\n`;
+      if (ai.chainKo?.length) text += `  경로: ${ai.chainKo.join(' → ')}\n`;
+      text += `  제품: ${ai.products.join('/')} | 지역: ${ai.regions.join('/')}\n`;
+      if (ai.actionsKo?.[0]) text += `  조치: ${ai.actionsKo[0]}\n`;
+    }
   }
 
   text += `\n대시보드: ${DASHBOARD_URL}\n`;

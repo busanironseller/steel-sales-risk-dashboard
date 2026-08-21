@@ -37,6 +37,8 @@ jobs:
       # instead and the dashboard's own freshness indicator shows how old it is.
       - name: Refresh market and news data
         continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npm run refresh
 
       - name: Build

@@ -19,7 +19,10 @@ jobs:
       - run: npm ci
 
       # Refresh data first so the digest uses the latest
-      - run: npm run refresh
+      - name: Refresh data with AI analysis
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npm run refresh
 
       - name: Send digest email
         env:

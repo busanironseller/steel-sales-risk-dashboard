@@ -1020,7 +1020,7 @@ export function App() {
                               </span>
                               <Arrow direction={sig.direction} />
                               <span className="text-[10px] text-[var(--color-faint)]">
-                                {sig.origin === 'MARKET_SIGNAL' ? '시장 신호' : '뉴스 클러스터'}
+                                {sig.origin === 'MARKET_SIGNAL' ? '시장 신호' : sig.origin === 'AI_INSIGHT' ? '🤖 AI 분석' : '뉴스 클러스터'}
                                 {' · '}{sig.riskTypeKo ?? sig.riskType}
                               </span>
                             </div>
@@ -1104,7 +1104,7 @@ export function App() {
                 titleKo="위험 분석 브리프 — 왼쪽 신호에 마우스를 올리면 자동 변경됩니다"
                 index="04"
                 glow={impact?.severity === 'HIGH' || impact?.severity === 'CRITICAL' ? 'high' : impact?.severity === 'MEDIUM' ? 'med' : undefined}
-                meta={impact ? `${impact.ruleId} · ${impact.origin === 'MARKET_SIGNAL' ? '시장' : '뉴스'} · ${impact.riskTypeKo ?? impact.riskType}` : undefined}
+                meta={impact ? `${impact.ruleId} · ${impact.origin === 'MARKET_SIGNAL' ? '시장' : impact.origin === 'AI_INSIGHT' ? 'AI' : '뉴스'} · ${impact.riskTypeKo ?? impact.riskType}` : undefined}
               >
                 {!impact ? (
                   <EmptyState text="왼쪽 핵심 신호에 마우스를 올리거나 클릭하세요." />

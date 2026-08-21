@@ -114,7 +114,7 @@ export interface Impact {
   ruleId: string;
   ruleName: string;
   ruleNameKo?: string;
-  origin: 'MARKET_SIGNAL' | 'EVENT_CLUSTER';
+  origin: 'MARKET_SIGNAL' | 'EVENT_CLUSTER' | 'AI_INSIGHT';
   originId: string;
   severity: Severity;
   confidence: Confidence;
