@@ -1171,6 +1171,131 @@ export function App() {
                       </div>
                     )}
 
+                    {/* ── AI Risk Intelligence extras ── */}
+                    {impact.origin === 'AI_INSIGHT' && impact.assessmentStatus && (
+                      <div className="space-y-2">
+                        {/* Assessment Status badge */}
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${
+                            impact.assessmentStatus === 'ALERT' ? 'bg-[var(--color-risk-high-soft)] text-[var(--color-risk-high)]'
+                            : impact.assessmentStatus === 'WATCH' ? 'bg-[var(--color-risk-med-soft)] text-[var(--color-risk-med)]'
+                            : 'bg-[var(--color-surface)] text-[var(--color-muted)]'
+                          }`}>
+                            {impact.assessmentStatus === 'ALERT' ? '🔴 ALERT' : impact.assessmentStatus === 'WATCH' ? '🟡 WATCH' : '🔵 INFO'}
+                          </span>
+                          {impact.timeHorizon && impact.timeHorizon !== 'UNKNOWN' && (
+                            <span className="text-[10px] text-[var(--color-faint)]">⏱ {impact.timeHorizon}</span>
+                          )}
+                          {impact.aiModelUsed && (
+                            <span className="text-[9px] text-[var(--color-faint)] ml-auto">🤖 {impact.aiModelUsed}</span>
+                          )}
+                        </div>
+
+                        {/* EEMMT Scores bar */}
+                        {impact.scores && (
+                          <div className="grid grid-cols-5 gap-1 text-center">
+                            {[
+                              { label: '근거', key: 'evidenceQuality', max: 3 },
+                              { label: '노출', key: 'exposureProximity', max: 3 },
+                              { label: '인과', key: 'causalStrength', max: 3 },
+                              { label: '중대성', key: 'businessMateriality', max: 3 },
+                              { label: '시급성', key: 'urgency', max: 2 },
+                            ].map(({ label, key, max }) => (
+                              <div key={key} className="rounded px-1 py-1" style={{ background: 'var(--color-surface)' }}>
+                                <div className="text-[9px] text-[var(--color-faint)]">{label}</div>
+                                <div className={`text-[13px] font-bold num ${
+                                  (impact.scores as any)[key] >= max ? 'text-[var(--color-risk-high)]'
+                                  : (impact.scores as any)[key] >= max - 1 ? 'text-[var(--color-risk-med)]'
+                                  : 'text-[var(--color-muted)]'
+                                }`}>
+                                  {(impact.scores as any)[key]}/{max}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Confirmed Facts */}
+                        {impact.facts && impact.facts.length > 0 && (
+                          <Epistemic kind="FACT">
+                            <div className="eyebrow mb-1">확인된 사실 ({impact.facts.length})</div>
+                            <ul className="space-y-0.5">
+                              {impact.facts.map((f: string, i: number) => <li key={i}>✓ {f}</li>)}
+                            </ul>
+                          </Epistemic>
+                        )}
+
+                        {/* Missing Evidence */}
+                        {impact.missingEvidence && impact.missingEvidence.length > 0 && (
+                          <div className="rounded-md px-3 py-2 text-[11px] leading-relaxed bg-[var(--color-surface)] text-[var(--color-muted)]">
+                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-faint)] mb-1">❓ 부족한 근거</div>
+                            <ul className="space-y-0.5">
+                              {impact.missingEvidence.map((m: string, i: number) => <li key={i}>· {m}</li>)}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Causal Chain with states */}
+                        {impact.causalChainDetailed && impact.causalChainDetailed.length > 0 && (
+                          <Epistemic kind="RULE">
+                            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                              {impact.causalChainDetailed.map((c: any, i: number) => (
+                                <span key={i} className="flex items-center gap-1">
+                                  {i > 0 && <span className="text-[var(--color-faint)]">→</span>}
+                                  <span className={`inline-block px-1.5 py-0.5 rounded-sm text-[11px] ${
+                                    c.state === 'CONFIRMED' ? 'font-semibold text-[var(--color-ink)] bg-green-100 dark:bg-green-900/30 border border-green-400'
+                                    : c.state === 'CONDITIONAL' ? 'text-[var(--color-muted)] bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-400'
+                                    : 'text-[var(--color-faint)] bg-[var(--color-surface)] border border-dashed border-[var(--color-slate-line)]'
+                                  }`}>
+                                    {c.step}
+                                    <span className="ml-1 text-[8px]">
+                                      {c.state === 'CONFIRMED' ? '✓' : c.state === 'CONDITIONAL' ? '?' : '…'}
+                                    </span>
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                          </Epistemic>
+                        )}
+
+                        {/* Threat & Opportunity */}
+                        {(impact.threat || impact.opportunity) && (
+                          <div className="grid grid-cols-2 gap-2">
+                            {impact.threat && (
+                              <div className="rounded-md px-2.5 py-2 text-[11px] bg-[var(--color-risk-high-soft)]">
+                                <div className="text-[9px] font-bold text-[var(--color-risk-high)] mb-0.5">⚠ 위협</div>
+                                {impact.threat}
+                              </div>
+                            )}
+                            {impact.opportunity && (
+                              <div className="rounded-md px-2.5 py-2 text-[11px] bg-green-50 dark:bg-green-900/20">
+                                <div className="text-[9px] font-bold text-green-600 dark:text-green-400 mb-0.5">💡 기회</div>
+                                {impact.opportunity}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Watch Signals */}
+                        {impact.watchSignals && impact.watchSignals.length > 0 && (
+                          <div className="rounded-md px-3 py-2 text-[11px] bg-[var(--color-surface)]">
+                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-faint)] mb-1">👁 모니터링 시그널</div>
+                            <ul className="space-y-0.5 text-[var(--color-muted)]">
+                              {impact.watchSignals.map((w: string, i: number) => <li key={i}>· {w}</li>)}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Counter-scenario */}
+                        {impact.counterScenario && (
+                          <div className="rounded-md px-3 py-2 text-[11px] text-[var(--color-muted)] bg-[var(--color-surface)] border border-dashed border-[var(--color-slate-line)]">
+                            <div className="text-[9px] font-bold tracking-[0.12em] text-[var(--color-faint)] mb-1">🔄 반론 시나리오</div>
+                            {impact.counterScenario}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {impact.evidence && impact.evidence.length > 0 && (
                       <div>
                         <div className="eyebrow mb-1.5">근거 자료 · {impact.evidence.length}건</div>

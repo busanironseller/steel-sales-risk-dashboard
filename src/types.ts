@@ -1,6 +1,35 @@
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type Confidence = 'LOW' | 'MEDIUM' | 'HIGH';
 export type Direction = 'UP' | 'DOWN';
+export type AssessmentStatus = 'ALERT' | 'WATCH' | 'INFO' | 'IGNORE';
+export type ImpactDirection = 'UP' | 'DOWN' | 'NEUTRAL' | 'UNKNOWN';
+export type TimeHorizon = 'NOW' | 'DAYS' | 'WEEKS' | '1-3_MONTHS' | '3-6_MONTHS' | 'LONG_TERM' | 'UNKNOWN';
+export type CausalState = 'CONFIRMED' | 'CONDITIONAL' | 'UNCONFIRMED';
+
+export interface CausalStep {
+  step: string;
+  state: CausalState;
+}
+
+export interface ImpactVectors {
+  price?: ImpactDirection;
+  cost?: ImpactDirection;
+  demand?: ImpactDirection;
+  sales?: ImpactDirection;
+  freight?: ImpactDirection;
+  leadTime?: ImpactDirection;
+  compliance?: ImpactDirection;
+  competition?: ImpactDirection;
+  opportunity?: ImpactDirection;
+}
+
+export interface RiskScores {
+  evidenceQuality: number;
+  exposureProximity: number;
+  causalStrength: number;
+  businessMateriality: number;
+  urgency: number;
+}
 
 export interface Bar {
   t: string;
@@ -138,6 +167,24 @@ export interface Impact {
   evidence?: Evidence[];
   corroboratedBy?: string;
   corroborationNote?: string;
+
+  // ── AI Risk Intelligence fields (additive, all optional) ──
+  assessmentStatus?: AssessmentStatus;
+  scores?: RiskScores;
+  impactVectors?: ImpactVectors;
+  facts?: string[];
+  inferences?: string[];
+  assumptions?: string[];
+  missingEvidence?: string[];
+  watchSignals?: string[];
+  threat?: string;
+  opportunity?: string;
+  timeHorizon?: TimeHorizon;
+  counterScenario?: string;
+  causalChainDetailed?: CausalStep[];
+  firstSeen?: string;
+  lastUpdated?: string;
+  aiModelUsed?: string;
 }
 
 export interface SalesImpactRow {

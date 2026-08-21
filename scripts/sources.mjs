@@ -174,6 +174,18 @@ export const NEWS_QUERIES = [
     q: 'when:7d (환율급등 OR 외환위기 OR 자본유출 OR 통화가치) (신흥국 OR 아시아 OR 수출)' },
 ];
 
+/**
+ * Broad discovery feeds — Google News topic-based RSS.
+ * These are NOT keyword-filtered: they return top stories in each category.
+ * The AI TRIAGE layer decides which are steel-business-relevant.
+ * Topic IDs are stable Google News identifiers (verified August 2026).
+ */
+export const BROAD_FEEDS = [
+  { domain: 'broad_world', weight: 0.3, lang: 'en', label: 'World News',
+    url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en' },
+  { domain: 'broad_business', weight: 0.3, lang: 'en', label: 'Business News',
+    url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en' },
+];
 
 export const GOOGLE_NEWS_BASE = 'https://news.google.com/rss/search';
 

@@ -57,7 +57,8 @@ function buildHtml() {
   const { impacts, criticalSignals, salesImpact, eventClusters, marketSignals, newsDigest, aiEnabled } = analysis;
   const highImpacts = impacts.filter((i) => i.severity === 'CRITICAL' || i.severity === 'HIGH');
   const medImpacts = impacts.filter((i) => i.severity === 'MEDIUM');
-  const aiInsights = impacts.filter((i) => i.origin === 'AI_INSIGHT');
+  // AI insights — only ALERT and WATCH go into the email (no INFO/IGNORE noise)
+  const aiInsights = impacts.filter((i) => i.origin === 'AI_INSIGHT' && (!i.assessmentStatus || i.assessmentStatus === 'ALERT' || i.assessmentStatus === 'WATCH'));
 
   // Count today's new articles vs total (KST-based date)
   const todayKST = new Date(now.toLocaleString('en-US', { timeZone: KST }));
@@ -221,25 +222,35 @@ function buildHtml() {
   </div>
 
   ${aiInsights.length > 0 ? `
-  <!-- Section: AI Insights -->
+  <!-- Section: AI Insights (ALERT/WATCH only) -->
   <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
     <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;">🤖 AI 리스크 인사이트 (${aiInsights.length}건)</div>
-    <div style="font-size:10px;color:#9ca3af;margin-bottom:10px;">규칙 엔진이 포착하지 못하는 간접적·구조적 리스크를 AI가 분석했습니다.</div>
-    ${aiInsights.map((ai) => `
-    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-bottom:8px;">
+    <div style="font-size:10px;color:#9ca3af;margin-bottom:10px;">규칙 엔진이 포착하지 못하는 간접적·구조적 리스크를 AI가 분석했습니다. (ALERT/WATCH만 표시)</div>
+    ${aiInsights.map((ai) => {
+      const statusBadge = ai.assessmentStatus === 'ALERT' ? '🔴 ALERT' : ai.assessmentStatus === 'WATCH' ? '🟡 WATCH' : '';
+      const statusBg = ai.assessmentStatus === 'ALERT' ? '#fef2f2' : '#eff6ff';
+      const statusBorder = ai.assessmentStatus === 'ALERT' ? '#fecaca' : '#bfdbfe';
+      return `
+    <div style="background:${statusBg};border:1px solid ${statusBorder};border-radius:8px;padding:12px 14px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <span style="background:${severityColor[ai.severity] || '#6b7280'};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">${ai.severity}</span>
-        <span style="font-size:10px;color:#3b82f6;font-weight:600;">🤖 AI</span>
-        <span style="font-size:10px;color:#6b7280;">${ai.riskTypeKo}</span>
+        <span style="font-size:10px;color:#3b82f6;font-weight:600;">${statusBadge || '🤖 AI'}</span>
+        <span style="font-size:10px;color:#6b7280;">${ai.riskTypeKo || ai.riskType}</span>
+        ${ai.timeHorizon && ai.timeHorizon !== 'UNKNOWN' ? `<span style="font-size:9px;color:#9ca3af;">⏱ ${ai.timeHorizon}</span>` : ''}
       </div>
       <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">${ai.ruleNameKo}</div>
-      ${ai.narrativeKo ? `<div style="font-size:11px;color:#4b5563;margin-bottom:4px;">${ai.narrativeKo}</div>` : ''}
-      ${ai.chainKo?.length ? `<div style="font-size:10px;color:#6b7280;margin-bottom:4px;">📎 ${ai.chainKo.join(' → ')}</div>` : ''}
+      ${ai.threat ? `<div style="font-size:11px;color:#4b5563;margin-bottom:4px;">⚠ ${ai.threat}</div>` : ''}
+      ${ai.opportunity ? `<div style="font-size:11px;color:#047857;margin-bottom:4px;">💡 ${ai.opportunity}</div>` : ''}
+      ${ai.facts?.length ? `<div style="font-size:10px;color:#374151;margin-bottom:4px;">✓ 확인된 사실: ${ai.facts.slice(0, 2).join('; ')}</div>` : ''}
+      ${ai.missingEvidence?.length ? `<div style="font-size:10px;color:#9ca3af;margin-bottom:4px;">❓ 부족: ${ai.missingEvidence.slice(0, 2).join('; ')}</div>` : ''}
+      ${ai.causalChainDetailed?.length ? `<div style="font-size:10px;color:#6b7280;margin-bottom:4px;">📎 ${ai.causalChainDetailed.map(c => c.step + (c.state === 'CONFIRMED' ? '✓' : c.state === 'CONDITIONAL' ? '?' : '…')).join(' → ')}</div>` : (ai.chainKo?.length ? `<div style="font-size:10px;color:#6b7280;margin-bottom:4px;">📎 ${ai.chainKo.join(' → ')}</div>` : '')}
       <div style="font-size:10px;color:#6b7280;">
-        제품: ${ai.products.join(' · ')} | 지역: ${ai.regions.join(' · ')}
+        제품: ${ai.products?.length ? ai.products.join(' · ') : '미정'} | 지역: ${ai.regions?.length ? ai.regions.join(' · ') : '미정'}
       </div>
-      ${ai.actionsKo?.length ? `<div style="font-size:10px;color:#2563eb;margin-top:4px;">💡 ${ai.actionsKo[0]}</div>` : ''}
-    </div>`).join('')}
+      ${ai.actionsKo?.length ? `<div style="font-size:10px;color:#2563eb;margin-top:4px;">💡 ${ai.actionsKo[0]}</div>` : (ai.actions?.length ? `<div style="font-size:10px;color:#2563eb;margin-top:4px;">💡 ${ai.actions[0]}</div>` : '')}
+      ${ai.watchSignals?.length ? `<div style="font-size:9px;color:#9ca3af;margin-top:4px;">👁 모니터링: ${ai.watchSignals.slice(0, 2).join(', ')}</div>` : ''}
+    </div>`;
+    }).join('')}
   </div>` : ''}
 
   <!-- Section: Top News -->
@@ -316,16 +327,21 @@ function buildPlainText() {
     text += `${s.region} | ${s.products.join('/')} | ${s.severity} | ${s.action}\n`;
   }
 
-  // AI insights section
-  const aiInsights = impacts.filter((i) => i.origin === 'AI_INSIGHT');
+  // AI insights section (ALERT/WATCH only — no INFO/IGNORE noise)
+  const aiInsights = impacts.filter((i) => i.origin === 'AI_INSIGHT' && (!i.assessmentStatus || i.assessmentStatus === 'ALERT' || i.assessmentStatus === 'WATCH'));
   if (aiInsights.length > 0) {
-    text += `\n--- AI 리스크 인사이트 (${aiInsights.length}건) ---\n`;
+    text += `\n--- AI 리스크 인사이트 (${aiInsights.length}건, ALERT/WATCH) ---\n`;
     for (const ai of aiInsights) {
-      text += `[${ai.severity}] ${ai.ruleNameKo}\n`;
-      if (ai.narrativeKo) text += `  ${ai.narrativeKo}\n`;
-      if (ai.chainKo?.length) text += `  경로: ${ai.chainKo.join(' → ')}\n`;
-      text += `  제품: ${ai.products.join('/')} | 지역: ${ai.regions.join('/')}\n`;
+      const status = ai.assessmentStatus || '';
+      text += `[${ai.severity}] [${status}] ${ai.ruleNameKo}\n`;
+      if (ai.threat) text += `  ⚠ 위협: ${ai.threat}\n`;
+      if (ai.opportunity) text += `  💡 기회: ${ai.opportunity}\n`;
+      if (ai.facts?.length) text += `  확인된 사실: ${ai.facts.slice(0, 3).join('; ')}\n`;
+      if (ai.missingEvidence?.length) text += `  부족한 근거: ${ai.missingEvidence.slice(0, 2).join('; ')}\n`;
+      if (ai.causalChainDetailed?.length) text += `  경로: ${ai.causalChainDetailed.map(c => c.step + '(' + c.state[0] + ')').join(' → ')}\n`;
+      text += `  제품: ${ai.products?.length ? ai.products.join('/') : '미정'} | 지역: ${ai.regions?.length ? ai.regions.join('/') : '미정'}\n`;
       if (ai.actionsKo?.[0]) text += `  조치: ${ai.actionsKo[0]}\n`;
+      if (ai.watchSignals?.length) text += `  모니터링: ${ai.watchSignals.slice(0, 2).join(', ')}\n`;
     }
   }
 

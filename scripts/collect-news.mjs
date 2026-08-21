@@ -7,7 +7,8 @@
  * cross-domain hits are exactly the signal the event clusterer wants.
  */
 import { writeFile, mkdir } from 'node:fs/promises';
-import { NEWS_QUERIES, newsFeedUrl } from './sources.mjs';
+import { createHash } from 'node:crypto';
+import { NEWS_QUERIES, BROAD_FEEDS, newsFeedUrl } from './sources.mjs';
 
 const OUT = new URL('../public/data/news.json', import.meta.url);
 const MAX_AGE_DAYS = 10;
@@ -96,6 +97,29 @@ function tag(block, name) {
   return m ? decodeEntities(m[1]) : '';
 }
 
+/**
+ * Stable deterministic fingerprint for an article.
+ * Uses normalized title + source + date → SHA-256 prefix (16 hex chars).
+ * This ID survives re-collection, re-sorting, and re-indexing.
+ */
+function fingerprint(title, source, pubDate) {
+  const normalized = `${title.toLowerCase().trim()}|${(source || '').toLowerCase().trim()}|${pubDate?.slice(0, 10) || ''}`;
+  return createHash('sha256').update(normalized).digest('hex').slice(0, 16);
+}
+
+/**
+ * Extract useful text from Google News RSS <description>.
+ * Descriptions contain HTML anchor tags with related article titles and publishers.
+ * For clustered stories, this provides extra context (multiple related headlines).
+ */
+function cleanDescription(raw) {
+  if (!raw) return null;
+  // Extract anchor text (article titles) and publisher names from font tags
+  const titles = [...raw.matchAll(/">[^<]*<\/a>/g)].map(m => m[0].replace(/">/,'').replace(/<\/a>/,'').trim());
+  const text = titles.filter(t => t.length > 5).join(' | ');
+  return text || null;
+}
+
 function parseRss(xml) {
   return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, block]) => {
     const title = tag(block, 'title');
@@ -105,11 +129,13 @@ function parseRss(xml) {
       source && title.endsWith(` - ${source}`)
         ? title.slice(0, -(source.length + 3)).trim()
         : title;
+    const rawDesc = tag(block, 'description');
     return {
       title: cleanTitle,
       link: tag(block, 'link'),
       publishedAt: tag(block, 'pubDate'),
       source: source || 'Unknown',
+      snippet: cleanDescription(rawDesc),
     };
   });
 }
@@ -169,6 +195,33 @@ async function main() {
     await new Promise((r) => setTimeout(r, 300));
   }
 
+  // Broad discovery feeds (Google News topic-based, no search query)
+  for (const feed of (BROAD_FEEDS || [])) {
+    try {
+      const xml = await fetchText(feed.url);
+      const items = parseRss(xml);
+      let kept = 0;
+      for (const item of items) {
+        const ts = Date.parse(item.publishedAt);
+        if (!Number.isFinite(ts) || ts < cutoff) continue;
+        collected.push({
+          ...item,
+          publishedAt: new Date(ts).toISOString(),
+          domains: [feed.domain],
+          weight: feed.weight,
+          lang: feed.lang,
+          tokens: tokenize(item.title),
+        });
+        kept++;
+      }
+      console.log(`  ok   ${feed.domain.padEnd(14)} ${String(kept).padStart(3)} fresh / ${items.length} returned  [broad]`);
+    } catch (err) {
+      failures.push({ domain: feed.domain, error: String(err.message || err) });
+      console.error(`  FAIL ${feed.domain.padEnd(14)} ${err.message || err}  [broad]`);
+    }
+    await new Promise((r) => setTimeout(r, 300));
+  }
+
   if (collected.length === 0) {
     throw new Error('no news items collected — refusing to write an empty news.json');
   }
@@ -191,6 +244,7 @@ async function main() {
 
   const articles = merged.slice(0, MAX_ITEMS).map(({ tokens, ...rest }, i) => ({
     id: `n${String(i + 1).padStart(4, '0')}`,
+    articleFingerprint: fingerprint(rest.title, rest.source, rest.publishedAt),
     ...rest,
   }));
 

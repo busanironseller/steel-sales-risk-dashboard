@@ -340,6 +340,8 @@ const DOMAIN_THEME = {
   geopolitics_global: '지정학',
   natural_disaster: '자연재해·공급망',
   currency_crisis: '환율·금융',
+  broad_world: '글로벌',
+  broad_business: '글로벌·경제',
   korea_steel: '한국 철강',
   macro_politics: '거시경제·정치',
   macro_economy: '거시경제·정치',
@@ -385,16 +387,23 @@ async function main() {
   const clusters = buildEventClusters(scored);
   const ruleImpacts = reconcile([...impactsFromMarket(signals, market), ...impactsFromEvents(clusters)]);
 
-  // AI analysis — Gemini reads ALL articles and identifies risks rules might miss
+  // AI analysis — TRIAGE → ANALYST → CRITIC → Deterministic Scoring pipeline
   let aiImpacts = [];
+  let aiMetrics = {};
   try {
-    aiImpacts = await aiAnalyze(news.articles, ruleImpacts.map((i) => i.id));
+    const aiResult = await aiAnalyze(news.articles, ruleImpacts.map((i) => i.id));
+    aiImpacts = aiResult.impacts || [];
+    aiMetrics = aiResult.metrics || {};
   } catch (err) {
     console.error('  ai       AI analysis failed (non-fatal):', err.message);
   }
 
-  // Merge: rule-based first, then AI insights (AI impacts keep lower priority in sort)
-  const allImpacts = [...ruleImpacts, ...aiImpacts];
+  // Dedup: AI impacts with same ruleId as a rule-engine impact are dropped (rule engine is authoritative)
+  const ruleImpactIds = new Set(ruleImpacts.map((i) => i.ruleId));
+  const dedupedAiImpacts = aiImpacts.filter((ai) => !ruleImpactIds.has(ai.ruleId));
+
+  // Merge: rule-based first, then AI insights
+  const allImpacts = [...ruleImpacts, ...dedupedAiImpacts];
   // Re-sort by severity
   allImpacts.sort(
     (a, b) => SEVERITY[b.severity] - SEVERITY[a.severity] || (['HIGH', 'MEDIUM', 'LOW'].indexOf(a.confidence) - ['HIGH', 'MEDIUM', 'LOW'].indexOf(b.confidence)),
@@ -416,7 +425,8 @@ async function main() {
       instrumentsCovered: Object.keys(market.instruments).length,
       marketFailures: market.failures,
       newsFailures: news.failures,
-      aiInsightsCount: aiImpacts.length,
+      aiInsightsCount: dedupedAiImpacts.length,
+      aiMetrics,
     },
     valueChain: VALUE_CHAIN,
     marketSignals: signals,
@@ -426,7 +436,7 @@ async function main() {
     salesImpact: salesImpact(allImpacts),
     newsDigest,
     ruleCount: RULES.length,
-    aiEnabled: aiImpacts.length > 0,
+    aiEnabled: dedupedAiImpacts.length > 0,
   };
 
   await writeFile(new URL('analysis.json', DATA), JSON.stringify(analysis));
@@ -436,7 +446,7 @@ async function main() {
   for (const s of signals) console.log(`             ${s.severity.padEnd(6)} ${s.instrument} ${s.pct.toFixed(2)}% (${s.windowLabel})`);
   console.log(`  clusters   ${clusters.length} event cluster(s)`);
   for (const c of clusters) console.log(`             ${c.confidence.padEnd(6)} ${c.eventType} — ${c.articleCount} articles / ${c.publisherCount} publishers`);
-  console.log(`  impacts    ${allImpacts.length} total (rules: ${ruleImpacts.length}, AI: ${aiImpacts.length}, critical: ${critical.length})`);
+  console.log(`  impacts    ${allImpacts.length} total (rules: ${ruleImpacts.length}, AI: ${dedupedAiImpacts.length}, critical: ${critical.length})`);
   console.log(`  salesImpact ${analysis.salesImpact.length} row(s)`);
   console.log('\nanalysis.json written');
 }
