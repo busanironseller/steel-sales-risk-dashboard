@@ -9,7 +9,7 @@ on:
 jobs:
   digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +23,8 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npm run refresh
+        timeout-minutes: 12
+        continue-on-error: true   # 데이터 갱신 실패해도 이메일은 발송
 
       - name: Send digest email
         env:

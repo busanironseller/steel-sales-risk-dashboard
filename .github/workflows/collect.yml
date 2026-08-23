@@ -17,9 +17,7 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
-    # Collectors retry three times against remote endpoints; if they are hanging
-    # rather than failing, fail the run instead of holding a runner for an hour.
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,6 +29,8 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npm run refresh
+        timeout-minutes: 12
+        continue-on-error: true   # AI 분석 실패/타임아웃해도 수집된 데이터는 커밋
 
       - name: Commit refreshed data
         run: |
