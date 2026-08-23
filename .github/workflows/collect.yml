@@ -2,9 +2,9 @@ name: Scheduled data collection
 
 on:
   schedule:
-    # Every 30 minutes, all day, every day. News and geopolitical events happen
-    # outside SHFE hours; the user checks the dashboard in KST mornings too.
-    - cron: '*/30 * * * *'
+    # Every hour at :05.  30-min cadence exceeded Gemini free-tier rate limits,
+    # causing consecutive timeouts that made GitHub suspend the cron schedule.
+    - cron: '5 * * * *'
   workflow_dispatch:
 
 permissions:

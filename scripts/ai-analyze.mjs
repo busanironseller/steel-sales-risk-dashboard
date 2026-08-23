@@ -388,8 +388,8 @@ async function callGemini(prompt, { temperature = 0.3, maxTokens = 8192, useGrou
     if (hardError) break;
     // If any model was rate-limited and none succeeded, wait and retry
     if (anyRateLimited && attempt < MAX_RETRIES) {
-      const wait = 15 * (attempt + 1); // 15s, 30s, 45s
-      console.log(`  ai       All models unavailable, waiting ${wait}s (retry ${attempt + 1}/${MAX_RETRIES})...`);
+      const wait = 30 * (attempt + 1); // 30s, 60s, 90s — aligned with free-tier 1-min RPM window
+      console.log(`  ai       All models rate-limited, waiting ${wait}s (retry ${attempt + 1}/${MAX_RETRIES})...`);
       await new Promise(r => setTimeout(r, wait * 1000));
     }
   }
@@ -674,8 +674,9 @@ function deriveLegacyDirection(vectors) {
 
 // ────────────────────────────────────────────────── PIPELINE STEPS
 
-/** Max articles per triage call — keeps both input and output within limits. */
-const TRIAGE_CHUNK_SIZE = 100;
+/** Max articles per triage call — keeps both input and output within limits.
+ *  200 ≈ 2 chunks for 400 articles → 2 API calls instead of 4. */
+const TRIAGE_CHUNK_SIZE = 200;
 
 /**
  * STEP 1 — TRIAGE
@@ -741,8 +742,8 @@ async function triage(articles, analyzedFingerprints) {
       console.error(`  ai       TRIAGE${chunkLabel}: parse error: ${err.message}`);
     }
 
-    // Pause between chunks to respect free-tier RPM limit (~15 RPM)
-    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 5000));
+    // Pause between chunks to respect free-tier RPM limit
+    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 10_000));
   }
 
   const candidates = allCandidates.slice(0, 30);
@@ -911,7 +912,7 @@ ${artDetails}`;
     }
 
     // Pause between chunks to respect free-tier RPM limit
-    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 5000));
+    if (ci < chunks.length - 1) await new Promise(r => setTimeout(r, 10_000));
   }
 
   console.log(`  ai       ANALYST total: ${allAssessments.length} assessments from ${enrichedCandidates.length} candidates`);
