@@ -2,9 +2,9 @@ name: Daily email digest
 
 on:
   schedule:
-    # 21:00 UTC = 06:00 KST 예약. GitHub 크론 실측 지연(~50분) + 데이터 갱신(~10분)을
-    # 감안하면 실제 도착은 매일 아침 약 07:00 KST.
-    - cron: '0 21 * * *'
+    # 21:50 UTC = 06:50 KST 예약. GitHub 크론 실측 지연(~50분) + 데이터 갱신(~10분)을
+    # 감안해 실제 메일 도착을 매일 아침 약 07:50 KST에 맞춤.
+    - cron: '50 21 * * *'
   workflow_dispatch:          # 수동 실행도 가능
 
 jobs:
