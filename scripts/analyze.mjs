@@ -285,17 +285,51 @@ function reconcile(impacts) {
   );
 }
 
+/**
+ * Normalize AI-generated riskType labels into canonical categories.
+ * AI produces 50+ variations ("물류 리스크", "물류 및 공급망 리스크", "logistics", etc.)
+ * — this maps them all to 7 standard categories for consistent filtering.
+ */
+const RISK_CATEGORY_RULES = [
+  { category: '원자재 원가', categoryEn: 'raw_material',
+    keywords: ['원자재', '원재료', '원판', '기판', '도금 원가', '아연', '알루미늄', 'raw_material', '원료', '코크스', 'coating cost', '합금'] },
+  { category: '물류·운임', categoryEn: 'logistics',
+    keywords: ['물류', '운임', '해운', 'logistics', 'supply_chain', '공급망', '선적', '항만', 'freight', '운송'] },
+  { category: '통상·규제', categoryEn: 'trade_policy',
+    keywords: ['통상', '관세', '규제', 'trade_policy', '무역', 'CBAM', 'ESG', '세이프가드', '반덤핑', '쿼터', 'safeguard', 'tariff'] },
+  { category: '환율', categoryEn: 'fx',
+    keywords: ['환율', 'currency', '금융', '달러', '원화', '위안'] },
+  { category: '경쟁 동향', categoryEn: 'competition',
+    keywords: ['경쟁', 'competition', '인도', '터키', '베트남', '중국', '대체재', '자급률', '공급 과잉', '수출 급증', '오퍼', '제철소'] },
+  { category: '지정학·제재', categoryEn: 'geopolitics',
+    keywords: ['지정학', '제재', 'sanction', 'geopolitical', '분쟁', '갈등', '전쟁', '군사'] },
+  { category: '수요·시장', categoryEn: 'demand',
+    keywords: ['수요', 'demand', '시장', '건설', '소비', '경기'] },
+];
+
+function normalizeRiskCategory(riskTypeKo, riskType) {
+  const label = (riskTypeKo || riskType || '').toLowerCase();
+  for (const rule of RISK_CATEGORY_RULES) {
+    if (rule.keywords.some(kw => label.includes(kw.toLowerCase()))) {
+      return { category: rule.category, categoryEn: rule.categoryEn };
+    }
+  }
+  return { category: '기타', categoryEn: 'other' };
+}
+
 /** Region x product projection (§13) — one row per actionable combination. */
 function salesImpact(impacts) {
   const rows = [];
   for (const impact of impacts) {
+    const { category, categoryEn } = normalizeRiskCategory(impact.riskTypeKo, impact.riskType);
     for (const region of impact.regions) {
       rows.push({
         id: `SI_${impact.id}_${region.replace(/\s+/g, '')}`,
         region,
         products: impact.products,
-        riskType: impact.riskType,
-        riskTypeKo: impact.riskTypeKo ?? impact.riskType,
+        riskType: categoryEn,
+        riskTypeKo: category,
+        riskTypeOriginal: impact.riskTypeKo ?? impact.riskType,  // 원본 보존
         direction: impact.direction,
         severity: impact.severity,
         confidence: impact.confidence,

@@ -191,8 +191,9 @@ export interface SalesImpactRow {
   id: string;
   region: string;
   products: string[];
-  riskType: string;
-  riskTypeKo?: string;
+  riskType: string;           // normalized category key (e.g. 'logistics')
+  riskTypeKo?: string;        // normalized category label (e.g. '물류·운임')
+  riskTypeOriginal?: string;  // AI-generated original label (preserved for detail view)
   direction: Direction;
   severity: Severity;
   confidence: Confidence;
