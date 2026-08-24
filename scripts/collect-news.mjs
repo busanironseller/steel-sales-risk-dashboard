@@ -20,42 +20,74 @@ const UA =
 
 /**
  * Translate a string to Korean using Google Translate's free endpoint.
- * Returns null on failure — never blocks the pipeline.
+ * Retries up to 3 times with exponential backoff on failure.
+ * Returns null only after all retries are exhausted — never blocks the pipeline.
  */
-async function translateToKo(text) {
+async function translateToKo(text, retries = 2) {
   if (!text || text.length < 3) return null;
   // Skip if already Korean (title from ko-language queries)
   if (/[가-힯]/.test(text.slice(0, 10))) return text;
-  try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q=${encodeURIComponent(text.slice(0, 500))}`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': UA },
-      signal: AbortSignal.timeout(6_000),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data[0]?.map((x) => x[0]).join('') || null;
-  } catch {
-    return null;
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ko&dt=t&q=${encodeURIComponent(text.slice(0, 500))}`;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: { 'User-Agent': UA },
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (res.status === 429) {
+        // Rate-limited — back off and retry
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        continue;
+      }
+      if (!res.ok) continue;
+      const data = await res.json();
+      const result = data[0]?.map((x) => x[0]).join('') || null;
+      if (result) return result;
+    } catch {
+      if (attempt < retries - 1) {
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+      }
+    }
   }
+  return null;
 }
 
-/** Batch-translate titles with throttling (150ms between calls). */
+/** Batch-translate titles with throttling (250ms between calls, retry pass for failures). */
 async function translateTitles(articles) {
   let translated = 0;
   let failed = 0;
+  const failedArticles = [];
   for (const article of articles) {
+    if (article.titleKo) { translated++; continue; }   // already has translation
     const ko = await translateToKo(article.title);
     if (ko) {
       article.titleKo = ko;
       translated++;
     } else {
       failed++;
+      failedArticles.push(article);
     }
     // Throttle to avoid rate limiting
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, 250));
   }
-  console.log(`  translate ${translated} ok / ${failed} failed`);
+  console.log(`  translate pass 1: ${translated} ok / ${failed} failed`);
+
+  // Second pass for failures — longer delay between calls
+  if (failedArticles.length > 0 && failedArticles.length <= 100) {
+    console.log(`  retrying ${failedArticles.length} failed translations...`);
+    let retryOk = 0;
+    for (const article of failedArticles) {
+      await new Promise((r) => setTimeout(r, 500));
+      const ko = await translateToKo(article.title, 2);
+      if (ko) {
+        article.titleKo = ko;
+        retryOk++;
+      }
+    }
+    translated += retryOk;
+    failed -= retryOk;
+    console.log(`  translate pass 2: ${retryOk} recovered / ${failed} still failed`);
+  }
 }
 
 async function fetchText(url, { attempts = 3 } = {}) {

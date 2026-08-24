@@ -13,8 +13,69 @@ import { aiAnalyze } from './ai-analyze.mjs';
 
 const DATA = new URL('../public/data/', import.meta.url);
 const WINDOW_LABEL = { m30: '30분', m60: '60분', m120: '120분', today: '금일' };
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const readJson = async (name) => JSON.parse(await readFile(new URL(name, DATA), 'utf8'));
+
+// ────────────────────────────────── Gemini-based batch title translation
+// Fallback for articles whose titleKo is still null after collect-news.mjs
+// (Google Translate free endpoint is often rate-limited from GitHub Actions IPs).
+
+async function translateTitlesViaGemini(articles) {
+  if (!GEMINI_API_KEY) return;
+  const needTranslation = articles.filter(
+    (a) => !a.titleKo && a.title && !/[가-힯]/.test(a.title.slice(0, 10)),
+  );
+  if (needTranslation.length === 0) return;
+  console.log(`  translate  ${needTranslation.length} titles need Gemini translation...`);
+
+  const BATCH = 60;  // titles per Gemini call
+  const models = ['gemini-3.7-flash', 'gemini-3.5-flash'];
+  let translated = 0;
+
+  for (let start = 0; start < needTranslation.length; start += BATCH) {
+    const batch = needTranslation.slice(start, start + BATCH);
+    const numbered = batch.map((a, i) => `${i + 1}. ${a.title}`).join('\n');
+    const prompt = `Translate each English news headline to natural Korean. Return a JSON array of objects [{\"i\":1,\"ko\":\"한국어 제목\"}, ...]. Keep the same numbering. Do NOT add information not in the original title.\n\n${numbered}`;
+
+    let result = null;
+    for (const model of models) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: 4096 },
+          }),
+          signal: AbortSignal.timeout(60_000),
+        });
+        if (res.status === 429) { continue; }
+        if (!res.ok) continue;
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) { result = JSON.parse(text); break; }
+      } catch { /* try next model */ }
+    }
+
+    if (Array.isArray(result)) {
+      for (const item of result) {
+        const idx = (item.i || item.index) - 1;
+        if (idx >= 0 && idx < batch.length && item.ko) {
+          batch[idx].titleKo = item.ko;
+          translated++;
+        }
+      }
+    }
+
+    // Respect Gemini rate limits — pause between batches
+    if (start + BATCH < needTranslation.length) {
+      await new Promise((r) => setTimeout(r, 5000));
+    }
+  }
+  console.log(`  translate  Gemini: ${translated}/${needTranslation.length} translated`);
+}
 
 // ---------------------------------------------------------------- market signals
 
@@ -410,6 +471,14 @@ function buildNewsDigest(allArticles) {
 async function main() {
   const market = await readJson('market.json');
   const news = await readJson('news.json');
+
+  // Translate any titles still missing Korean translation (Google Translate fallback)
+  const preTranslateCount = news.articles.filter((a) => !a.titleKo).length;
+  await translateTitlesViaGemini(news.articles);
+  // Write back to news.json so translations persist for subsequent runs
+  if (preTranslateCount > 0 && news.articles.some((a) => a.titleKo)) {
+    await writeFile(new URL('news.json', DATA), JSON.stringify(news));
+  }
 
   const scored = news.articles
     .map((a) => ({ ...a, relevance: relevanceScore(`${a.title} ${a.source}`) }))
