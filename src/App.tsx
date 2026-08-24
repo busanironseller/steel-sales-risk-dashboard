@@ -301,11 +301,10 @@ export function App() {
       if (!selectedImpactRef.current || changed) {
         setSelectedImpact(a.criticalSignals[0]?.id ?? a.impacts[0]?.id ?? null);
       }
-      // Mark ALL current impact IDs as known for next session
-      // (previouslyKnown state is NOT updated — only localStorage, so this session still sees new items)
-      const allKnown = loadKnown();
-      a.impacts.forEach((imp: { id: string }) => allKnown.add(imp.id));
-      saveKnown(allKnown);
+      // NOTE: known 저장은 여기서 하지 않는다.
+      // 여기서 전체 impacts를 known 처리하면, 백그라운드 자동 갱신으로 도착만 한
+      // (사용자가 본 적 없는) 신규 신호까지 "확인됨"으로 기록되어 알림에 뜨지 않는
+      // 버그가 생긴다. known 저장은 알림 섹션에 실제 노출된 시점에 수행한다.
 
       if (isManual) {
         setToast(changed ? '✅ 새 데이터가 반영되었습니다' : 'ℹ️ 아직 새 데이터가 없습니다 (CI 대기 중)');
@@ -343,6 +342,28 @@ export function App() {
     const id = setTimeout(() => setToast(null), 3200);
     return () => clearTimeout(id);
   }, [toast]);
+
+  /* ── 알림 known 저장: 탭이 화면에 보이는 상태에서 실제 노출됐을 때만 기록 ──
+   * 백그라운드 탭에 데이터만 도착한 경우는 저장하지 않으므로,
+   * 사용자가 못 본 신규 신호는 다음 방문에도 알림으로 남는다. */
+  useEffect(() => {
+    if (!analysis) return;
+    const persistSeen = () => {
+      if (document.visibilityState !== 'visible') return;
+      const k = loadKnown();
+      let added = false;
+      for (const imp of analysis.impacts) {
+        if ((imp.severity === 'CRITICAL' || imp.severity === 'HIGH' || imp.severity === 'MEDIUM') && !k.has(imp.id)) {
+          k.add(imp.id);
+          added = true;
+        }
+      }
+      if (added) saveKnown(k);
+    };
+    persistSeen();
+    document.addEventListener('visibilitychange', persistSeen);
+    return () => document.removeEventListener('visibilitychange', persistSeen);
+  }, [analysis]);
 
   /* ── derived data ── */
   const hrc = market?.instruments.hrc;
@@ -581,11 +602,14 @@ export function App() {
   const stale = collectedAgo > 90;
 
   /* Notifications: only impacts the user has NEVER seen before (not in previouslyKnown from prior sessions, not dismissed this session) */
+  const SEV_ORDER: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2 };
   const notices = analysis
-    ? analysis.impacts.filter((imp) =>
-        (imp.severity === 'CRITICAL' || imp.severity === 'HIGH') &&
-        !previouslyKnown.has(imp.id) &&
-        !dismissed.has(imp.id))
+    ? analysis.impacts
+        .filter((imp) =>
+          (imp.severity === 'CRITICAL' || imp.severity === 'HIGH' || imp.severity === 'MEDIUM') &&
+          !previouslyKnown.has(imp.id) &&
+          !dismissed.has(imp.id))
+        .sort((a, b) => (SEV_ORDER[a.severity] ?? 9) - (SEV_ORDER[b.severity] ?? 9))
     : [];
 
   /* ══════════════════════════════════════════════════════════════════
@@ -1735,7 +1759,7 @@ export function App() {
         >
           <div className="px-4 py-3 border-b border-[var(--color-slate-line)] text-[11.5px] text-[var(--color-muted)] bg-[var(--color-surface)]">
             <strong className="text-[var(--color-ink)]">안내:</strong>{' '}
-            이전 방문 이후 새로 감지된 HIGH/CRITICAL 위험 신호만 표시됩니다.
+            이전 방문 이후 새로 감지된 CRITICAL/HIGH/MEDIUM 위험 신호만 표시됩니다.
             데이터가 갱신되어 새로운 리스크가 발생하면 여기에 알림이 나타납니다.
           </div>
 
