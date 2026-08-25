@@ -6,13 +6,25 @@
  * dropping the duplicates we merge them and keep every domain that matched —
  * cross-domain hits are exactly the signal the event clusterer wants.
  */
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 import { NEWS_QUERIES, BROAD_FEEDS, newsFeedUrl } from './sources.mjs';
 
 const OUT = new URL('../public/data/news.json', import.meta.url);
+const ANALYSIS = new URL('../public/data/analysis.json', import.meta.url);
 const MAX_AGE_DAYS = 10;
 const MAX_ITEMS = 400;
+
+/**
+ * Hard time budget for the best-effort translation pass. Translation is
+ * ENRICHMENT, not part of the freshness critical path: fresh news.json is
+ * written BEFORE translation starts, so even a zero budget only means English
+ * titles — never stale data. 3 min default; override via TRANSLATE_BUDGET_MS.
+ * (2026-08-25: a slow gtx endpoint held `translating 400 titles...` past the
+ * deploy step's 15-min timeout, killing refresh and shipping stale data.)
+ */
+const TRANSLATE_BUDGET_MS = Number(process.env.TRANSLATE_BUDGET_MS || 180_000);
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
@@ -52,42 +64,150 @@ async function translateToKo(text, retries = 2) {
   return null;
 }
 
-/** Batch-translate titles with throttling (250ms between calls, retry pass for failures). */
-async function translateTitles(articles) {
+/**
+ * Batch-translate titles with throttling and a hard deadline (best effort).
+ * Untranslated articles simply keep titleKo: null — English titles beat
+ * stale data. Returns counts so the caller knows whether anything changed.
+ */
+async function translateTitles(articles, {
+  translate = translateToKo,
+  deadlineAt = Date.now() + TRANSLATE_BUDGET_MS,
+  throttleMs = 250,
+} = {}) {
   let translated = 0;
+  let newlyTranslated = 0;
   let failed = 0;
+  let skippedByBudget = 0;
   const failedArticles = [];
+
   for (const article of articles) {
-    if (article.titleKo) { translated++; continue; }   // already has translation
-    const ko = await translateToKo(article.title);
+    if (article.titleKo) { translated++; continue; }   // already has translation (reuse or ko-lang)
+    if (Date.now() >= deadlineAt) { skippedByBudget++; continue; }
+    const ko = await translate(article.title);
     if (ko) {
       article.titleKo = ko;
       translated++;
+      newlyTranslated++;
     } else {
       failed++;
       failedArticles.push(article);
     }
     // Throttle to avoid rate limiting
-    await new Promise((r) => setTimeout(r, 250));
+    if (throttleMs > 0) await new Promise((r) => setTimeout(r, throttleMs));
   }
-  console.log(`  translate pass 1: ${translated} ok / ${failed} failed`);
+  console.log(`  translate pass 1: ${translated} ok / ${failed} failed / ${skippedByBudget} skipped (budget)`);
 
-  // Second pass for failures — longer delay between calls
-  if (failedArticles.length > 0 && failedArticles.length <= 100) {
+  // Second pass for failures — only if budget remains
+  if (failedArticles.length > 0 && failedArticles.length <= 100 && Date.now() < deadlineAt) {
     console.log(`  retrying ${failedArticles.length} failed translations...`);
     let retryOk = 0;
     for (const article of failedArticles) {
-      await new Promise((r) => setTimeout(r, 500));
-      const ko = await translateToKo(article.title, 2);
+      if (Date.now() >= deadlineAt) break;
+      if (throttleMs > 0) await new Promise((r) => setTimeout(r, throttleMs * 2));
+      const ko = await translate(article.title);
       if (ko) {
         article.titleKo = ko;
         retryOk++;
       }
     }
     translated += retryOk;
+    newlyTranslated += retryOk;
     failed -= retryOk;
     console.log(`  translate pass 2: ${retryOk} recovered / ${failed} still failed`);
   }
+
+  return { translated, newlyTranslated, failed, skippedByBudget };
+}
+
+/**
+ * Reuse translations from previous runs, keyed by articleFingerprint (stable
+ * across re-collection). Sources, best effort: the previous news.json (local
+ * runs) and the committed analysis.json's newsDigest (CI — news.json is
+ * gitignored there, so this is the only carry-over that survives a fresh
+ * checkout). Without this, every hourly run re-translated all ~400 titles.
+ */
+async function loadPreviousTranslations() {
+  const map = new Map();
+  const harvest = (title, source, publishedAt, titleKo) => {
+    if (!titleKo || !title) return;
+    map.set(fingerprint(title, source, publishedAt), titleKo);
+  };
+  try {
+    const prev = JSON.parse(await readFile(OUT, 'utf8'));
+    for (const a of prev.articles ?? []) {
+      if (a.articleFingerprint && a.titleKo) map.set(a.articleFingerprint, a.titleKo);
+      else harvest(a.title, a.source, a.publishedAt, a.titleKo);
+    }
+  } catch { /* no previous news.json — fine */ }
+  try {
+    const analysis = JSON.parse(await readFile(ANALYSIS, 'utf8'));
+    for (const n of analysis.newsDigest ?? []) harvest(n.title, n.source, n.publishedAt, n.titleKo);
+  } catch { /* no analysis.json — fine */ }
+  return map;
+}
+
+/** Apply reused translations in place; returns how many were reused. */
+function applyPreviousTranslations(articles, prevMap) {
+  let reused = 0;
+  for (const a of articles) {
+    if (!a.titleKo && prevMap.has(a.articleFingerprint)) {
+      a.titleKo = prevMap.get(a.articleFingerprint);
+      reused++;
+    }
+  }
+  return reused;
+}
+
+/**
+ * Write fresh news.json FIRST, then enrich with best-effort translation and
+ * rewrite only if anything new was translated. Collection freshness never
+ * waits on the translation endpoint.
+ */
+async function finalizeAndWrite(articles, { counts, failures, generatedAt }, opts = {}) {
+  const {
+    translate = translateToKo,
+    budgetMs = TRANSLATE_BUDGET_MS,
+    throttleMs = 250,
+    outUrl = OUT,
+    reuse = new Map(),
+  } = opts;
+
+  const reusedCount = applyPreviousTranslations(articles, reuse);
+  if (reusedCount > 0) console.log(`  translate reuse: ${reusedCount} titles carried over from previous run`);
+
+  const payload = {
+    generatedAt,
+    source: 'Google News RSS',
+    window: `${MAX_AGE_DAYS}d`,
+    counts,
+    failures,
+    articles,
+  };
+
+  // 1) FRESH WRITE — collection result is safe on disk before translation starts.
+  await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
+  await writeFile(outUrl, JSON.stringify(payload));
+  console.log(`  news.json written (pre-translation) — ${articles.length} articles`);
+
+  // 2) Best-effort enrichment within the budget. Never throws.
+  let translation = { translated: 0, newlyTranslated: 0, failed: 0, skippedByBudget: 0 };
+  try {
+    const untranslated = articles.filter((a) => !a.titleKo).length;
+    if (untranslated > 0) {
+      console.log(`\ntranslating ${untranslated} untranslated titles (budget ${Math.round(budgetMs / 1000)}s)...`);
+      translation = await translateTitles(articles, { translate, deadlineAt: Date.now() + budgetMs, throttleMs });
+    }
+  } catch (err) {
+    console.error(`  translate: enrichment failed (${err.message}) — keeping untranslated titles`);
+  }
+
+  // 3) Rewrite only when enrichment actually added something.
+  if (translation.newlyTranslated > 0) {
+    await writeFile(outUrl, JSON.stringify(payload));
+    console.log(`  news.json updated with ${translation.newlyTranslated} new translation(s)`);
+  }
+
+  return { payload, translation, reusedCount };
 }
 
 async function fetchText(url, { attempts = 3 } = {}) {
@@ -280,33 +400,32 @@ async function main() {
     ...rest,
   }));
 
-  // Translate article titles to Korean
-  console.log(`\ntranslating ${articles.length} titles to Korean...`);
-  await translateTitles(articles);
-
-  await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
-  await writeFile(
-    OUT,
-    JSON.stringify(
-      {
-        generatedAt: startedAt,
-        source: 'Google News RSS',
-        window: `${MAX_AGE_DAYS}d`,
-        counts: { collected: collected.length, afterDedupe: merged.length, written: articles.length },
-        failures,
-        articles,
-      },
-      ),
-    );
+  // generatedAt = the moment collection actually succeeded (not translation).
+  const { translation, reusedCount } = await finalizeAndWrite(
+    articles,
+    {
+      counts: { collected: collected.length, afterDedupe: merged.length, written: articles.length },
+      failures,
+      generatedAt: new Date().toISOString(),
+    },
+    { reuse: await loadPreviousTranslations() },
+  );
 
   console.log(
-    `\nnews.json written — ${articles.length} articles ` +
+    `\nnews.json final — ${articles.length} articles ` +
       `(${collected.length} raw, ${collected.length - merged.length} merged as duplicates), ` +
-      `${failures.length} failed feed(s)`,
+      `${failures.length} failed feed(s), ` +
+      `titleKo: ${reusedCount} reused + ${translation.newlyTranslated} new / ${translation.skippedByBudget + translation.failed} pending`,
   );
+  void startedAt;
 }
 
-main().catch((err) => {
-  console.error('collect-news failed:', err);
-  process.exit(1);
-});
+// Exported for deterministic tests — importing must not run the collector.
+export { translateTitles, finalizeAndWrite, applyPreviousTranslations, fingerprint };
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error('collect-news failed:', err);
+    process.exit(1);
+  });
+}
