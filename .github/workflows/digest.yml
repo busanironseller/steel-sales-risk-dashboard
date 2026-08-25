@@ -6,6 +6,11 @@ on:
     # 감안해 실제 메일 도착을 매일 아침 약 07:50 KST에 맞춤.
     - cron: '50 21 * * *'
   workflow_dispatch:          # 수동 실행도 가능
+    inputs:
+      use_extra_recipient:
+        description: 'DIGEST_TO 대신 DIGEST_TO_EXTRA(보조 수신자 시크릿)로 발송'
+        type: boolean
+        default: false
 
 jobs:
   digest:
@@ -31,5 +36,5 @@ jobs:
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          DIGEST_TO: ${{ secrets.DIGEST_TO }}
+          DIGEST_TO: ${{ inputs.use_extra_recipient == true && secrets.DIGEST_TO_EXTRA || secrets.DIGEST_TO }}
         run: node scripts/send-digest.mjs
