@@ -88,12 +88,15 @@ function pickTopImpacts(impacts, n = 5) {
     })
     .sort((a, b) => b.score - a.score);
 
-  // Deduplicate: avoid showing the same event twice (e.g. HRC→CRC and HRC→GI/GL/COLOR)
+  // Deduplicate: avoid showing the same event twice. Identity keys, strongest
+  // first: originId (signal/cluster/case ID — the actual risk identity), then
+  // the fact string (identical for same-signal impacts), then names. The old
+  // key led with ruleNameKo, which DIFFERS between rules fired by the same
+  // signal (R1A vs R1B) — exactly the duplication it was meant to remove.
   const seen = new Set();
   const result = [];
   for (const { imp } of scored) {
-    // Build a dedup key from the core event (rule name or canonical title)
-    const key = (imp.ruleNameKo || imp.ruleName || imp.canonicalEventTitle || imp.fact || '').slice(0, 40);
+    const key = imp.originId || (imp.fact || imp.canonicalEventTitle || imp.ruleNameKo || imp.ruleName || '').slice(0, 60);
     if (seen.has(key)) continue;
     seen.add(key);
     result.push(imp);

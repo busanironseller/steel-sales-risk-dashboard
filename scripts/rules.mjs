@@ -42,24 +42,35 @@ export const SEVERITY = { LOW: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4 };
 /**
  * Market-signal thresholds (§6). Tuned to the 30-minute bar grid: `bars` counts
  * completed bars, so `m120` is four bars and session breaks never inflate it.
+ *
+ * Severity semantics (2026-08-25 recalibration, based on the last ~500 trading
+ * days of daily closes in public/data/market.json — see tests/thresholds.test.mjs):
+ *   HIGH   = tail movement the desk should look at NOW  (≈ p95 of |daily change|)
+ *   MEDIUM = meaningful move worth noting               (≈ p80)
+ *   LOW    = routine fluctuation
+ * Measured |daily-change| percentiles: hrc p80=0.99 p95=1.92 · zinc p80=1.20
+ * p95=2.22 · aluminium p80=0.99 p95=1.96. The previous HIGH threshold of 1.0 %
+ * fired on ~20-24 % of all trading days (i.e. "HIGH" every other day across the
+ * three instruments), which made HIGH meaningless as an alert level.
  */
 export const MARKET_THRESHOLDS = {
   hrc: [
-    { window: 'm120', abs: 0.8, severity: 'HIGH' },
-    { window: 'm60',  abs: 0.4, severity: 'MEDIUM' },
-    { window: 'today', abs: 1.0, severity: 'HIGH' },
-    { window: 'today', abs: 0.3, severity: 'MEDIUM' },
+    { window: 'm120', abs: 1.5, severity: 'HIGH' },    // 2-hour move at daily-p95 scale = genuinely abrupt
+    { window: 'm120', abs: 0.8, severity: 'MEDIUM' },
+    { window: 'm60',  abs: 0.6, severity: 'MEDIUM' },
+    { window: 'today', abs: 2.0, severity: 'HIGH' },   // ≈ p95 (1.92) → fires ~3.6 % of days
+    { window: 'today', abs: 1.0, severity: 'MEDIUM' }, // ≈ p80 (0.99) → about once a week
   ],
   zinc: [
-    { window: 'today', abs: 1.0, severity: 'HIGH' },
-    { window: 'today', abs: 0.3, severity: 'MEDIUM' },
+    { window: 'today', abs: 2.2, severity: 'HIGH' },   // ≈ p95 (2.22)
+    { window: 'today', abs: 1.2, severity: 'MEDIUM' }, // ≈ p80 (1.20)
   ],
   aluminium: [
-    { window: 'today', abs: 1.0, severity: 'HIGH' },
-    { window: 'today', abs: 0.3, severity: 'MEDIUM' },
+    { window: 'today', abs: 2.0, severity: 'HIGH' },   // ≈ p95 (1.96)
+    { window: 'today', abs: 1.0, severity: 'MEDIUM' }, // ≈ p80 (0.99)
   ],
   ironOre: [
-    { window: 'today', abs: 0.5, severity: 'MEDIUM' },
+    { window: 'today', abs: 0.5, severity: 'MEDIUM' }, // no daily history collected (DCE) — unchanged, never reaches HIGH
   ],
   cokingCoal: [
     { window: 'today', abs: 0.5, severity: 'MEDIUM' },

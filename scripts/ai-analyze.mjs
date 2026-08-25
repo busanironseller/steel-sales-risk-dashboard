@@ -598,15 +598,129 @@ async function saveState(state) {
   await writeFile(STATE_PATH, JSON.stringify(state, null, 2));
 }
 
-/** Generate a stable case ID from event characteristics. */
+/**
+ * Fixed alias table mapping event-title wording (KO/EN variants) onto stable
+ * anchor tokens. This is what keeps "미국-캐나다 관세 전쟁 발발" and
+ * "미국-캐나다 무역 협상 결렬 및 50% 상호 보복 관세 부과" in ONE risk case:
+ * both normalize to the anchor set {canada, tariff, us}. Deterministic — no
+ * embeddings, no external services. Unmatched titles fall back to the
+ * normalized title string (same behaviour as before this table existed).
+ */
+const EVENT_ANCHORS = [
+  // chokepoints / logistics — Hormuz, Red Sea and Suez are one connected
+  // corridor crisis in practice (the audit found ONE such event split across
+  // 10 cases whose titles mixed all three names), so they share one anchor.
+  ['mideast_corridor', ['hormuz', '호르무즈', 'red sea', '홍해', 'houthi', '후티', 'suez', '수에즈']],
+  ['panama', ['panama', '파나마']],
+  ['malacca', ['malacca', '말라카']],
+  ['port', ['port strike', '항만 파업', 'port closure', '항만 폐쇄']],
+  ['freight', ['freight', '운임', 'shipping cost', '해상 운임']],
+  // countries / blocs
+  ['us', ['미국', 'united states', ' us ', 'u.s.', 'america', '트럼프', 'trump', 'washington']],
+  ['canada', ['canada', '캐나다']],
+  ['china', ['china', '중국', 'chinese']],
+  ['eu', [' eu ', 'european union', '유럽연합', '유럽 연합', ' eu의', 'eu ', '유럽']],
+  ['iran', ['iran', '이란']],
+  ['india', ['india', '인도']],
+  ['turkey', ['turkey', 'türkiye', '터키', '튀르키예']],
+  ['vietnam', ['vietnam', '베트남']],
+  ['japan', ['japan', '일본']],
+  ['korea', ['korea', '한국', '원화', '원/달러', '원달러']],
+  ['ukraine', ['ukraine', '우크라이나']],
+  ['russia', ['russia', '러시아']],
+  ['uae', ['uae', '아랍에미리트']],
+  ['saudi', ['saudi', '사우디']],
+  // measures / channels
+  ['tariff', ['tariff', '관세', 'section 232', 'section 301', '보복 관세']],
+  ['antidumping', ['anti-dumping', 'antidumping', '반덤핑']],
+  ['quota', ['quota', '쿼터', 'safeguard', '세이프가드']],
+  ['cbam', ['cbam', '탄소국경']],
+  ['sanction', ['sanction', '제재', 'embargo', '수출통제', 'export control']],
+  ['fx', ['환율', 'exchange rate', 'currency', '달러 매각', '원화 강세', '원화 약세']],
+  ['oil', ['oil', '유가', 'crude', '원유']],
+];
+
+/**
+ * Anchors that name a physical event locus. When one is present it defines the
+ * event by itself — secondary anchors (countries, measures) are facets of the
+ * same crisis ("호르무즈 + 이란 제재" and "홍해 물류 마비" are one corridor
+ * event, not two), so they are dropped from the key.
+ */
+const PRIMARY_ANCHORS = new Set(['mideast_corridor', 'panama', 'malacca', 'port']);
+
+/** Extract the sorted anchor set for an event title (lowercased match). */
+function eventAnchors(title) {
+  const t = ` ${(title || '').toLowerCase()} `;
+  const found = new Set();
+  for (const [anchor, aliases] of EVENT_ANCHORS) {
+    if (aliases.some((a) => t.includes(a.toLowerCase()))) found.add(anchor);
+  }
+  const primaries = [...found].filter((a) => PRIMARY_ANCHORS.has(a));
+  return (primaries.length > 0 ? primaries : [...found]).sort();
+}
+
+/**
+ * Generate a stable case ID from a deterministic event fingerprint.
+ *
+ * Previous key was dominated by the raw canonicalEventTitle hash, so any
+ * wording drift from the LLM opened a brand-new case (audit found ONE Hormuz
+ * event split across 10 cases). The fingerprint now uses anchors extracted
+ * with a fixed alias table + structured exposure fields. Opposing states of
+ * the same dispute ("tariff imposed" / "tariff reduced") intentionally map to
+ * the same case: updateRiskCases() overwrites content with the newest
+ * assessment and appends to `history`, so the latest evidence wins while the
+ * state transition is preserved.
+ */
 function generateCaseId(assessment) {
-  const key = [
-    assessment.canonicalEventTitle?.toLowerCase() || '',
-    assessment.riskType?.toLowerCase() || '',
-    (assessment.exposure?.regions || []).sort().join(','),
-    (assessment.exposure?.products || []).sort().join(','),
+  const anchors = eventAnchors(assessment.canonicalEventTitle);
+  const eventKey = anchors.length > 0
+    ? anchors.join('+')
+    : (assessment.canonicalEventTitle || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  // A physical-locus event (chokepoint, port) is ONE event no matter which
+  // region/product facet a given assessment emphasises — the LLM's region
+  // list varies run to run and was splitting one corridor crisis into
+  // parallel cases. Non-locus events keep exposure in the key so, e.g., two
+  // different regions' trade measures stay separate.
+  const hasPrimary = anchors.some((a) => PRIMARY_ANCHORS.has(a));
+  const key = hasPrimary ? eventKey : [
+    eventKey,
+    (assessment.exposure?.regions || []).slice().sort().join(','),
+    (assessment.exposure?.products || []).slice().sort().join(','),
   ].join('|');
   return 'RC_' + createHash('sha256').update(key).digest('hex').slice(0, 12);
+}
+
+/**
+ * One-time state migration: recompute case IDs for cases stored under the old
+ * title-hash scheme and merge collisions. The newest case wins the content;
+ * evidence fingerprints are unioned and histories concatenated (capped at 20)
+ * so nothing is lost. Runs on every load — already-migrated states no-op.
+ */
+function migrateCaseIds(state) {
+  const cases = state.riskCases || {};
+  const migrated = {};
+  let merges = 0;
+  for (const c of Object.values(cases)) {
+    const newId = generateCaseId(c);
+    const existing = migrated[newId];
+    if (!existing) {
+      migrated[newId] = { ...c, caseId: newId };
+      continue;
+    }
+    merges++;
+    const newer = Date.parse(c.lastUpdated || 0) >= Date.parse(existing.lastUpdated || 0) ? c : existing;
+    const older = newer === c ? existing : c;
+    const merged = { ...newer, caseId: newId };
+    merged.firstSeen = [older.firstSeen, newer.firstSeen].filter(Boolean).sort()[0] ?? newer.firstSeen;
+    merged.evidenceFingerprints = [...new Set([...(older.evidenceFingerprints || []), ...(newer.evidenceFingerprints || [])])];
+    merged.history = [...(older.history || []), ...(newer.history || [])]
+      .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+      .slice(-20);
+    migrated[newId] = merged;
+  }
+  if (merges > 0) console.log(`  ai       STATE: merged ${merges} duplicate risk case(s) during fingerprint migration`);
+  state.riskCases = migrated;
+  return state;
 }
 
 // ────────────────────────────────────────────────── Deterministic Scoring
@@ -648,8 +762,13 @@ function computeSeverity(scores, assessmentStatus) {
     return 'CRITICAL';
   }
 
-  // HIGH: strong evidence + clear exposure + meaningful impact
-  if (assessmentStatus === 'ALERT' && total >= 10) {
+  // HIGH: strong evidence + clear exposure + meaningful impact.
+  // ALERT's minimum composition is (2,2,2,2) + urgency, i.e. total 8-10, so the
+  // old `total >= 10` gate made HIGH the *default* outcome of ALERT (audit:
+  // 5 of 7 live HIGH cases sat exactly at total 10-11). total >= 12 on a
+  // 14-point scale requires at least two dimensions at 3 on top of the ALERT
+  // minimum gates — HIGH now means "clearly above the alert floor".
+  if (assessmentStatus === 'ALERT' && total >= 12) {
     return 'HIGH';
   }
 
@@ -808,33 +927,68 @@ async function enrichCandidates(candidates, articles) {
 /** Max candidates per analyst call — each produces ~500-800 tokens of output. */
 const ANALYST_CHUNK_SIZE = 8;
 
-/** Try to salvage an assessment object with missing/invalid fields. */
+/** Clamp a raw LLM score into [0, cap]. Anything non-numeric collapses to 0 —
+ * the conservative direction. Never rounds upward past the cap. */
+function clampScore(value, cap) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(cap, Math.round(n)));
+}
+
+const STR_ARRAY = (v) => (Array.isArray(v) ? v.filter((s) => typeof s === 'string') : []);
+const TIME_HORIZONS = ['NOW', 'DAYS', 'WEEKS', '1-3_MONTHS', '3-6_MONTHS', 'LONG_TERM', 'UNKNOWN'];
+const CHAIN_STATES = ['CONFIRMED', 'CONDITIONAL', 'UNCONFIRMED'];
+
+/**
+ * Try to salvage an assessment object with missing/invalid fields.
+ *
+ * Order is SALVAGE → normalize → Zod validate → (caller pushes to scoring).
+ * The normalize step clamps every score into schema range — the old version
+ * passed `item.scores` through raw, so an LLM emitting `evidenceQuality: 9`
+ * bypassed Zod entirely and inflated the severity total. The final safeParse
+ * guarantees nothing schema-invalid can reach scoring; if even the normalized
+ * object fails validation, the assessment is dropped rather than repaired.
+ */
 function salvageAssessment(item) {
-  if (!item?.canonicalEventTitle) return null;
-  return {
+  if (!item?.canonicalEventTitle || typeof item.canonicalEventTitle !== 'string') return null;
+  const normalized = {
     canonicalEventTitle: item.canonicalEventTitle,
-    riskType: item.riskType || '기타',
-    facts: Array.isArray(item.facts) ? item.facts : [],
-    inferences: Array.isArray(item.inferences) ? item.inferences : [],
-    assumptions: Array.isArray(item.assumptions) ? item.assumptions : [],
-    missingEvidence: Array.isArray(item.missingEvidence) ? item.missingEvidence : [],
+    riskType: typeof item.riskType === 'string' && item.riskType ? item.riskType : '기타',
+    facts: STR_ARRAY(item.facts),
+    inferences: STR_ARRAY(item.inferences),
+    assumptions: STR_ARRAY(item.assumptions),
+    missingEvidence: STR_ARRAY(item.missingEvidence),
     exposure: {
       products: Array.isArray(item.exposure?.products) ? item.exposure.products.filter(p => ['CRC','GI','GL','COLOR'].includes(p)) : [],
       regions: Array.isArray(item.exposure?.regions) ? item.exposure.regions.filter(r => ['Europe','GCC','Asia','US','Korea Export'].includes(r)) : [],
-      routes: item.exposure?.routes || [],
-      tradeMeasures: item.exposure?.tradeMeasures || [],
+      routes: STR_ARRAY(item.exposure?.routes),
+      tradeMeasures: STR_ARRAY(item.exposure?.tradeMeasures),
     },
-    causalChain: Array.isArray(item.causalChain) ? item.causalChain : [],
-    impactVectors: item.impactVectors || {},
-    scores: item.scores || { evidenceQuality: 0, exposureProximity: 0, causalStrength: 0, businessMateriality: 0, urgency: 0 },
-    threat: item.threat || '',
-    opportunity: item.opportunity || '',
-    timeHorizon: item.timeHorizon || 'UNKNOWN',
-    watchSignals: Array.isArray(item.watchSignals) ? item.watchSignals : [],
-    counterScenario: item.counterScenario || '',
-    suggestedActions: Array.isArray(item.suggestedActions) ? item.suggestedActions : [],
-    evidenceIndices: Array.isArray(item.evidenceIndices) ? item.evidenceIndices : [],
+    causalChain: (Array.isArray(item.causalChain) ? item.causalChain : [])
+      .filter((c) => c && typeof c.step === 'string')
+      .map((c) => ({ step: c.step, state: CHAIN_STATES.includes(c.state) ? c.state : 'UNCONFIRMED' })),
+    impactVectors: Object.fromEntries(
+      ['price','cost','demand','sales','freight','leadTime','compliance','competition','opportunity']
+        .map((k) => [k, ['UP','DOWN','NEUTRAL','UNKNOWN'].includes(item.impactVectors?.[k]) ? item.impactVectors[k] : 'UNKNOWN']),
+    ),
+    scores: {
+      evidenceQuality: clampScore(item.scores?.evidenceQuality, 3),
+      exposureProximity: clampScore(item.scores?.exposureProximity, 3),
+      causalStrength: clampScore(item.scores?.causalStrength, 3),
+      businessMateriality: clampScore(item.scores?.businessMateriality, 3),
+      urgency: clampScore(item.scores?.urgency, 2),
+    },
+    threat: typeof item.threat === 'string' ? item.threat : '',
+    opportunity: typeof item.opportunity === 'string' ? item.opportunity : '',
+    timeHorizon: TIME_HORIZONS.includes(item.timeHorizon) ? item.timeHorizon : 'UNKNOWN',
+    watchSignals: STR_ARRAY(item.watchSignals),
+    counterScenario: typeof item.counterScenario === 'string' ? item.counterScenario : '',
+    suggestedActions: STR_ARRAY(item.suggestedActions),
+    evidenceIndices: Array.isArray(item.evidenceIndices) ? item.evidenceIndices.filter(Number.isFinite) : [],
   };
+  // Salvaged output must clear the same bar as first-pass output.
+  const parsed = AnalystOutputSchema.safeParse(normalized);
+  return parsed.success ? parsed.data : null;
 }
 
 /**
@@ -917,6 +1071,39 @@ ${artDetails}`;
 
   console.log(`  ai       ANALYST total: ${allAssessments.length} assessments from ${enrichedCandidates.length} candidates`);
   return { assessments: allAssessments, model: modelUsed };
+}
+
+/**
+ * Constitution rule 14, enforced in code: if an assessment's evidence articles
+ * have neither fetched body text nor an RSS snippet (headline-only), its
+ * evidenceQuality is clamped to ≤ 1. An assessment with NO traceable evidence
+ * indices is treated as headline-only too — untraceable evidence is the
+ * weakest kind. Returns how many assessments were capped.
+ */
+function capEvidenceQuality(assessments, enrichedCandidates) {
+  // article index → strongest evidence available for that article
+  const evidenceByIndex = new Map();
+  for (const cand of enrichedCandidates) {
+    for (const a of cand.enrichedArticles || []) {
+      const prev = evidenceByIndex.get(a.index);
+      const level = a.hasText ? 2 : a.hasSnippet ? 1 : 0;
+      if (prev == null || level > prev) evidenceByIndex.set(a.index, level);
+    }
+  }
+
+  let capped = 0;
+  for (const assessment of assessments) {
+    const indices = assessment.evidenceIndices || [];
+    const best = indices.length === 0
+      ? 0
+      : Math.max(...indices.map((i) => evidenceByIndex.get(i) ?? 0));
+    if (best === 0 && assessment.scores.evidenceQuality > 1) {
+      assessment.scores.evidenceQuality = 1;
+      assessment._evidenceCapped = true;
+      capped++;
+    }
+  }
+  return capped;
 }
 
 /**
@@ -1186,8 +1373,9 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
     return { impacts: [], metrics };
   }
 
-  // Load persistent state
-  const state = await loadState();
+  // Load persistent state and migrate any cases stored under the old
+  // title-hash IDs onto the deterministic event fingerprint (merges dupes).
+  const state = migrateCaseIds(await loadState());
   const prevCaseCount = Object.keys(state.riskCases || {}).length;
 
   // ── STEP 1: TRIAGE ──
@@ -1232,6 +1420,11 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
   }
 
   // ── STEP 5: DETERMINISTIC SCORING ──
+  // Enforce Constitution rule 14 in code, not just in the prompt: headline-only
+  // evidence can never carry evidenceQuality above 1. Runs after CRITIC, so the
+  // cap survives any critic adjustment (critic can only lower scores anyway).
+  const capped = capEvidenceQuality(assessments, enrichedCandidates);
+  if (capped > 0) console.log(`  ai       SCORE: evidenceQuality capped to ≤1 on ${capped} headline-only assessment(s)`);
   for (const a of assessments) {
     a._assessmentStatus = computeAssessmentStatus(a.scores);
     a._severity = computeSeverity(a.scores, a._assessmentStatus);
@@ -1277,3 +1470,15 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
 
   return { impacts, metrics };
 }
+
+// Exported for deterministic tests (tests/*.test.mjs) — pure functions only.
+export {
+  computeAssessmentStatus,
+  computeSeverity,
+  salvageAssessment,
+  capEvidenceQuality,
+  generateCaseId,
+  eventAnchors,
+  migrateCaseIds,
+  AnalystOutputSchema,
+};

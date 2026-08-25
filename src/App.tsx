@@ -385,6 +385,16 @@ export function App() {
     return analysis.criticalSignals.filter((s) => matchFilter(s.regions, s.products));
   }, [analysis, filterRegion, filterProduct]);
 
+  /* Full impact list (NOT the top-15 priority shortlist) — severity KPIs are
+   * computed from this so the user never mistakes a truncated shortlist's
+   * composition for the real distribution. */
+  const filteredImpacts = useMemo(() => {
+    if (!analysis) return [];
+    const all = analysis.impacts ?? [];
+    if (!isFiltered) return all;
+    return all.filter((s) => matchFilter(s.regions, s.products));
+  }, [analysis, filterRegion, filterProduct]);
+
   const filteredSalesImpact = useMemo(() => {
     if (!analysis) return [];
     return analysis.salesImpact.filter((row) => {
@@ -408,9 +418,15 @@ export function App() {
     return filteredCriticalSignals.filter((s) => s.severity === 'LOW');
   }, [filteredCriticalSignals, signalTab]);
 
-  const highCount = filteredCriticalSignals.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL').length;
-  const medCount = filteredCriticalSignals.filter((s) => s.severity === 'MEDIUM').length;
-  const lowCount = filteredCriticalSignals.filter((s) => s.severity === 'LOW').length;
+  // Severity counts over the FULL impact list — the priority panel below may
+  // truncate to 15 rows, but these numbers never come from that slice.
+  const highCount = filteredImpacts.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL').length;
+  const medCount = filteredImpacts.filter((s) => s.severity === 'MEDIUM').length;
+  const lowCount = filteredImpacts.filter((s) => s.severity === 'LOW').length;
+  void lowCount; // full-distribution LOW count — kept for parity, not currently displayed
+  // Shortlist-local counts drive the tab chips (they must match visible rows).
+  const shortlistHigh = filteredCriticalSignals.filter((s) => s.severity === 'HIGH' || s.severity === 'CRITICAL').length;
+  const shortlistMed = filteredCriticalSignals.filter((s) => s.severity === 'MEDIUM').length;
 
   // Sales Impact risk-type tabs (dynamically extracted)
   const salesRiskTypes = useMemo(() => {
@@ -655,9 +671,9 @@ export function App() {
           <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--color-side-fg)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
             {highCount}<span style={{ fontSize: 14, color: 'var(--color-side-fg-40)', fontWeight: 500 }}> 건 HIGH+</span>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--color-side-fg-70)' }}>전체 신호 {filteredCriticalSignals.length}건 · 규칙 {analysis.ruleCount}개</div>
+          <div style={{ fontSize: 11, color: 'var(--color-side-fg-70)' }}>전체 위험 {filteredImpacts.length}건 · 규칙 {analysis.ruleCount}개</div>
           <div style={{ height: 4, borderRadius: 2, background: 'var(--color-side-track)', overflow: 'hidden', marginTop: 4 }}>
-            <div style={{ height: '100%', background: 'var(--color-side-fg)', borderRadius: 2, width: `${filteredCriticalSignals.length > 0 ? Math.min(100, (highCount / filteredCriticalSignals.length) * 100) : 0}%` }} />
+            <div style={{ height: '100%', background: 'var(--color-side-fg)', borderRadius: 2, width: `${filteredImpacts.length > 0 ? Math.min(100, (highCount / filteredImpacts.length) * 100) : 0}%` }} />
           </div>
         </div>
       </aside>
@@ -991,24 +1007,20 @@ export function App() {
           <div className="grid-signals-brief">
             {/* ─── LEFT: Critical Signals ─── */}
             <Panel
-              title="CRITICAL SIGNALS"
-              titleKo={`핵심 위험 신호${isFiltered ? ' (필터 적용)' : ''}`}
+              title="PRIORITY RISK SIGNALS"
+              titleKo={`주요 위험 신호 — 우선순위 상위 ${filteredCriticalSignals.length}건 표시${isFiltered ? ' (필터 적용)' : ''}`}
               index="02"
               glow={highCount > 0 ? 'high' : undefined}
-              meta={`${filteredCriticalSignals.length}건${isFiltered ? ` / 전체 ${analysis.criticalSignals.length}건` : ''} · 규칙 ${analysis.ruleCount}개`}
+              meta={`상위 ${filteredCriticalSignals.length}건 표시 / 전체 위험 ${filteredImpacts.length}건 · 규칙 ${analysis.ruleCount}개`}
             >
-              {/* Severity tabs */}
+              {/* Severity tabs — counts are the rows visible in THIS shortlist */}
               <div className="tab-bar">
                 <TabChip label="전체" count={filteredCriticalSignals.length} active={signalTab === 'ALL'}
                   onClick={() => setSignalTab('ALL')} />
-                <TabChip label="🔴 HIGH" count={highCount} active={signalTab === 'HIGH'}
+                <TabChip label="🔴 HIGH" count={shortlistHigh} active={signalTab === 'HIGH'}
                   onClick={() => setSignalTab('HIGH')} />
-                <TabChip label="🟡 MEDIUM" count={medCount} active={signalTab === 'MEDIUM'}
+                <TabChip label="🟡 MEDIUM" count={shortlistMed} active={signalTab === 'MEDIUM'}
                   onClick={() => setSignalTab('MEDIUM')} />
-                {lowCount > 0 && (
-                  <TabChip label="⚪ LOW" count={lowCount} active={signalTab === 'LOW'}
-                    onClick={() => setSignalTab('LOW')} />
-                )}
               </div>
 
               {signalsByTab.length === 0 ? (

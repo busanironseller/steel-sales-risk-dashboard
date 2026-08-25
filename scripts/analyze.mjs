@@ -8,6 +8,7 @@
  * explicitly hedged. Nothing here invents a number.
  */
 import { readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { RULES, MARKET_THRESHOLDS, SEVERITY, RELEVANCE_TERMS, VALUE_CHAIN } from './rules.mjs';
 import { aiAnalyze } from './ai-analyze.mjs';
 
@@ -220,54 +221,78 @@ function buildEventClusters(articles) {
 
 const confidenceRank = { LOW: 1, MEDIUM: 2, HIGH: 3 };
 
+/**
+ * One market signal = one risk, no matter how many rules it triggers.
+ *
+ * Several rules legitimately share a trigger instrument (R1A/R1B both fire on
+ * hrc; R4A/R4C both fire on zinc) because one price move has several business
+ * effects. Previously each matching rule emitted its own impact, so a single
+ * HRC move counted as two HIGH risks with byte-identical `fact` strings. Now
+ * the first matching rule is the primary card and the remaining rules become
+ * `relatedEffects` inside that one impact — the distinct business effects are
+ * kept, but the risk is counted once.
+ */
 function impactsFromMarket(signals, market) {
   const impacts = [];
 
   for (const signal of signals) {
-    for (const rule of RULES) {
-      if (rule.trigger.kind !== 'market') continue;
+    const matched = RULES.filter((rule) => {
+      if (rule.trigger.kind !== 'market') return false;
       const targets = Array.isArray(rule.trigger.instrument) ? rule.trigger.instrument : [rule.trigger.instrument];
-      if (!targets.includes(signal.instrument)) continue;
+      return targets.includes(signal.instrument);
+    });
+    if (matched.length === 0) continue;
 
-      const direction = rule.directionFrom(signal.pct);
-      const actions = Array.isArray(rule.actions) ? rule.actions : rule.actions[direction] ?? [];
-      const actionsKo = rule.actionsKo
-        ? (Array.isArray(rule.actionsKo) ? rule.actionsKo : rule.actionsKo[direction] ?? [])
-        : [];
-      const narrative = rule.narrativeKo?.[direction] ?? rule.narrativeKo?.UP ?? null;
+    const [primary, ...secondary] = matched;
+    const direction = primary.directionFrom(signal.pct);
 
-      impacts.push({
-        id: `IM_${rule.id}_${signal.instrument}`,
+    const pick = (rule, table) =>
+      table ? (Array.isArray(table) ? table : table[direction] ?? []) : [];
+    const products = [...new Set(matched.flatMap((r) => r.products))];
+    const regions = [...new Set(matched.flatMap((r) => r.regions))];
+    const actions = [...new Set(matched.flatMap((r) => pick(r, r.actions)))].slice(0, 5);
+    const actionsKo = [...new Set(matched.flatMap((r) => pick(r, r.actionsKo)))].slice(0, 5);
+
+    impacts.push({
+      id: `IM_${primary.id}_${signal.instrument}`,
+      ruleId: primary.id,
+      mergedRuleIds: matched.map((r) => r.id),
+      ruleName: primary.name,
+      ruleNameKo: primary.nameKo ?? primary.name,
+      origin: 'MARKET_SIGNAL',
+      originId: signal.id,
+      severity: signal.severity,
+      confidence: signal.severity === 'HIGH' ? 'HIGH' : 'MEDIUM',
+      direction,
+      riskType: primary.riskType,
+      riskTypeKo: primary.riskTypeKo ?? primary.riskType,
+      products,
+      regions,
+      chain: primary.chain,
+      chainKo: primary.chainKo ?? primary.chain,
+      lagNote: primary.lagNote ?? null,
+      lagNoteKo: primary.lagNoteKo ?? primary.lagNote ?? null,
+      narrativeKo: primary.narrativeKo?.[direction] ?? primary.narrativeKo?.UP ?? null,
+      fact: signal.fact,
+      factSource: signal.source,
+      factTimestamp: signal.sourceTimestamp,
+      rule: primary.chain.join(' → '),
+      inference:
+        `${regions.join('/')} 향 ${products.join('/')} 거래에서 ` +
+        `${primary.riskTypeKo ?? primary.riskType} 리스크가 ` +
+        `${direction === 'UP' ? '상승' : '하락'}할 가능성이 있습니다. ` +
+        `(시장 데이터 기반 추론이며, 실제 오퍼 변동은 확인이 필요합니다)`,
+      actions,
+      actionsKo,
+      // The same price move seen through the other rules it triggers.
+      relatedEffects: secondary.map((rule) => ({
         ruleId: rule.id,
-        ruleName: rule.name,
         ruleNameKo: rule.nameKo ?? rule.name,
-        origin: 'MARKET_SIGNAL',
-        originId: signal.id,
-        severity: signal.severity,
-        confidence: signal.severity === 'HIGH' ? 'HIGH' : 'MEDIUM',
-        direction,
-        riskType: rule.riskType,
         riskTypeKo: rule.riskTypeKo ?? rule.riskType,
         products: rule.products,
-        regions: rule.regions,
-        chain: rule.chain,
-        chainKo: rule.chainKo ?? rule.chain,
-        lagNote: rule.lagNote ?? null,
-        lagNoteKo: rule.lagNoteKo ?? rule.lagNote ?? null,
-        narrativeKo: narrative,
-        fact: signal.fact,
-        factSource: signal.source,
-        factTimestamp: signal.sourceTimestamp,
-        rule: rule.chain.join(' → '),
-        inference:
-          `${rule.regions.join('/')} 향 ${rule.products.join('/')} 거래에서 ` +
-          `${rule.riskTypeKo ?? rule.riskType} 리스크가 ` +
-          `${direction === 'UP' ? '상승' : '하락'}할 가능성이 있습니다. ` +
-          `(시장 데이터 기반 추론이며, 실제 오퍼 변동은 확인이 필요합니다)`,
-        actions,
-        actionsKo,
-      });
-    }
+        narrativeKo: rule.narrativeKo?.[direction] ?? rule.narrativeKo?.UP ?? null,
+      })),
+    });
   }
   return impacts;
 }
@@ -281,8 +306,11 @@ function impactsFromEvents(clusters) {
       ? (Array.isArray(rule.actionsKo) ? rule.actionsKo : rule.actionsKo[direction] ?? [])
       : [];
     const narrative = rule.narrativeKo?.[direction] ?? rule.narrativeKo?.UP ?? null;
-    const severity =
-      cluster.confidence === 'HIGH' ? 'HIGH' : cluster.confidence === 'MEDIUM' ? 'MEDIUM' : 'LOW';
+    // Coverage (how many outlets wrote about it) measures how well-reported an
+    // event is, not how much it hurts the business — so coverage alone is
+    // capped at MEDIUM. HIGH from this path is only reachable via reconcile(),
+    // when a market signal confirms the same rule with hard price data.
+    const severity = cluster.confidence === 'LOW' ? 'LOW' : 'MEDIUM';
 
     return {
       id: `IM_${rule.id}_EVENT`,
@@ -376,6 +404,43 @@ function normalizeRiskCategory(riskTypeKo, riskType) {
     }
   }
   return { category: '기타', categoryEn: 'other' };
+}
+
+/**
+ * Drop AI impacts that describe the same event a rule-engine impact already
+ * covers. Two impacts are "the same event" when they share at least one
+ * evidence article AND normalize to the same risk category — deliberately
+ * conservative so genuinely different risks are never merged away. The
+ * surviving rule impact is annotated as AI-corroborated.
+ */
+function dedupAiAgainstRules(ruleImpacts, aiImpacts) {
+  const ruleEvidence = new Map(); // articleId -> rule impact
+  for (const imp of ruleImpacts) {
+    for (const ev of imp.evidence ?? []) {
+      if (ev?.id) ruleEvidence.set(ev.id, imp);
+    }
+  }
+
+  return aiImpacts.filter((ai) => {
+    const aiCategory = normalizeRiskCategory(ai.riskTypeKo, ai.riskType).categoryEn;
+    for (const ev of ai.evidence ?? []) {
+      const ruleImp = ev?.id ? ruleEvidence.get(ev.id) : null;
+      if (!ruleImp) continue;
+      const ruleCategory = normalizeRiskCategory(ruleImp.riskTypeKo, ruleImp.riskType).categoryEn;
+      if (ruleCategory === aiCategory) {
+        ruleImp.corroboratedByAI = true;
+        return false; // same articles, same risk category → one event, keep the rule
+      }
+    }
+    return true;
+  });
+}
+
+/** Severity distribution over the FULL impact list (never over a sliced view). */
+function summarizeSeverity(impacts) {
+  const counts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+  for (const imp of impacts) if (counts[imp.severity] != null) counts[imp.severity]++;
+  return counts;
 }
 
 /** Region x product projection (§13) — one row per actionable combination. */
@@ -501,9 +566,12 @@ async function main() {
     console.error('  ai       AI analysis failed (non-fatal):', err.message);
   }
 
-  // Dedup: AI impacts with same ruleId as a rule-engine impact are dropped (rule engine is authoritative)
-  const ruleImpactIds = new Set(ruleImpacts.map((i) => i.ruleId));
-  const dedupedAiImpacts = aiImpacts.filter((ai) => !ruleImpactIds.has(ai.ruleId));
+  // Dedup: an AI impact that covers the same event as a rule-engine impact is
+  // dropped (rule engine is authoritative). Identity is judged on shared
+  // evidence articles + same normalized risk category — the old ruleId
+  // comparison was a no-op because rule IDs (R1A_…) and AI case IDs (RC_…)
+  // live in different namespaces and never matched.
+  const dedupedAiImpacts = dedupAiAgainstRules(ruleImpacts, aiImpacts);
 
   // Merge: rule-based first, then AI insights
   const allImpacts = [...ruleImpacts, ...dedupedAiImpacts];
@@ -512,7 +580,11 @@ async function main() {
     (a, b) => SEVERITY[b.severity] - SEVERITY[a.severity] || (['HIGH', 'MEDIUM', 'LOW'].indexOf(a.confidence) - ['HIGH', 'MEDIUM', 'LOW'].indexOf(b.confidence)),
   );
 
-  const critical = allImpacts.filter((i) => SEVERITY[i.severity] >= SEVERITY.MEDIUM);
+  // Priority list for the dashboard's top panel: MEDIUM-and-above, best 15.
+  // This is a *display shortlist*, not the full distribution — severityCounts
+  // below carries the real per-severity totals over ALL impacts.
+  const priority = allImpacts.filter((i) => SEVERITY[i.severity] >= SEVERITY.MEDIUM);
+  const severityCounts = summarizeSeverity(allImpacts);
 
   // News digest for Event Radar: ALL articles, not just rule-matched
   const newsDigest = buildNewsDigest(news.articles);
@@ -535,7 +607,12 @@ async function main() {
     marketSignals: signals,
     eventClusters: clusters,
     impacts: allImpacts,
-    criticalSignals: critical.slice(0, 15),
+    // Compatibility field (UI/digest read this): top-15 priority shortlist.
+    criticalSignals: priority.slice(0, 15),
+    prioritySignalsTruncated: priority.length > 15,
+    prioritySignalsTotal: priority.length,
+    severityCounts,
+    impactsTotal: allImpacts.length,
     salesImpact: salesImpact(allImpacts),
     newsDigest,
     ruleCount: RULES.length,
@@ -549,12 +626,28 @@ async function main() {
   for (const s of signals) console.log(`             ${s.severity.padEnd(6)} ${s.instrument} ${s.pct.toFixed(2)}% (${s.windowLabel})`);
   console.log(`  clusters   ${clusters.length} event cluster(s)`);
   for (const c of clusters) console.log(`             ${c.confidence.padEnd(6)} ${c.eventType} — ${c.articleCount} articles / ${c.publisherCount} publishers`);
-  console.log(`  impacts    ${allImpacts.length} total (rules: ${ruleImpacts.length}, AI: ${dedupedAiImpacts.length}, critical: ${critical.length})`);
+  console.log(`  impacts    ${allImpacts.length} total (rules: ${ruleImpacts.length}, AI: ${dedupedAiImpacts.length} kept / ${aiImpacts.length - dedupedAiImpacts.length} deduped, priority: ${priority.length})`);
+  console.log(`  severity   CRITICAL ${severityCounts.CRITICAL} / HIGH ${severityCounts.HIGH} / MEDIUM ${severityCounts.MEDIUM} / LOW ${severityCounts.LOW}`);
   console.log(`  salesImpact ${analysis.salesImpact.length} row(s)`);
   console.log('\nanalysis.json written');
 }
 
-main().catch((err) => {
-  console.error('analyze failed:', err);
-  process.exit(1);
-});
+// Exported for deterministic tests (tests/*.test.mjs). Importing this module
+// must not run the pipeline — main() only fires when executed directly.
+export {
+  marketSignals,
+  impactsFromMarket,
+  impactsFromEvents,
+  buildEventClusters,
+  reconcile,
+  dedupAiAgainstRules,
+  summarizeSeverity,
+  normalizeRiskCategory,
+};
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error('analyze failed:', err);
+    process.exit(1);
+  });
+}

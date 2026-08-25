@@ -17,13 +17,24 @@ permissions:
   pages: write
   id-token: write
 
+# cancel-in-progress must stay FALSE here. With `true`, every new trigger
+# (hourly collector chain + any push) killed the deploy already in flight —
+# observed on 2026-08-24 as three consecutive cancelled deploys leaving the
+# site stale for hours. With `false`, an in-flight deploy always completes,
+# and GitHub keeps only the LATEST pending run in the queue (older pending
+# runs are superseded), so the newest build still wins without cancelling
+# work in progress.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Normal successful runs take 12-14 min (refresh ~10 + build ~2).
+    # 25 min leaves ~2x headroom while stopping a hung refresh from
+    # blocking the queue for an hour.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,6 +48,7 @@ jobs:
       # instead and the dashboard's own freshness indicator shows how old it is.
       - name: Refresh market and news data
         continue-on-error: true
+        timeout-minutes: 15
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npm run refresh
@@ -54,6 +66,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
