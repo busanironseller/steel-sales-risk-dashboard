@@ -380,7 +380,11 @@ async function sendEmail() {
 
   const info = await transporter.sendMail({
     from: `${senderName} <${GMAIL_USER}>`,
-    to: TO,
+    // Recipients go in BCC so nobody sees who else receives the digest.
+    // `to` is the sender's own address — without a visible To, many mail
+    // clients render "undisclosed recipients" or flag the mail as spammy.
+    to: `${senderName} <${GMAIL_USER}>`,
+    bcc: TO,
     subject,
     html,
     text,  // plain-text alternative — reduces spam score
