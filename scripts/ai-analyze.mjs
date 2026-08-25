@@ -810,7 +810,13 @@ async function triage(articles, analyzedFingerprints) {
 
   if (newCount === 0) {
     console.log('  ai       No new articles since last analysis — skipping');
-    return { candidates: [], newCount: 0, cacheHits: articles.length, model: null };
+    return {
+      candidates: [], newCount: 0, cacheHits: articles.length, model: null,
+      // Nothing needed judging, so nothing failed — every current article is
+      // already-analyzed and may stay in the fingerprint cache.
+      succeeded: true, chunksSucceeded: 0, chunksFailed: 0,
+      consumedFingerprints: articles.map(a => a.articleFingerprint).filter(Boolean),
+    };
   }
 
   console.log(`  ai       TRIAGE: ${newCount} new / ${articles.length - newCount} cached`);
@@ -830,6 +836,14 @@ async function triage(articles, analyzedFingerprints) {
     chunks.push({ lines: articleLines.slice(i, i + TRIAGE_CHUNK_SIZE), offset: i });
   }
 
+  // Per-chunk outcome tracking: only articles in chunks the model actually
+  // JUDGED (API responded AND the response parsed) may be marked analyzed.
+  // Articles in failed chunks must be re-triaged on the next run — otherwise
+  // a 429/timeout would permanently skip them (false-negative cache poisoning).
+  let chunksSucceeded = 0;
+  let chunksFailed = 0;
+  const consumedFingerprints = [];
+
   for (const [ci, chunk] of chunks.entries()) {
     const chunkLabel = chunks.length > 1 ? ` [chunk ${ci + 1}/${chunks.length}]` : '';
     const prompt = TRIAGE_PROMPT
@@ -838,7 +852,8 @@ async function triage(articles, analyzedFingerprints) {
 
     const result = await callGemini(prompt, { temperature: 0.2, maxTokens: 8192 });
     if (!result) {
-      console.error(`  ai       TRIAGE${chunkLabel}: Gemini call failed`);
+      console.error(`  ai       TRIAGE${chunkLabel}: Gemini call failed — articles in this chunk will be re-triaged next run`);
+      chunksFailed++;
       continue;
     }
     modelUsed = result.model;
@@ -852,13 +867,18 @@ async function triage(articles, analyzedFingerprints) {
         allCandidates.push(...good);
         console.log(`  ai       TRIAGE${chunkLabel}: ${good.length} candidates (model: ${result.model})`);
       } else {
-        // Salvage what we can
+        // Salvage what we can — still a real judgment from a real response
         const salvaged = items.filter(c => c?.articleIndices?.length > 0 && c?.needsDeepAnalysis !== false);
         allCandidates.push(...salvaged);
         console.log(`  ai       TRIAGE${chunkLabel}: validation partial — salvaged ${salvaged.length}`);
       }
+      chunksSucceeded++;
+      for (const a of articles.slice(chunk.offset, chunk.offset + chunk.lines.length)) {
+        if (a.articleFingerprint) consumedFingerprints.push(a.articleFingerprint);
+      }
     } catch (err) {
-      console.error(`  ai       TRIAGE${chunkLabel}: parse error: ${err.message}`);
+      console.error(`  ai       TRIAGE${chunkLabel}: parse error: ${err.message} — articles in this chunk will be re-triaged next run`);
+      chunksFailed++;
     }
 
     // Pause between chunks to respect free-tier RPM limit
@@ -866,8 +886,35 @@ async function triage(articles, analyzedFingerprints) {
   }
 
   const candidates = allCandidates.slice(0, 30);
-  console.log(`  ai       TRIAGE total: ${candidates.length} candidates from ${articles.length} articles`);
-  return { candidates, newCount, cacheHits: articles.length - newCount, model: modelUsed };
+  console.log(`  ai       TRIAGE total: ${candidates.length} candidates from ${articles.length} articles (chunks: ${chunksSucceeded} ok / ${chunksFailed} failed)`);
+  return {
+    candidates, newCount, cacheHits: articles.length - newCount, model: modelUsed,
+    succeeded: chunksFailed === 0,
+    chunksSucceeded,
+    chunksFailed,
+    consumedFingerprints,
+  };
+}
+
+/**
+ * Decide the next analyzedFingerprints cache after a triage run.
+ *
+ * An article's fingerprint may stay in / enter the cache only if it is
+ *  (a) still present in the current feed AND
+ *  (b) either previously analyzed, or consumed by a SUCCEEDED triage chunk
+ *      in this run.
+ * New articles whose chunk failed satisfy neither, so they remain un-cached
+ * and are re-triaged on the next refresh. Articles that dropped out of the
+ * feed are evicted, exactly as the previous full-replacement behaviour did.
+ */
+function mergeAnalyzedFingerprints(prevFingerprints, articles, consumedFingerprints) {
+  const prev = new Set(prevFingerprints);
+  const consumed = new Set(consumedFingerprints);
+  return articles
+    .map(a => a.articleFingerprint)
+    .filter(Boolean)
+    .filter(fp => prev.has(fp) || consumed.has(fp))
+    .slice(0, 500); // cap to prevent unbounded growth
 }
 
 /**
@@ -1386,8 +1433,16 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
   metrics.aiCallCount++;
 
   if (triageResult.candidates.length === 0) {
-    // Triage found nothing actionable — update fingerprints and return existing cases
-    state.analyzedFingerprints = articles.map(a => a.articleFingerprint).filter(Boolean).slice(0, 500);
+    // Zero candidates has two very different causes: (a) triage genuinely
+    // judged the articles and found nothing, or (b) the API/parse failed and
+    // no judgment happened. Only chunk-consumed articles are cached — articles
+    // from failed chunks stay un-cached so the next run re-triages them.
+    if (triageResult.chunksFailed > 0) {
+      console.log(`  ai       TRIAGE degraded (${triageResult.chunksFailed} chunk(s) failed) — unjudged new articles stay queued for next run`);
+    }
+    state.analyzedFingerprints = mergeAnalyzedFingerprints(
+      state.analyzedFingerprints || [], articles, triageResult.consumedFingerprints,
+    );
     await saveState(state);
     const existingCases = Object.values(state.riskCases || {}).filter(c => c.assessmentStatus !== 'IGNORE');
     const impacts = existingCases.map(c => toImpact(c, articles, triageResult.model));
@@ -1434,11 +1489,11 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
   const casesBeforeUpdate = new Set(Object.keys(state.riskCases || {}));
   updateRiskCases(assessments, state, articles);
 
-  // Update fingerprint cache with all current article fingerprints
-  state.analyzedFingerprints = articles
-    .map(a => a.articleFingerprint)
-    .filter(Boolean)
-    .slice(0, 500); // cap to prevent unbounded growth
+  // Update fingerprint cache — only articles from succeeded triage chunks are
+  // marked analyzed; articles from failed chunks will be re-triaged next run.
+  state.analyzedFingerprints = mergeAnalyzedFingerprints(
+    state.analyzedFingerprints || [], articles, triageResult.consumedFingerprints,
+  );
 
   const casesAfterUpdate = Object.keys(state.riskCases || {});
   metrics.riskCasesNew = casesAfterUpdate.filter(id => !casesBeforeUpdate.has(id)).length;
@@ -1480,5 +1535,6 @@ export {
   generateCaseId,
   eventAnchors,
   migrateCaseIds,
+  mergeAnalyzedFingerprints,
   AnalystOutputSchema,
 };
