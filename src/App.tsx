@@ -764,6 +764,18 @@ export function App() {
             <span>원가 시뮬레이터</span>
           </button>
           <button
+            className="btn-secondary"
+            title="GitHub Actions에서 데이터 수집을 직접 실행합니다 (GitHub 로그인 필요)"
+            onClick={() => window.open(
+              'https://github.com/busanironseller/steel-sales-risk-dashboard/actions/workflows/collect.yml',
+              '_blank',
+              'noopener,noreferrer',
+            )}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 13v6a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h6"/></svg>
+            <span>수동 갱신</span>
+          </button>
+          <button
             className="btn-primary"
             onClick={() => loadData(true)}
             disabled={refreshing}
