@@ -22,6 +22,44 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODELS = ['gemini-3.7-flash', 'gemini-3.5-flash'];
 const STATE_PATH = new URL('../public/data/ai-state.json', import.meta.url);
 
+/**
+ * Whole-stage time budget for AI calls. Overridable via AI_BUDGET_MS.
+ *
+ * 2026-08-27: Gemini returned 429 on every model, and callGemini's retry
+ * backoff (30s/60s/90s across 4 attempts x 2 models x 120s timeouts — up to
+ * ~19 min for a SINGLE call) consumed the whole workflow step timeout. The
+ * step was killed before analyze.mjs could write analysis.json at all, so the
+ * build fell back to the committed copy and the site went 20 hours stale.
+ *
+ * Giving up early is safe: analyze.mjs already treats AI failure as
+ * non-fatal, and a failed TRIAGE returns the cached risk cases, so the
+ * dashboard keeps its AI insights and simply gains fresh market/news data.
+ */
+const AI_BUDGET_MS = Number(process.env.AI_BUDGET_MS || 360_000); // 6 min
+
+/** Absolute deadline for the AI stage; set once per aiAnalyze() run. */
+let aiDeadline = Infinity;
+
+/** Arm the budget. Exported for tests. */
+function setAiDeadline(budgetMs = AI_BUDGET_MS) {
+  aiDeadline = Date.now() + budgetMs;
+  return aiDeadline;
+}
+
+/** True once the AI stage has spent its budget. */
+function isBudgetExhausted(now = Date.now()) {
+  return now >= aiDeadline;
+}
+
+/**
+ * Per-request timeout, never longer than the budget that remains.
+ * Floored at 10s so a nearly-spent budget still allows one honest attempt.
+ */
+function callTimeoutMs(max = 120_000, now = Date.now()) {
+  if (!Number.isFinite(aiDeadline)) return max;
+  return Math.max(10_000, Math.min(max, aiDeadline - now));
+}
+
 // ────────────────────────────────────────────────── Zod Schemas
 
 const DirectionEnum = z.enum(['UP', 'DOWN', 'NEUTRAL', 'UNKNOWN']);
@@ -336,6 +374,11 @@ async function callGemini(prompt, { temperature = 0.3, maxTokens = 8192, useGrou
 
   const MAX_RETRIES = 3;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    // Budget guard: never start another attempt past the deadline.
+    if (isBudgetExhausted()) {
+      console.log('  ai       time budget exhausted — giving up on this call');
+      return null;
+    }
     let anyRateLimited = false;
     let hardError = false;
     for (const model of GEMINI_MODELS) {
@@ -344,7 +387,7 @@ async function callGemini(prompt, { temperature = 0.3, maxTokens = 8192, useGrou
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body,
-          signal: AbortSignal.timeout(120_000),
+          signal: AbortSignal.timeout(callTimeoutMs()),
         });
 
         if (res.ok) {
@@ -389,6 +432,12 @@ async function callGemini(prompt, { temperature = 0.3, maxTokens = 8192, useGrou
     // If any model was rate-limited and none succeeded, wait and retry
     if (anyRateLimited && attempt < MAX_RETRIES) {
       const wait = 30 * (attempt + 1); // 30s, 60s, 90s — aligned with free-tier 1-min RPM window
+      // Don't sleep into the deadline: when the daily quota is gone, waiting
+      // buys nothing and the whole refresh gets killed before it can save.
+      if (isBudgetExhausted(Date.now() + wait * 1000)) {
+        console.log('  ai       time budget would be exceeded — skipping retry');
+        return null;
+      }
       console.log(`  ai       All models rate-limited, waiting ${wait}s (retry ${attempt + 1}/${MAX_RETRIES})...`);
       await new Promise(r => setTimeout(r, wait * 1000));
     }
@@ -1420,6 +1469,12 @@ export async function aiAnalyze(articles, existingRuleImpactIds = []) {
     return { impacts: [], metrics };
   }
 
+  // Arm the AI time budget for this run. Everything downstream (TRIAGE,
+  // ANALYST, CRITIC) shares it, so a stalled provider can never consume the
+  // workflow step timeout and prevent analysis.json from being written.
+  setAiDeadline();
+  console.log(`  ai       time budget: ${Math.round(AI_BUDGET_MS / 1000)}s`);
+
   // Load persistent state and migrate any cases stored under the old
   // title-hash IDs onto the deterministic event fingerprint (merges dupes).
   const state = migrateCaseIds(await loadState());
@@ -1536,5 +1591,8 @@ export {
   eventAnchors,
   migrateCaseIds,
   mergeAnalyzedFingerprints,
+  setAiDeadline,
+  isBudgetExhausted,
+  callTimeoutMs,
   AnalystOutputSchema,
 };
