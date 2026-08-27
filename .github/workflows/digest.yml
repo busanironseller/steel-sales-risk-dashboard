@@ -12,6 +12,10 @@ on:
         type: boolean
         default: false
 
+# 수집한 데이터를 커밋해야 하므로 쓰기 권한이 필요하다.
+permissions:
+  contents: write
+
 jobs:
   digest:
     runs-on: ubuntu-latest
@@ -31,6 +35,21 @@ jobs:
         run: npm run refresh
         timeout-minutes: 12
         continue-on-error: true   # 데이터 갱신 실패해도 이메일은 발송
+
+      # 수집 결과를 커밋해 두지 않으면 메일에만 담기고 버려져서, 웹 대시보드가
+      # 메일보다 오래된 데이터를 계속 보여주게 된다(발산). 커밋해 두면 뒤이어
+      # 도는 배포가 이 데이터를 사이트에 반영한다.
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          if git diff --staged --quiet; then
+            echo "no data change"
+            exit 0
+          fi
+          git commit -m "data: digest refresh $(date -u +'%Y-%m-%dT%H:%MZ')"
+          git push
 
       - name: Send digest email
         env:

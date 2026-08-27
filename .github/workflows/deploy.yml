@@ -8,7 +8,7 @@ on:
   # off the collector's completion instead — workflow_run is not subject to that
   # loop-prevention rule.
   workflow_run:
-    workflows: ['Scheduled data collection']
+    workflows: ['Scheduled data collection', 'Daily email digest']
     types: [completed]
   workflow_dispatch:
 
