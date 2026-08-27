@@ -1,0 +1,104 @@
+name: Watchdog — keep collect alive
+
+# Runs every 6 hours. Even if GitHub suspends hourly cron schedules
+# (due to consecutive failures in collect.yml), a 6-hour schedule is
+# far less likely to be suspended. This workflow:
+#   1. Re-enables collect.yml if GitHub disabled it
+#   2. Triggers a collect run if the last one was >3 hours ago
+#   3. Makes a keep-alive commit every 50 days to prevent the 60-day
+#      inactivity auto-disable on public repos
+
+on:
+  schedule:
+    - cron: '30 */6 * * *'   # Every 6 hours at :30
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Re-enable collect workflow if disabled
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          # Find the collect workflow ID
+          WF_ID=$(gh api "repos/$REPO/actions/workflows" \
+            --jq '.workflows[] | select(.name == "Scheduled data collection") | .id')
+
+          if [ -z "$WF_ID" ]; then
+            echo "::warning::Could not find 'Scheduled data collection' workflow"
+            exit 0
+          fi
+
+          # Check if it's disabled
+          STATE=$(gh api "repos/$REPO/actions/workflows/$WF_ID" --jq '.state')
+          echo "Collect workflow state: $STATE"
+
+          if [ "$STATE" = "disabled_inactivity" ] || [ "$STATE" = "disabled" ]; then
+            echo "🔄 Re-enabling collect workflow..."
+            gh api -X PUT "repos/$REPO/actions/workflows/$WF_ID/enable"
+            echo "✅ Collect workflow re-enabled"
+          else
+            echo "✅ Collect workflow is active ($STATE)"
+          fi
+
+      - name: Trigger collect if stale (>3 hours since last run)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+
+          # Get last collect run timestamp
+          LAST_RUN=$(gh api "repos/$REPO/actions/workflows/collect.yml/runs?per_page=1&status=completed" \
+            --jq '.workflow_runs[0].updated_at // empty')
+
+          if [ -z "$LAST_RUN" ]; then
+            echo "No completed runs found — triggering collect"
+            gh workflow run collect.yml
+            exit 0
+          fi
+
+          LAST_EPOCH=$(date -d "$LAST_RUN" +%s 2>/dev/null || date -u +%s)
+          NOW_EPOCH=$(date -u +%s)
+          DIFF=$(( NOW_EPOCH - LAST_EPOCH ))
+          HOURS=$(( DIFF / 3600 ))
+
+          echo "Last collect run: $LAST_RUN ($HOURS hours ago)"
+
+          if [ "$DIFF" -gt 10800 ]; then
+            echo "🔄 Last run was ${HOURS}h ago (>3h) — triggering collect..."
+            gh workflow run collect.yml
+            echo "✅ Collect triggered"
+          else
+            echo "✅ Collect ran recently (${HOURS}h ago), no action needed"
+          fi
+
+      - name: Keep-alive commit (prevents 60-day inactivity disable)
+        run: |
+          # Only commit if last commit is >50 days old
+          LAST_COMMIT_EPOCH=$(git log -1 --format=%ct)
+          NOW_EPOCH=$(date -u +%s)
+          DAYS_SINCE=$(( (NOW_EPOCH - LAST_COMMIT_EPOCH) / 86400 ))
+
+          echo "Days since last commit: $DAYS_SINCE"
+
+          if [ "$DAYS_SINCE" -gt 50 ]; then
+            echo "🔄 Repo inactive for ${DAYS_SINCE} days — making keep-alive commit"
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            date -u > .github/.keep-alive
+            git add .github/.keep-alive
+            git commit -m "chore: keep-alive to prevent GitHub schedule disable"
+            git push
+            echo "✅ Keep-alive committed"
+          else
+            echo "✅ Recent activity (${DAYS_SINCE} days ago), no keep-alive needed"
+          fi
