@@ -1,137 +1,279 @@
 {
-  "lastAnalyzedAt": "2026-09-14T01:06:30.185Z",
+  "lastAnalyzedAt": "2026-09-14T05:21:54.901Z",
   "analyzedFingerprints": [
-    "c0367d1cc59dacaa",
+    "69fa818d36906676",
+    "bda28aa7a2a771cc",
+    "b8ecae91c31e996f",
+    "a32ea0fc8be6ade7",
+    "23fa2a5362041517",
+    "a750b9a7b916aa85",
+    "92b00d04c0fb7e7e",
+    "1ca0fb444b040bb3",
+    "83ebde6ae113e4b8",
+    "d41f6c9efe5d7de5",
+    "83cf4f6bf0203c54",
+    "dfbb33d7d86e868b",
+    "f40574a3cfdeabf6",
+    "6a26b3f305b46a05",
+    "16d56c8f7867484f",
+    "cc70d3e6a0c83413",
+    "5fe9e5288829c0eb",
+    "c9616d1ba1fc4303",
+    "8b8feea08b398304",
+    "1078dd0361b9e22d",
+    "84e866c07cbf5592",
+    "ec6c794c2093899a",
+    "8c107dfe9ae4a9f7",
+    "edc99cbe620d07bf",
+    "1e961cc56c7ad05a",
+    "175c1a3c26959e4b",
+    "0cb4bdbd8b2a7185",
+    "6b97a5199ded777e",
+    "73e8bcac03e4adc7",
+    "69ae58202427a911",
+    "7b15189557b2df3f",
+    "f97d41cff9ca5107",
+    "ae2601c415fb2baf",
+    "61dfe8612af151b2",
+    "0679eb6cd9ba9e85",
+    "4a4c5ccf84c8bb9d",
+    "a55e890d50d93556",
+    "c7e5541ad06b7794",
+    "946b96c5a7718542",
+    "5045810338f69100",
+    "b303b44b1f07ea7d",
+    "dcc50010490e6847",
+    "f3e0aa54169a509b",
+    "dc14fb897ae1dc4d",
+    "a12d0e49cdb8237f",
+    "be61869287f12553",
+    "164c9cef9629909e",
+    "ba252ae7bd6d00be",
+    "73a8c8eb32678039",
+    "92f41eebb8acac6a",
+    "eb82ef8676ae653d",
+    "b0115633eb254a2b",
+    "0f272eb4798bde7a",
+    "0c4acf54b0b2ef60",
+    "f85cb7619a4e37b5",
+    "6db300e97d3ce4c1",
+    "ca980ab04bd21fbb",
+    "2dea422df69e51c7",
+    "9551329b246ddf5c",
+    "5fb7dc817d77ebcf",
+    "6121ba35856b31a2",
+    "d7cf3c9f258c82fb",
+    "91b9e70c291a811a",
+    "eb06a5dcd14a9e9a",
+    "328ffd556268f93f",
+    "9216ce6809bc45cc",
+    "013fdeeab74b6462",
+    "47881f9eb3c5b6f6",
+    "e26d08c94460aadc",
+    "ac149052ec0872c4",
+    "144d8f1dfc1f779e",
+    "df07cf645cb0bbf6",
+    "dfc1ba6c124bd6d2",
+    "5451aaa40f76e8be",
+    "1086bcbfee07299b",
+    "295b7f10cb621e29",
+    "f573bba2a144fc86",
+    "5e45ba19f979dceb",
+    "8aca6dbbdb7e4ad3",
+    "77946846dd6449dd",
+    "f0f00c06a8b16211",
+    "980267e2ab165059",
+    "03114b09c1a5cd86",
+    "99332578945eed20",
+    "6894a8ea3f3fc30b",
+    "b971347a71c01483",
+    "05f38d6b14e602b0",
+    "ceceba03fc5c5bac",
+    "8c7f0d9108249369",
+    "c222ff621f76869c",
+    "0b2340054e73d2f6",
+    "cb9f03ebede4307e",
+    "d2a89348a0e75b82",
+    "2c3ac4c3c5bba564",
+    "d331bd126252be7f",
+    "52a4d5746ebd1453",
+    "af29fc72ce4adbb5",
+    "d1dc979e408bcedd",
+    "cf51d20c66a9f685",
+    "80d1c5db638b1b56",
+    "84f3142615c5e4b5",
+    "a9f982d217904c41",
+    "79dd14ad98c79d00",
+    "9488a77d17292dc0",
+    "53cce449553d76ec",
+    "8e71a28d71d64204",
+    "717bfbbd71ff846a",
+    "56c8586cb97f1284",
+    "8dbbb984576650a0",
+    "f371451624359771",
+    "597f9f3a7a5972c1",
+    "0f2dc870d01f5433",
+    "49ba6b00c94187c3",
+    "f679a02d2825e363",
+    "1cf87b6b5a3143ed",
+    "e9690c209c5dfe73",
+    "14c54d6acdf1d7ac",
+    "9d4a4fcac68befc9",
+    "e05a9ae6ad30b64f",
+    "8b205128dc7116c0",
+    "9708aada236af677",
+    "53e1722862ff92be",
+    "a644d80426de8127",
+    "d7473aff5188d469",
+    "3e47b673ea77a9f2",
+    "5964955870d4818d",
+    "5253fbdab2784657",
+    "45ec70db315e2557",
+    "d4ed6a705062d06c",
+    "f846f396e21fd2f1",
+    "d13e552a39f85610",
+    "644db1cfea76d834",
+    "098e02ed11983e59",
+    "e2cf1b48a5c47756",
+    "df722ac309541d1e",
+    "979b87c4b8b04927",
+    "70d290c1ab258bcf",
+    "c1c329e37e5816ed",
+    "496ab84aeca93cd4",
+    "d61651ae638f262c",
+    "af978289e9da2509",
+    "e6b25d8b26a55e99",
+    "d739710ad37d4858",
+    "21ae64fff4c814c9",
+    "c2fcbe75cd35a5da",
     "177ee3b45557bd68",
+    "887785ab960673af",
+    "6e5733caede0e93a",
+    "f32b37bbc55c1b46",
+    "b161389b526de058",
+    "4b141339c29d423b",
+    "1bb2f48552f2fe5c",
+    "dd33b8f5f64a11ad",
+    "5537224858609239",
+    "8028ac63c5693928",
+    "56988c9ee301eae6",
+    "aeb23722877d79ee",
+    "726037e8e51a7339",
+    "5f0a82e9696815b2",
+    "425c393b93002e7c",
+    "6d3fb3bd7ee09fb6",
+    "61a7eb7a7ab7cf44",
+    "46cb2ccffbfbd1ee",
+    "8f5eb95cd8ae9755",
+    "1b93d51cdaa67747",
     "d6c539756cb2bd4b",
-    "da9f5a09a9689479",
+    "79c2eee98ccb9a58",
+    "e7ac52ba8b6ddc06",
+    "32e37f210547fd94",
+    "05d6ac62b5042280",
+    "80012fb15c68d20c",
+    "b1ab1a903ff513e6",
+    "3ab2633b7b70d38a",
+    "8d3ca7e18906f577",
+    "bf09c8a2d1b5a563",
+    "84bb466035125729",
+    "7734629f94f1a6d1",
+    "ca260b195181bdb7",
+    "1d0292e6125142dd",
+    "c74f759109d4f831",
+    "390102118404c3cd",
+    "51cecce08db199f3",
+    "4255ebe1b3957864",
     "dd6d2611d7531da3",
-    "555009c679fcba62",
+    "a80ac88108d8035b",
     "fa2a0de931f8aaeb",
-    "9117a33a57767ed8",
+    "33255cb6c387b964",
     "b98efe35eb2ebbd2",
     "c527a2ea79868302",
     "617c22214da06015",
+    "307002dd89d917a5",
+    "22cfe5e75b72fdbd",
+    "0eeead37d118223b",
+    "91ba3c9ae404fd05",
+    "e48c5a22d6bf1b8d",
+    "97cccc6dd96f7b87",
+    "626368acfeaf29c2",
     "03fba8a0e405eefd",
+    "9016f7b80ac8b2d5",
+    "79491bb64ac47e4a",
     "6bfe83db555c38cd",
     "eb5ddc023ff613d1",
-    "9d39fdf9999d6737",
     "3315a510179e24fc",
     "2b23a367c31f4b2d",
-    "a3cca9f2d5eccda1",
     "b325a41e9f2dc4ba",
     "b14fb269383a9024",
     "4aa1adee4454de2e",
     "595edc92c708fb1d",
-    "6bdce75bfe932bf8",
     "35ba68ce0dc5ff41",
-    "67d2ca1b76fabcde",
-    "307b73ce6067bcba",
-    "ffbfa92a91bef00b",
     "d37dd2c0813d35b6",
     "a8f3557c3943417b",
     "b35c5913a69ad2bb",
-    "572853480292388e",
     "d190b92da871b1e8",
-    "e44c3b5bdaa16438",
     "12cb91dcf5d4ea8f",
-    "5ef8701e20971b18",
     "180db76606824e45",
-    "12f7299289bbd4fb",
-    "b3b0ba5e4e01f75e",
-    "567e2cd4f6dbabb1",
     "b31af4a62d1a3ba6",
     "81ba01f5fb8909a6",
-    "e2d8f04b0de26570",
     "775679b2ccf68c22",
     "d2a6d3c9564372d4",
     "c92233e9eba581c5",
-    "af10e1e76de75f97",
     "3a5b6b53210902cd",
     "1fbabfc758cf57a7",
-    "7105351f22f15f73",
     "9f42397eec88ac18",
-    "5c65f23cd6063267",
     "6826275d8ba2a353",
-    "8f631fa9e22b22ce",
-    "b4bc0f8d7057d613",
     "c4683603a994f08f",
     "8d571b1aaa443897",
     "e6482e98a476b366",
     "10240e3cfcd0196f",
-    "1a99c482c150c2d7",
-    "e1b1dafc81de2f75",
-    "989667df4bf5a6fa",
     "2afffbd82ac0869c",
-    "5ca0b431ac377014",
-    "2a760a9ce8bb2bee",
     "74919d53977b9485",
     "5186814a026f4368",
-    "12afecb201f3d30b",
     "95dfe4ee79ac7347",
-    "deeb87a40f661305",
     "56bf3e5aa449f59f",
     "83ad4a1f9baf40f0",
     "a41f72620450a1cd",
-    "ddce23326f9f8a78",
     "f23759f07256904f",
     "fbb36474c868f050",
     "b93cafdc073f1858",
     "c11c332fac283f98",
     "f431d3f83a70147c",
-    "5a530059122be2de",
-    "cd6583bca7dea75d",
     "728272d5331921bb",
-    "b1b9a6a2352144af",
     "381cae7c6c5041e1",
     "e0260e240bce4d88",
     "9c6fa5ae7308d23c",
     "283b85993b683dae",
-    "6abc9086c4b6ec6d",
-    "55ad2459c7d4a297",
-    "ed16e0c7288adadc",
     "98102d55549e9c38",
     "0eb27bd5f3dd2388",
     "f3b0c98be211db65",
-    "72dcb4d7bf637594",
     "e2e129986365ff95",
-    "cedf3240aae6178b",
-    "1d002300e210160a",
     "c68799a19092171c",
     "f3cdc7a10db52247",
     "cdf9b8cd8ce14f25",
     "e460f683a081d848",
     "e368fa5aa363adc0",
     "81d1065a714c1a98",
-    "f0f4a3c33122a211",
     "7e33e2a655211fdd",
     "8f1e3eced5416981",
-    "6a99efd49b16fcb6",
-    "bbbb76242533bca4",
     "1480c77830964912",
     "887a26868f00460d",
-    "f9dd8023d8bc3c83",
     "48e91d88befbb3fd",
-    "4e68b6868e3fbe0e",
     "273a99dccd4fb76b",
     "18c4fd6c592482a5",
     "d7bcd780b8083094",
     "224ee447bb8e1f13",
     "b388b8fefddbf1f9",
-    "6c55a54130a67a22",
     "c6fa9180d07a34ee",
-    "ccb0cad8e5ee55ec",
     "49f5f3399f7fd86f",
     "1ca421ca541ef2be",
     "77cba375b509781e",
-    "f00a4777e881b990",
     "7c72ba086740b7d9",
     "f2f4799d74d478f8",
     "6b124d4e17dcb23b",
-    "4ca10f0f3e5d631e",
-    "0164536600b0d05d",
     "33aea0349b6a7b6b",
-    "deececbcb242f294",
     "ae7befd16024d172",
     "4be1fc8ba9637c7e",
     "ac12b590db62d468",
@@ -139,150 +281,30 @@
     "24c50487365c2863",
     "927ee59598a39717",
     "2c11e46740127abb",
-    "b7a5675e4ba43900",
     "501795516c4e4f72",
-    "223075a4a7acfc49",
     "e3002ca6e7791f12",
     "3d6254be04513936",
-    "3bc724bea88e111c",
-    "9d0b55e234176089",
-    "15db34f1a61ac292",
-    "fbc57a391b84b71e",
     "0778cf11a6a72cfc",
-    "674997f484e0fb6e",
-    "feba8ce77a519706",
-    "2c3a4a6fb47d917a",
-    "a95eb700782b3643",
     "350d8b4219c92ee3",
-    "0bd4d8e9a36e5b31",
     "5f4478a1b6595345",
     "b2560c25e8f89bcb",
-    "b67be85021796ff0",
-    "3ca1b2bc5ac77edc",
     "b299134d07e1b77e",
     "16bf83ea078e4770",
-    "bf333a21853c1eba",
     "fed3d31f7daf733c",
     "021293d52d6e5f81",
-    "14e10169ec424038",
     "d897494a6dfecbc1",
     "a94747963c3ae39e",
     "74acb5d17b86cb38",
-    "e836b2aed20311c0",
     "7f3943bb90427589",
     "47d7a0cda9c20fc1",
     "46bf37e06368b077",
-    "76614ef5e50331b9",
     "35c7b35e2b5d6e5f",
     "877f971adbf28327",
     "7b8ac5bbb18d0faa",
     "d60f3cab47efcc56",
     "58188c537f8e1c31",
     "c0c0fcc4f76dba1f",
-    "e9d5e0a7acf21cfd",
-    "15b3f84c6084654d",
-    "22d22d9c218883b3",
-    "502c6b63468472b3",
-    "960de948cf7af802",
-    "b51e67720c40f48c",
-    "a58a252aa404745f",
-    "e5268c5f6691665d",
-    "6d16f701026963c6",
-    "0f5613db95a06ee3",
-    "be9be6310cbf1842",
-    "3797ac1de0060199",
-    "7299512ae6a292e7",
-    "d9f9a7917ec8377f",
-    "5495672efb2aeef3",
-    "590f7fd71b2018b3",
-    "382bad05eef461e9",
-    "c2e5e3461ef52dd6",
-    "ebed09569e9af473",
-    "97a987bac067f1e6",
-    "7f6830085728ed81",
-    "88ad432b144d7464",
-    "d7371dad05b295d3",
-    "1ba7d6e6fff944e4",
-    "1bbd456b27680ef8",
-    "c939c84c12b050fd",
-    "2c1650810100f934",
-    "79fee2dabb8a8a70",
-    "6a8222935e65f97c",
-    "10096570a05bedef",
-    "b044ccc67ba27a13",
-    "b333e24d0fb1b7f9",
-    "0942436da72793ab",
-    "e09bb531fdd214ae",
-    "07b6e14fc46f298f",
-    "cf188cb320abeb50",
-    "d78e3e874f0f2497",
-    "3aea199af028e70c",
-    "6821e5555203015b",
-    "d5389264db127cc5",
-    "e8abae917ea16a82",
-    "f62f66b807969508",
-    "2743837a0492db5f",
-    "72a64817178d119c",
-    "a5da98262730e3b4",
-    "29768312fb7c2998",
-    "4453952adfc434c9",
-    "9375da62715e6c92",
-    "93a6def65667c789",
-    "e761f73c7f5357d4",
-    "6bcb225befa81277",
-    "8c2b2bf7c3d0c2d6",
-    "743d3234b77d2d66",
-    "205a710effa61f28",
-    "dbebb77010938a33",
-    "2c0db37f0e44f55d",
-    "22aa85ec37610410",
-    "4bd5263343cc4b58",
-    "715efcf8130fbe45",
-    "a866898936267467",
-    "ecdef4734c1d0b00",
-    "ee7b5a1cf5de26e4",
-    "5c9b9f44b1f78656",
-    "2c02d0bbeb088f36",
-    "42285a3658fe0af1",
-    "fa2e87eb2c83aeb4",
-    "9c26462cac094e5f",
-    "aeaa7191d0f674c7",
-    "6fcf8b615c599f9d",
-    "907fd7f426969d82",
-    "f6baeaba4d2de02d",
-    "0f04bb01918ba103",
-    "18ee78aa94b97bbe",
-    "acbb2294b8805cd6",
-    "f1ef9461962630f0",
-    "c175d932a7ec7061",
-    "80deb514c4b1217e",
-    "f1f07a29710c2800",
-    "1713ef433bbfe6db",
-    "d0180994021d97ea",
-    "b3e6d4becd3be75f",
-    "43384547324b8515",
-    "191100602aa9de77",
-    "badcf8fa3ffa8073",
-    "f1c47620d970e0a2",
-    "fc4d783b6e51b959",
-    "18df1a296c28f2b8",
-    "fcab725066a9cff3",
-    "205ec81431bca0aa",
-    "81413a0db53a204c",
-    "0369670c341e7927",
-    "93186f0c4014e109",
-    "a86624b1b648605c",
-    "1efdeb7106011197",
-    "539a181c782071f9",
-    "b751619b6cf11c25",
-    "a55fa585c713050e",
-    "9289fd4552d5bbbe",
-    "db9b84b56044fb8c",
-    "d23a359db6596574",
-    "26e232a681fd00a2",
-    "1d6ea8e6c08674d4",
-    "29126394febca19b",
-    "1f86be204d3904e0"
+    "e9d5e0a7acf21cfd"
   ],
   "riskCases": {
     "RC_e4ee05a5da86": {
@@ -5514,209 +5536,6 @@
         }
       ]
     },
-    "RC_fcb41c47ca5c": {
-      "caseId": "RC_fcb41c47ca5c",
-      "canonicalEventTitle": "미국의 대중국 수출 급증 대응 G20 공조 추진",
-      "assessmentStatus": "WATCH",
-      "severity": "LOW",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "통상 규제 리스크",
-      "facts": [
-        "미국 재무장관(베센트)이 G20 국가들에게 중국의 과잉 수출에 대응하는 단일 장벽(unified wall) 구축을 촉구함"
-      ],
-      "inferences": [
-        "G20 국가들이 동시다발적으로 중국산 철강에 대한 관세 장벽을 높일 가능성이 있음"
-      ],
-      "assumptions": [
-        "유럽, 인도 등 주요 G20 국가들이 미국의 제안에 동참하여 중국산 철강 규제를 강화할 것임"
-      ],
-      "missingEvidence": [
-        "G20 회원국들의 구체적인 동참 여부 및 공동 규제 도입 일정"
-      ],
-      "exposure": {
-        "products": [
-          "CRC",
-          "GI",
-          "GL",
-          "COLOR"
-        ],
-        "regions": [
-          "Europe",
-          "GCC",
-          "Asia"
-        ],
-        "routes": [],
-        "tradeMeasures": [
-          "Anti-dumping",
-          "Countervailing duties"
-        ]
-      },
-      "causalChain": [
-        {
-          "step": "미국 재무부의 대중국 G20 공동 규제 장벽 제안",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "G20 국가들의 중국산 철강(HRC, 도금강판 등) 규제 공조 합의",
-          "state": "UNCONFIRMED"
-        },
-        {
-          "step": "중국산 철강의 G20 외 비동맹국(ASEAN, 중동 일부)으로의 우회 수출 및 밀어내기 급증",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "아시아 및 GCC 시장에서 한국산 제품과 중국산 제품 간의 가격 경쟁 극대화",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "DOWN",
-        "cost": "NEUTRAL",
-        "demand": "NEUTRAL",
-        "sales": "DOWN",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "UP",
-        "opportunity": "NEUTRAL"
-      },
-      "scores": {
-        "evidenceQuality": 1,
-        "exposureProximity": 2,
-        "causalStrength": 1,
-        "businessMateriality": 2,
-        "urgency": 0
-      },
-      "threat": "G20 공조로 중국산 철강의 선진국 수출이 막힐 경우, 중국산 저가 도금강판이 동남아(ASEAN) 및 중동(GCC) 시장으로 대거 유입되어 한국산의 해당 지역 수출 마진이 폭락할 수 있음",
-      "opportunity": "유럽(EU) 등 G20 국가들이 중국산 철강 규제를 강화할 때 한국이 규제 대상에서 제외된다면, 유럽 시장 내에서 중국산 대비 반사이익을 얻을 수 있음",
-      "timeHorizon": "LONG_TERM",
-      "watchSignals": [
-        "G20 재무장관 회의 공동 선언문 내용",
-        "유럽연합(EU)의 중국산 철강에 대한 추가 반덤핑 조사 개시 여부",
-        "중국산 HRC 및 도금강판의 동남아향 오퍼 가격 추이"
-      ],
-      "counterScenario": "G20 회원국 중 중국과의 무역 의존도가 높은 국가들이 미국의 공조 제안을 거부하여 단일 장벽 구축이 무산될 수 있음",
-      "suggestedActions": [
-        "유럽향 수출 비중을 선제적으로 점검하고, 중국산 규제 강화 시 반사이익을 극대화할 수 있는 마케팅 전략 수립",
-        "동남아 및 중동 시장에서 중국산 저가 공세에 대비해 비가격 경쟁력(품질, 납기, 금융 조건) 강화"
-      ],
-      "evidenceFingerprints": [
-        "c969b6fce5b9a24d",
-        "246018aa37f5dd33"
-      ],
-      "evidenceIndices": [
-        25,
-        35
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "WATCH",
-          "severity": "LOW",
-          "newEvidenceCount": 2
-        }
-      ]
-    },
-    "RC_87d405a51537": {
-      "caseId": "RC_87d405a51537",
-      "canonicalEventTitle": "유럽 CBAM 시행에 따른 인도의 탄소 시장 구축 대응",
-      "assessmentStatus": "WATCH",
-      "severity": "LOW",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "환경 규제 리스크",
-      "facts": [
-        "유럽연합(EU)의 탄소국경조정제도(CBAM)가 본격 시행됨에 따라 인도 산업계(CII-IIM)가 수출 기업 보호를 위한 신뢰성 있는 탄소 시장 구축을 촉구함"
-      ],
-      "inferences": [
-        "인도가 자체 탄소 시장을 구축하여 EU CBAM 인증서 비용 감면을 시도할 것임"
-      ],
-      "assumptions": [
-        "EU가 인도의 국내 탄소 가격 제도를 동등하게 인정하여 관세 감면 혜택을 부여할 것임"
-      ],
-      "missingEvidence": [
-        "인도 탄소 시장의 구체적인 출범 일정 및 EU의 인도 탄소세 인정 여부"
-      ],
-      "exposure": {
-        "products": [
-          "GI",
-          "GL",
-          "COLOR"
-        ],
-        "regions": [
-          "Europe"
-        ],
-        "routes": [],
-        "tradeMeasures": [
-          "CBAM"
-        ]
-      },
-      "causalChain": [
-        {
-          "step": "EU CBAM 본격 시행 및 인도 수출 기업 타격 우려",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "인도 정부의 국내 탄소 시장 및 탄소 가격제 도입 추진",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "인도산 철강의 대EU 수출 경쟁력 유지 또는 규제 회피 실패 시 타 지역(GCC, 아시아)으로의 수출 전환",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "한국산 도금강판의 대EU 상대적 경쟁력 변화 및 아시아 시장 내 인도산과의 경쟁 심화",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "NEUTRAL",
-        "cost": "UP",
-        "demand": "NEUTRAL",
-        "sales": "NEUTRAL",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "UP",
-        "competition": "UP",
-        "opportunity": "NEUTRAL"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 2,
-        "causalStrength": 1,
-        "businessMateriality": 1,
-        "urgency": 0
-      },
-      "threat": "인도가 자체 탄소 시장 구축에 성공하여 EU CBAM 규제를 우회할 경우, 한국산 도금강판이 유럽 시장에서 가질 수 있는 상대적인 친환경 경쟁 우위가 희석될 수 있음",
-      "opportunity": "인도의 탄소 시장 구축이 지연되어 대EU 수출에 차질을 빚을 경우, 한국산 도금강판(특히 저탄소 제품)의 유럽 시장 점유율 확대 기회가 될 수 있음",
-      "timeHorizon": "LONG_TERM",
-      "watchSignals": [
-        "인도 탄소 거래제(CCTS) 법안 통과 및 시행 일정",
-        "EU 집행위원회의 제3국 탄소 가격제 인정 기준 발표",
-        "한국 철강사들의 CBAM 대응 탄소 배출량 검증 현황"
-      ],
-      "counterScenario": "EU가 제3국의 자체 탄소 시장을 엄격하게 평가하여 인도의 탄소 가격제를 불인정할 경우, 인도산 철강은 유럽 시장에서 높은 CBAM 비용 부담을 안게 됨",
-      "suggestedActions": [
-        "유럽향 도금강판 수출 시 CBAM 신고 프로세스를 완벽히 준수하고, 국내 저탄소 HRC 소재 조달을 통한 제품별 탄소 집약도 감축 증명서 확보"
-      ],
-      "evidenceFingerprints": [
-        "598e5df77736d5cd"
-      ],
-      "evidenceIndices": [
-        141
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "WATCH",
-          "severity": "LOW",
-          "newEvidenceCount": 1
-        }
-      ]
-    },
     "RC_4a024926c6ba": {
       "caseId": "RC_4a024926c6ba",
       "canonicalEventTitle": "터키의 열연(HRC) 수입 급감 및 원자재발 가격 상승세",
@@ -5818,112 +5637,6 @@
           "status": "WATCH",
           "severity": "LOW",
           "newEvidenceCount": 2
-        }
-      ]
-    },
-    "RC_e05fad713428": {
-      "caseId": "RC_e05fad713428",
-      "canonicalEventTitle": "인도의 철강 생산 능력 확대 및 내수 성장",
-      "assessmentStatus": "WATCH",
-      "severity": "LOW",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "경쟁 리스크",
-      "facts": [
-        "인도가 세계 2위 철강 생산국 지위를 유지하고 있음",
-        "인도의 FY27 GDP 성장률이 내수 및 인프라 투자(capex)에 힘입어 7-7.2%를 기록할 것으로 전망됨",
-        "Birla와 Adani 등 대기업 간 철강 증설 경쟁이 지속됨"
-      ],
-      "inferences": [
-        "인도의 철강 생산 능력이 크게 확장되고 있으나, 강력한 내수 성장세가 이를 상당 부분 흡수할 것임"
-      ],
-      "assumptions": [
-        "인도 내수 수요가 증설 속도를 따라잡지 못할 경우에만 잉여 물량이 아시아 및 GCC로 수출될 것임"
-      ],
-      "missingEvidence": [
-        "인도 철강사들의 도금강판(GI/GL) 부문 구체적인 증설 규모 및 수출 비중 변화"
-      ],
-      "exposure": {
-        "products": [
-          "CRC",
-          "GI"
-        ],
-        "regions": [
-          "GCC",
-          "Asia"
-        ],
-        "routes": [],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "인도 철강 대기업들의 설비 증설 및 세계 2위 생산국 유지",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "인도 FY27 GDP 7%대 고성장으로 내수 철강 소비 급증",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "내수 흡수 후 남은 잉여 CRC/GI 물량의 아시아/GCC 수출 밀어내기",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "한국산 도금강판과의 아시아/GCC 시장 내 가격 경쟁 유발",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "NEUTRAL",
-        "cost": "NEUTRAL",
-        "demand": "NEUTRAL",
-        "sales": "NEUTRAL",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "UP",
-        "opportunity": "NEUTRAL"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 2,
-        "causalStrength": 1,
-        "businessMateriality": 1,
-        "urgency": 0
-      },
-      "threat": "인도 대기업들의 공격적인 증설로 인해 장기적으로 인도산 CRC 및 GI의 글로벌 공급 과잉이 발생하여 아시아 및 GCC 시장에서 한국산의 입지가 좁아질 수 있음",
-      "opportunity": "인도의 강력한 내수 성장(7%대 GDP 성장)으로 인해 인도 철강사들이 내수 판매에 집중할 경우, 아시아 및 GCC 시장에서 인도산과의 경쟁 압력이 일시적으로 완화될 수 있음",
-      "timeHorizon": "LONG_TERM",
-      "watchSignals": [
-        "인도 철강사들의 분기별 수출 비중 변화",
-        "인도 정부의 인프라 투자 예산 집행 속도",
-        "동남아 시장 내 인도산 GI 오퍼 가격"
-      ],
-      "counterScenario": "인도 내수 경기 과열로 철강 수요가 공급을 초과하여 인도가 철강 순수입국으로 전환될 경우, 글로벌 수출 경쟁 압력은 오히려 감소함",
-      "suggestedActions": [
-        "인도 내수 시장의 성장세를 모니터링하며, 인도향 고부가가치 도금강판 수출 가능성 타진 및 현지 가공센터와의 협력 강화"
-      ],
-      "evidenceFingerprints": [
-        "9ad2fff54bf6e190",
-        "0bd2ef6d42015b81",
-        "8f14876bf85fd729",
-        "1e4e45ef6083600f",
-        "2363d2f3991540ef"
-      ],
-      "evidenceIndices": [
-        51,
-        87,
-        95,
-        173,
-        184
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "WATCH",
-          "severity": "LOW",
-          "newEvidenceCount": 5
         }
       ]
     },
@@ -6102,105 +5815,6 @@
         }
       ]
     },
-    "RC_305f2e082c90": {
-      "caseId": "RC_305f2e082c90",
-      "canonicalEventTitle": "알루미늄 가격 변동성 확대에 따른 갈바륨 원가 충격",
-      "assessmentStatus": "ALERT",
-      "severity": "MEDIUM",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "원자재 리스크",
-      "facts": [
-        "알루미늄 가격 쇼크(price shock)로 관련 금속 주가들이 반응하고 있으며, Press Metal은 공급 증가 속에서도 안정적인 전망을 제시함"
-      ],
-      "inferences": [
-        "알루미늄 가격의 급격한 변동이 갈바륨(GL, 알루미늄 55% 함유)의 코팅 원가에 직접적인 영향을 미칠 것임"
-      ],
-      "assumptions": [
-        "알루미늄 가격 쇼크가 하락이 아닌 상승 방향으로 작용하여 원가 부담을 가중시킬 것임"
-      ],
-      "missingEvidence": [
-        "LME 알루미늄 현물 가격의 구체적인 상승 폭 및 향후 가격 전망 데이터"
-      ],
-      "exposure": {
-        "products": [
-          "GL"
-        ],
-        "regions": [
-          "Korea Export"
-        ],
-        "routes": [],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "글로벌 알루미늄 시장 가격 쇼크 발생",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "갈바륨(GL) 도금 공정용 알루미늄 잉곳 구매 단가 상승",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "GL 제조 원가 급등 및 수출 마진 스프레드 축소",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "원가 상승분을 수출 판가에 전가하지 못할 경우 GL 수익성 악화",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "UP",
-        "cost": "UP",
-        "demand": "NEUTRAL",
-        "sales": "NEUTRAL",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "NEUTRAL",
-        "opportunity": "NEUTRAL"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 3,
-        "causalStrength": 2,
-        "businessMateriality": 2,
-        "urgency": 1
-      },
-      "threat": "알루미늄 가격 급등 시 갈바륨(GL)의 도금 원가가 상승하여 수출 마진이 급격히 악화되며, 가격 전가 실패 시 적자 수출로 이어질 수 있음",
-      "opportunity": "알루미늄 가격 상승이 장기화될 경우, 알루미늄 함량이 없는 아연도금강판(GI)으로의 수요 대체가 일어나 GI 판매량이 증가할 수 있음",
-      "timeHorizon": "1-3_MONTHS",
-      "watchSignals": [
-        "LME 알루미늄 공식 현물 가격 추이",
-        "국내 알루미늄 잉곳 수입 단가",
-        "글로벌 GL 대비 GI 오퍼 스프레드 추이"
-      ],
-      "counterScenario": "글로벌 알루미늄 공급 과잉 기조가 유지되어 가격 쇼크가 단기에 그치고 하향 안정화될 경우 원가 부담이 자연 해소될 수 있음",
-      "suggestedActions": [
-        "알루미늄 원자재 구매 시 선물 헷징(Hedging) 비율을 확대하여 가격 변동성 제어",
-        "GL 수출 오퍼 시 원자재 가격 연동제(Surcharge) 도입을 바이어와 협상"
-      ],
-      "evidenceFingerprints": [
-        "0777784ac6944abc",
-        "497afce37b244bc4",
-        "d5f60326186e896c"
-      ],
-      "evidenceIndices": [
-        12,
-        99,
-        129
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "ALERT",
-          "severity": "MEDIUM",
-          "newEvidenceCount": 3
-        }
-      ]
-    },
     "RC_249a82487850": {
       "caseId": "RC_249a82487850",
       "canonicalEventTitle": "유럽연합 수입 철강재 원산지(Melt-and-Pour) 규정 구체화",
@@ -6330,116 +5944,6 @@
         }
       ]
     },
-    "RC_2a9c4edd43e8": {
-      "caseId": "RC_2a9c4edd43e8",
-      "canonicalEventTitle": "미국 금리 및 원/달러·엔화 환율 변동성 확대",
-      "assessmentStatus": "ALERT",
-      "severity": "MEDIUM",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "환율 리스크",
-      "facts": [
-        "미 연준 관계자 매파적 발언으로 원/달러 환율이 1,380원대에 근접 (뉴시스)",
-        "베센트 관련 미국-일본 통화정책 발언 속 일본 엔화 약세 재개 (Bloomberg, Yahoo Finance)",
-        "증권가 일각에서 연말 원/달러 환율 1,340원대 하락 가능성 전망 (매일경제)"
-      ],
-      "inferences": [
-        "원/달러 환율 상승(원화 약세)은 단기적으로 한국 철강 수출의 달러 가격 경쟁력을 높이고 원화 환산 마진을 개선함",
-        "엔화 약세가 지속될 경우 아시아 및 글로벌 시장에서 일본산 고급 GI/CRC 대비 가격 격차가 축소될 수 있음"
-      ],
-      "assumptions": [
-        "수출 계약은 주로 USD 기준 결제이며, 원자재(HRC) 매입 환율과 수출 결제 환율 간 시차가 존재함"
-      ],
-      "missingEvidence": [
-        "향후 1~3개월 내 미 연준 및 일본은행(BOJ)의 기준금리 결정 결과",
-        "원/엔 크로스 환율의 실제 변동폭"
-      ],
-      "exposure": {
-        "products": [
-          "CRC",
-          "GI",
-          "GL",
-          "COLOR"
-        ],
-        "regions": [
-          "Asia",
-          "US",
-          "Europe",
-          "GCC",
-          "Korea Export"
-        ],
-        "routes": [],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "미 연준 매파 발언 및 달러 강세로 원/달러 1,380원 근접, 엔화 동반 약세",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "원화 약세에 따른 한국 수출 제품 원화 마진 일시적 개선",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "엔화 초약세 지속 시 일본 철강사와의 3국간/아시아 수출 경합 심화",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "NEUTRAL",
-        "cost": "UP",
-        "demand": "NEUTRAL",
-        "sales": "UP",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "UP",
-        "opportunity": "UP"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 2,
-        "causalStrength": 2,
-        "businessMateriality": 2,
-        "urgency": 2
-      },
-      "threat": "수입 열연(HRC) 등 원자재 수입 비용 증가 및 일본 경쟁 밀 대비 가격 우위 희석",
-      "opportunity": "달러 결제 수출 건의 원화 환산 매출 및 단기 수익성 증대",
-      "timeHorizon": "NOW",
-      "watchSignals": [
-        "원/달러 환율 1,380원 돌파 여부 및 1,400원 상단 저항선",
-        "엔/달러 환율 및 BOJ 금리 인상 시점",
-        "수출입 결제 통화별 헤지 비율"
-      ],
-      "counterScenario": "미국 금리 인하 사이클 본격화로 원/달러 환율이 1,340원대로 급락할 경우 환차익 소멸 및 마진 압박 발생 가능",
-      "suggestedActions": [
-        "선물환 및 환변동 보험을 통한 환율 변동성 헷지 비중 점검",
-        "원자재 매입 통화(USD)와 수출 대금 회수 통화 간 매칭(Natural Hedge) 강화"
-      ],
-      "evidenceFingerprints": [
-        "7da9609d14a79ea6",
-        "4de7a203edba6dc7",
-        "1dcf205cbb65a5c3",
-        "c73c5df23926c125",
-        "9a37face85078ec3"
-      ],
-      "evidenceIndices": [
-        3,
-        13,
-        23,
-        30,
-        58
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "ALERT",
-          "severity": "MEDIUM",
-          "newEvidenceCount": 5
-        }
-      ]
-    },
     "RC_296323233890": {
       "caseId": "RC_296323233890",
       "canonicalEventTitle": "한국 및 아세안 제조업 경기 둔화",
@@ -6544,323 +6048,6 @@
           "status": "ALERT",
           "severity": "MEDIUM",
           "newEvidenceCount": 4
-        }
-      ]
-    },
-    "RC_be0b852c9493": {
-      "caseId": "RC_be0b852c9493",
-      "canonicalEventTitle": "러시아의 우크라이나 에너지 인프라 대규모 공습 및 지정학적 긴장 고조",
-      "assessmentStatus": "WATCH",
-      "severity": "LOW",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "지정학 리스크",
-      "facts": [
-        "러시아가 우크라이나 에너지 시설 및 물류 인프라에 대한 대규모 보복 공습을 예고 및 실행함 (AP, Al Jazeera, Independent, Politico 등)",
-        "우크라이나 내 에너지 공급 중단 및 원전 외부 전력 상실 사태 발생"
-      ],
-      "inferences": [
-        "우크라이나 잔존 제철소(Zaporizhstal, ArcelorMittal Kryvyi Rih 등)의 전력난으로 인한 생산 차질 지속",
-        "유럽 천연가스 및 전력 가격의 단기 변동성 확대로 유럽 역내 밀들의 에너지 비용 부담 가중 가능성"
-      ],
-      "assumptions": [
-        "우크라이나산 선철(Pig Iron), 슬래브(Slab), 빌렛 등 반제품의 유럽 공급이 추가 위축됨"
-      ],
-      "missingEvidence": [
-        "흑해 곡물/철강 수출 회랑의 물리적 폐쇄 여부",
-        "유럽 가스 및 전력 현물 가격의 실제 급등 폭"
-      ],
-      "exposure": {
-        "products": [
-          "CRC",
-          "GI"
-        ],
-        "regions": [
-          "Europe"
-        ],
-        "routes": [
-          "Black Sea Routes"
-        ],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "러시아의 우크라이나 에너지 인프라 파괴 및 전쟁 격화",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "우크라이나 철강 생산 차질 및 유럽 에너지 가격 불안",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "유럽 역내 코일 생산 원가 상승 및 수입재 수요 반등",
-          "state": "UNCONFIRMED"
-        }
-      ],
-      "impactVectors": {
-        "price": "UP",
-        "cost": "NEUTRAL",
-        "demand": "UP",
-        "sales": "UP",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "DOWN",
-        "opportunity": "UP"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 1,
-        "causalStrength": 1,
-        "businessMateriality": 1,
-        "urgency": 1
-      },
-      "threat": "유럽 전반의 경기 심리 위축 및 글로벌 지정학적 불안에 따른 원자재 시장 변동성",
-      "opportunity": "유럽 역내 공급망 불안 시 한국산 냉연/도금재의 대체 수입 수요 발생 가능성",
-      "timeHorizon": "1-3_MONTHS",
-      "watchSignals": [
-        "TTF 유럽 천연가스 선물 가격 추이",
-        "우크라이나 주요 철강사 가동률 뉴스",
-        "유럽 열연/냉연 스팟 오퍼 가격 추이"
-      ],
-      "counterScenario": "전쟁 장기화에 따른 시장 내성 형성 및 유럽 철강 수요 침체로 에너지 가격 상승이 제품가로 전가되지 못할 수 있음",
-      "suggestedActions": [
-        "유럽향 GI/CRC 오퍼 시 현지 유통 재고 및 현물 가격 모니터링 후 가격 반영"
-      ],
-      "evidenceFingerprints": [
-        "54090c8eae803c55",
-        "052bec5343ebac07",
-        "9f31ddd0f1d64776",
-        "3059804cf8ee68b4",
-        "d62c94a3b30bd8fa",
-        "5ae5f355afbc5ce8",
-        "b830dcd5b1d4eff2",
-        "2ada33b4601fc848",
-        "29b061dc9f2603d6",
-        "5d54b4f37c460a0d",
-        "c83560dd80e4a1f1",
-        "c92d243ea5e92dda",
-        "91841f917a0b9c36",
-        "b14b1d9df2dd39c8",
-        "ec1d81ada6afc518"
-      ],
-      "evidenceIndices": [
-        5,
-        11,
-        72,
-        78,
-        93,
-        100,
-        103,
-        104,
-        113,
-        167,
-        177,
-        188,
-        195,
-        196,
-        200
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "WATCH",
-          "severity": "LOW",
-          "newEvidenceCount": 15
-        }
-      ]
-    },
-    "RC_fda0537fc980": {
-      "caseId": "RC_fda0537fc980",
-      "canonicalEventTitle": "포스코 1.6조원 규모 HyREX 수소환원제철 투자 추진",
-      "assessmentStatus": "WATCH",
-      "severity": "LOW",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "원자재/공급망 리스크",
-      "facts": [
-        "포스코가 1.6조원을 투입하여 HyREX 데모플랜트 착공 등 저탄소 수소환원제철 상용화 및 원가 경쟁력 확보 추진 (네이트 보도)"
-      ],
-      "inferences": [
-        "포스코의 중장기 열연(HRC) 기재 제조 공정이 수소환원 기반으로 전환되며 탄소 배출량이 크게 감축될 예정",
-        "상용화 초기 설비 투자 비용 및 수소 인프라 비용으로 인해 HRC 원가 변동 및 그린 프리미엄 부과 가능성"
-      ],
-      "assumptions": [
-        "포스코 HRC를 공급받아 도금/컬러강판을 생산하는 한국 리롤러들의 원재료 탄소발자국이 동반 감소함"
-      ],
-      "missingEvidence": [
-        "데모플랜트 완공 및 실제 상용 양산 시점(2030년경 예상)",
-        "HyREX 적용 HRC의 톤당 생산 원가 및 판매 프리미엄 가이드라인"
-      ],
-      "exposure": {
-        "products": [
-          "CRC",
-          "GI",
-          "GL",
-          "COLOR"
-        ],
-        "regions": [
-          "Korea Export",
-          "Europe",
-          "US"
-        ],
-        "routes": [],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "포스코 1.6조원 HyREX 기술 투자 진행",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "저탄소 HRC 생산 라인 구축 및 탈탄소 원판 공급 능력 확보",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "유럽 CBAM 및 글로벌 탄소 규제 하에서 한국산 도금재의 규제 준수력 및 수출 경쟁력 강화",
-          "state": "UNCONFIRMED"
-        }
-      ],
-      "impactVectors": {
-        "price": "UP",
-        "cost": "UP",
-        "demand": "UP",
-        "sales": "UP",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "UP",
-        "competition": "UP",
-        "opportunity": "UP"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 2,
-        "causalStrength": 1,
-        "businessMateriality": 2,
-        "urgency": 0
-      },
-      "threat": "향후 저탄소 HRC 기재 조달 단가 상승에 따른 제품 원가 부담 증가",
-      "opportunity": "유럽 등 선진 시장의 CBAM 및 탈탄소 요구에 부합하는 프리미엄 GI/COLOR 수출 확대",
-      "timeHorizon": "LONG_TERM",
-      "watchSignals": [
-        "포스코 HyREX 데모플랜트 구축 공정률",
-        "포스코의 탄소저감 브랜드(Greenate 등) 제품군 출하 동향",
-        "정부의 수소환원제철 R&D 지원 정책"
-      ],
-      "counterScenario": "수소 단가 및 전력 비용 과다로 경제성 확보가 지연되어 기존 고로 방식이 장기간 유지될 수 있음",
-      "suggestedActions": [
-        "장기적인 ESG 및 CBAM 대응 전략 수립 시 포스코 저탄소 HRC 공급 일정 연계 검토"
-      ],
-      "evidenceFingerprints": [
-        "dbe01a1ca484ea46"
-      ],
-      "evidenceIndices": [
-        67
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "WATCH",
-          "severity": "LOW",
-          "newEvidenceCount": 1
-        }
-      ]
-    },
-    "RC_e53ab7561206": {
-      "caseId": "RC_e53ab7561206",
-      "canonicalEventTitle": "EU 쿼터제로 인한 우크라이나산 금속류 유럽 수출 급감",
-      "assessmentStatus": "ALERT",
-      "severity": "MEDIUM",
-      "firstSeen": "2026-08-31T01:18:02.833Z",
-      "lastUpdated": "2026-08-31T01:18:02.833Z",
-      "lastAnalyzed": "2026-08-31T01:18:02.833Z",
-      "riskType": "통상/경쟁 리스크",
-      "facts": [
-        "EU의 쿼터 규제로 인해 우크라이나산 금속(metal) 수출이 약 60% 급감함 (Комерсант Український 보도)"
-      ],
-      "inferences": [
-        "EU가 전쟁 특례 조치 완화 또는 세이프가드/쿼터 제한을 엄격히 적용하면서 우크라이나산 철강재의 유럽 유입이 크게 축소됨",
-        "유럽 역내에서 우크라이나산 강재를 대체할 수입 쿼터 보유국(한국, 대만, 베트남, 인도 등)의 반사이익 가능성"
-      ],
-      "assumptions": [
-        "우크라이나산 금속 수출 감소 품목에 열연, 냉연, 도금 등 판재류가 포함되어 있음"
-      ],
-      "missingEvidence": [
-        "급감한 구체적 HS 코드(품목)별 물량 데이터",
-        "EU 세이프가드 개별국 쿼터 잔여량 및 한국산 할당 쿼터 소진율"
-      ],
-      "exposure": {
-        "products": [
-          "CRC",
-          "GI"
-        ],
-        "regions": [
-          "Europe",
-          "Korea Export"
-        ],
-        "routes": [],
-        "tradeMeasures": [
-          "EU Steel Safeguard Quota"
-        ]
-      },
-      "causalChain": [
-        {
-          "step": "EU 쿼터 규제로 우크라이나산 철강/금속 수입 60% 급감",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "유럽 수입 철강 시장 내 공급 공백 및 대체 소싱 수요 발생",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "한국산 도금강판/냉연강판의 대EU 쿼터 내 수출 수주 기회 확대",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "UP",
-        "cost": "NEUTRAL",
-        "demand": "UP",
-        "sales": "UP",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "UP",
-        "competition": "DOWN",
-        "opportunity": "UP"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 2,
-        "causalStrength": 2,
-        "businessMateriality": 2,
-        "urgency": 1
-      },
-      "threat": "EU 전반의 세이프가드 및 쿼터 관리 강화로 한국산 쿼터 조기 소진 시 관세(25%) 리스크",
-      "opportunity": "동유럽 및 지중해 인근 바이어들의 한국산 GI/CRC 대체 수입 문의 및 프리미엄 수주 증가",
-      "timeHorizon": "1-3_MONTHS",
-      "watchSignals": [
-        "EU 세이프가드 카테고리 4A(금속코팅판재), 4B, 2(냉연) 쿼터 잔여량 모니터링",
-        "유럽 철강 유통업체들의 수입재 오퍼 가격 추이"
-      ],
-      "counterScenario": "유럽 자동차 및 가전 등 전방 제조업 수요 둔화로 우크라이나산 공백을 로컬 밀들이 충분히 흡수할 수 있음",
-      "suggestedActions": [
-        "한국 철강협회 및 EU 관세청 사이트에서 한국산 대EU 세이프가드 분기별 쿼터 잔여율 실시간 체크",
-        "우크라이나산 대체 수요가 발생하는 유럽 동유럽/남유럽 유통상 타깃 영업 강화"
-      ],
-      "evidenceFingerprints": [
-        "70b11c7af998b710"
-      ],
-      "evidenceIndices": [
-        204
-      ],
-      "history": [
-        {
-          "date": "2026-08-31T01:18:02.833Z",
-          "status": "ALERT",
-          "severity": "MEDIUM",
-          "newEvidenceCount": 1
         }
       ]
     },
