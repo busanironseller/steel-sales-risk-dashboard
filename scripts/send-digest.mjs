@@ -22,7 +22,9 @@ import { createTransport } from 'nodemailer';
 
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
-const TO = process.env.DIGEST_TO;
+const TO = [process.env.DIGEST_TO, process.env.DIGEST_TO_EXTRA]
+  .filter(Boolean)
+  .join(',');
 const DASHBOARD_URL = 'https://busanironseller.github.io/steel-sales-risk-dashboard/';
 
 if (!GMAIL_USER) { console.error('GMAIL_USER is required'); process.exit(1); }
