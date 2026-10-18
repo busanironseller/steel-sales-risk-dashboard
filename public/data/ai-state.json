@@ -1,106 +1,153 @@
 {
-  "lastAnalyzedAt": "2026-10-18T13:15:52.023Z",
+  "lastAnalyzedAt": "2026-10-18T17:19:12.970Z",
   "analyzedFingerprints": [
-    "9545d9ed262cd100",
+    "9991dce0419e0b2b",
+    "bba645a5e155ee17",
+    "2c08314d3f09c73f",
+    "fb6e8e955ead4196",
+    "493e12e1e9792283",
     "f3188445191e3571",
-    "310186429fafae3d",
+    "229b669501c99d0f",
     "3486240ef610a5fe",
+    "a7b331780a1e3f61",
+    "cf65e716ff922b78",
+    "361916c8ff43e9fa",
+    "d85a3a97199763d1",
+    "68b0b0d1598f1703",
+    "31ed4a027570d43e",
+    "4591cb5fa8665550",
+    "ade98a0fd4d63e3f",
+    "1240276dd84572b9",
+    "e98fc8965356ce89",
+    "52d5d8ee0337bff1",
+    "3aeeeec347e3f5ca",
+    "16fac087587b4a8a",
+    "c13da5e9cea21cb8",
+    "84afecbcfba5be88",
+    "5c7916ba7994dde2",
+    "19ddd8ab1a70c6e8",
+    "aa317f3a0b3abae9",
+    "4f54ee6aed05bc4d",
+    "7a55ef3183cf2da3",
+    "77f395a15124ed11",
+    "09dbef728a0a8318",
+    "3973a04b6af144d9",
+    "6d6561cc2ef54f05",
+    "68a636a6ea1caf3e",
+    "62f4e03a48571ce2",
+    "36abc37ce12ade1a",
+    "98665ca88aff0d5a",
+    "6782705addf2bc3f",
+    "b5c0203866d08229",
+    "9dfa0378bbb00c59",
+    "5fbda8fdb313517b",
+    "9545d9ed262cd100",
+    "309d157ad09649d9",
+    "f7948065f8a9347b",
+    "041e9a5e8726ca8a",
+    "310186429fafae3d",
     "d619c93f8d0562b4",
     "8fdb8d5da0f460c5",
+    "e16d9c26b82d00b6",
     "fcbed0c3f6b1bdb7",
     "26930a0a39ce44ff",
     "b200b16f09026d5e",
     "3a1df7727e077175",
-    "4713d14540c17e56",
+    "abed5f953e84f0d4",
+    "963fb89b5d22aa1a",
     "7f56ea69ae2cfb4c",
     "94daf6ae328d49e9",
-    "ddfaba72fef60069",
     "1f5c559872bb3b66",
-    "52d5d8ee0337bff1",
-    "1c3eeb0718f81216",
+    "4122406026ebc1c5",
+    "4fa192f6287b59fb",
     "23f048d3e1d31341",
     "94680baa3c418e2d",
     "bffce59047e40759",
+    "3e579f7131d1ac4b",
+    "dc16a14bd9a51acc",
     "9cf11e57198740da",
     "c5e06a01ca5734e8",
     "72d7e081206cbd09",
     "ffb8a2391b7859fe",
-    "62405333fa27639d",
     "318743479fbb6885",
     "5ff18ceb52c586ee",
     "8a88bcc8b5d425af",
-    "ce1454f9d73507a4",
     "c9a18f5b210dd3d4",
+    "01dab838b3e8d914",
     "f9c1ea65ee4ec82f",
     "b03fc37e846274c0",
     "a1697a1ded4382a6",
     "a9f7e27cca11231c",
-    "36aa64cef5a761d4",
+    "72ce43c7bc2e8b8b",
     "3cac195cb5f9e4a1",
     "32165082052cc6b6",
     "9642a2e2202af57f",
     "9c1bcaeabcd5d59f",
     "7e1825cf1b461b7d",
-    "3295c48eec694165",
+    "032d80c5561ed8c2",
     "5a35d0d5c46e5bb7",
-    "bec2cc81ed677325",
     "ea80481440863222",
     "605b4edd36d49566",
-    "a985b6f7d24aca56",
     "fb13da875c8552ac",
     "30288948032ce787",
-    "589a0c24ff96aba3",
     "2a4ed467ab4235af",
     "380c9dd0596eab9c",
+    "466db5f190756549",
+    "bff2b7760f512abc",
+    "a9207aef35e24fdd",
+    "8ea8c2ace035d9c6",
     "6f80d2968b1ca7ef",
     "d7a3f300a286af92",
     "bfd58647793409bd",
-    "1281e823285e80f3",
     "c12b3b3356207523",
-    "fec89d5982a99705",
+    "1ccf69eee2393589",
     "6b8fab8cadfe2427",
     "cc508dfe76433914",
     "55b0fa6e5a899c8c",
-    "320d7db0a3354d80",
     "05b0389a882b92c8",
     "7e35e00ca828f75d",
     "f9a285b64a70ca14",
+    "08028258a4bfd9c1",
     "0f6c46a8506698cb",
     "0eec1e3c26e063d1",
     "2148a37be54d9b70",
     "07d06310a3130245",
     "baa56d7c61258876",
     "37340dbc27433fd0",
-    "897c083246a50804",
+    "16dda26b077e84e7",
     "f19535e0752b8834",
+    "430a5ccefe753f7d",
     "484c602ce8c89609",
     "325a47c3cfb1c411",
-    "98af1a37a493e2a4",
+    "c6cc926d1ee04417",
     "cb63ffc167bf8ad7",
     "ad2c0b7587208b86",
     "859b6e38e2b7da78",
     "f2b37005491bb394",
     "19dbd673f77db062",
-    "76d05eb963257bf4",
-    "4ab43690ee66a112",
+    "c2a6b23d70c175d6",
+    "807f013f72ccaf47",
+    "d79083b0ea28c38e",
     "87d7c91df6f85456",
+    "b23ca812abfec1d5",
+    "18a5f4216314ac6e",
     "d6860d5d5e9f26d5",
     "e0f9bcb1cb995a22",
     "9a9e0bb34cb15907",
     "7d4649701152e35c",
+    "7d39e4f82e355a51",
     "0e98235d18bb2840",
+    "25fa7085afe9fb41",
     "39f904b500bd9976",
     "8519da19d95197a9",
+    "721a6d5e30d213ba",
     "21b3c41cb6a4280a",
     "bd6588c6089f82a0",
-    "d5258c418aea53cd",
     "9e66076bde12e56a",
     "fa194c586eb75882",
     "7ededb2ea6852f73",
-    "427387e5f80c1e07",
     "7d40aa27a6c8e436",
     "626fa0c306966231",
-    "c9119b62dee964e4",
     "fe17dad02f389956",
     "4537b293aea62695",
     "11c1e462b85c5db9",
@@ -109,11 +156,8 @@
     "e3cd1c0d3d482675",
     "ccfb7ae64fbeed4a",
     "9703a64f9998f01c",
-    "731efc817a568bea",
     "cffb8ba88d5866ba",
-    "6d39f0fe63540f37",
     "5808b1b9d1c32f02",
-    "65b1639065cd579f",
     "48c75520477864a9",
     "131bc43392953ede",
     "40ffb85a861a45ab",
@@ -135,65 +179,63 @@
     "013750a39e8cb8f0",
     "001e045dd75bfcc5",
     "e01c6f332326298d",
-    "9ba58fce565279e9",
     "a1f054aaa225b836",
     "1a52e579553b8f9c",
     "13cf53c2344bce6a",
     "d676a7202e0218ce",
     "69e3b056e83cec36",
     "f922e70a3a82296b",
+    "c3179b234e491eed",
     "d4056f29aef1d7bc",
     "372eb70ad4f8f5b6",
     "55e10ea7cff66779",
     "fbd599a9ae31b269",
     "613363b7b68ac11a",
-    "e9469ba96cb23413",
     "2eded80c11fb82de",
-    "c44a828f8cd1aa2f",
     "8cb142fbb50f8207",
     "a59b88b91bf4d111",
     "a3e21215a01fca52",
     "cc24a6eb507e86de",
+    "ee21235fa3070c60",
     "401945fedf1dd2f5",
     "9776168ccccb5dec",
     "20d3099beafbb5c9",
     "6ed497d2e9e9ae08",
     "3f0d6e13a2d37f81",
+    "5dd5ffa877021c36",
     "d9fc36bfd3ecbeb6",
     "ac6fed94c8da8ee1",
-    "336cdc5b6131b7eb",
     "a0fffccf1ef5c6e6",
     "1ae5e977caa4bd60",
     "905822556305b135",
     "737c9968147830a1",
     "b3ea0ad270c8dcd3",
     "f305741fa506efa9",
-    "715ff6ba6fe2f281",
-    "390bf328ad5d83cf",
     "23f48c4a4b901b98",
     "410c6fa61c65ee77",
+    "d22dff0a0dca18fe",
     "c5ab3338c1968294",
     "e63b6d8fe208c19f",
     "6849b257a692309f",
     "0b2e31f80eca1cb8",
+    "8ddbe9d635ac6e0a",
     "02d4e327642f6575",
-    "6200f2f67657c468",
+    "7cc469bf8a95c924",
     "792d125b1d979c72",
+    "1f16f80bc30c06b4",
     "603625c28906c87b",
-    "39207204025335fd",
-    "54394f227d4b80f4",
     "d6ff50c2c0c56a56",
     "dc293185ae0d9cc3",
     "b5b2014c6eda02b6",
     "d48153536b6e70f4",
     "47abb70b02497167",
     "3174067950e842f1",
-    "b706250eec008a31",
-    "934053c22d7cf859",
+    "4c1edf4bdbecca2a",
     "2163e942bbf7a70d",
     "5a6990c6129d0831",
     "ac6fdb7dab69093f",
     "d62ecb32236267c7",
+    "2cd20603a44574e7",
     "d3e571ddc0a5d9c0",
     "ef3874025cdc1627",
     "e69895b694f7bd90",
@@ -203,21 +245,18 @@
     "59813c9a49deae30",
     "a69b0ef491255b6e",
     "2f4565fd659c3d45",
-    "e172a03d01f68d01",
     "e297d3cad3ca93f1",
-    "0893ccedda7f6430",
     "e142c4a97d103c69",
     "f40225d54f5904ae",
     "04c385c3364a1f71",
     "61be0a40ee04c71b",
     "3f30e76bd54d124e",
-    "cfaf8d6492736ff4",
-    "3c1190226837d5bd",
+    "97e1a555b3c4d14f",
     "d73290e4697ac4ba",
     "37d3b429e6c92e34",
     "17ed612e96b9af9f",
     "f71248ad83ea76e6",
-    "4795e2a059e29475",
+    "e9e4d582e10ba423",
     "8ca9894f14588224",
     "e962920f3218ce65",
     "870d5c9667842e5a",
@@ -226,27 +265,26 @@
     "1750e05df890b8c5",
     "d9e25524abdf7885",
     "21c3d280f8147e4b",
+    "cf19a2083212b7a6",
     "1923a73b576ffa48",
     "7cb0ff707d17fcf9",
     "3cdb4b65befb145a",
     "a15bc40ffcc3072e",
-    "8f7b7a6bb258b363",
     "5eba80fc33d0d157",
-    "7ed4dd635c66a038",
     "7f36296e4148ca3d",
     "34e4ec523dfe2fee",
     "36b3c38844f8654d",
     "0a7c1fe4239d149b",
     "986b5d9a32487e2e",
     "dea693c8d5e8e2c9",
-    "e0a5a6470259157e",
     "8136ab84608b12dd",
     "71df4e95283002b7",
-    "805b853052f9fdef",
+    "12923f48575b3dd2",
     "cd56588359d87973",
     "8343e39ecb8853c9",
     "616e0706b207548a",
     "1dba4e989fcf9f5b",
+    "db0afb5f760ec6a4",
     "c132e6bffe69140b",
     "f125bc0ba95c994e",
     "1028b2137ffad76c",
@@ -254,46 +292,41 @@
     "96cd3363ec18cf2d",
     "8effe73414744db5",
     "13271b27a4644e22",
-    "e43678078911f9e3",
     "febf5ef503fdcd06",
-    "4b467913e80d0c19",
     "83c29bfec25764bf",
     "b3162490e531b4d6",
+    "0a07124009053768",
     "087d0b729d490f70",
+    "f4692470cc0b5932",
+    "047fce910e488cb1",
     "97517a7a8e73219e",
-    "868fb9a9f5b0d272",
     "c4391640b2793482",
     "b262402514ccc327",
     "7048ac3aac8d9738",
     "ec59883ba42661a9",
-    "631aebfce78cac5f",
     "b91a93c8f513c93f",
     "28b0a2eb17403fba",
     "1bd3acbbe94115b2",
     "764b9f184c668cf8",
     "159c7517c9e26c23",
-    "cace95d6c380333f",
     "a25eef95db94511b",
     "424a7fb92ba993ee",
     "c1101ab0f0567e60",
+    "666e6741ccad85f8",
     "2435d4d58572148a",
     "1c4cffb670b51847",
     "3a3cba79f5322148",
-    "99986889276cf092",
     "8cecf21c76f21bdd",
     "a344d319cff59aa0",
     "286cd442a99bc543",
     "ced7d51b8f95ea16",
     "7c7019f8f393b724",
-    "4ae8fcc0dcdde856",
-    "9d16c902c2d3f11e",
-    "2551117d4a67e16b",
+    "a9a75283febf9b77",
     "7a8acd0076084004",
     "562b172d58c5aa25",
     "dc086a89daa3e397",
     "72b3492d89e43942",
-    "f0e76a9574f08024",
-    "ccc3fcff552ba31e",
+    "2f5783560ab4738c",
     "ad6b1756a7cb1683",
     "64725b525a41a0d7",
     "ea61b2a1e6a08fe9",
@@ -304,16 +337,13 @@
     "e091af2bcbdb6061",
     "5c589f943b80d066",
     "7f8657a1f9d88b16",
-    "ecad68c40a9b267b",
     "b53909521a81218c",
     "21fd73d84c0041b6",
     "cba179c6e6e5780c",
     "f3026ee6fe3e5f16",
-    "16da1807ba2a9761",
     "ebb35a7c05f09f2a",
-    "636c89f15eddc4e1",
-    "fbc4c5c8959ebe43",
     "e5b294b333288a38",
+    "485e77685bf3fe63",
     "28a6afd31770a260",
     "72cfc94d4c1fcd93",
     "8b6e94ccc802e911",
@@ -321,11 +351,11 @@
     "62e490720ffa38ae",
     "9289a052a95921e9",
     "aa19777f2eb22f96",
-    "e788ae0e2233203c",
     "904d67acb269c609",
-    "cda4ff98bf54a28c",
+    "29c4e388099befac",
     "6cba87ec998aa734",
     "505475c5c92e0f0f",
+    "707434ec574df690",
     "a5c645bae7c39e97",
     "2d0681ede41464b2",
     "359b192f72286892",
@@ -333,7 +363,6 @@
     "d5c042a3918bcd49",
     "39cc5ede5f3c3b18",
     "d2ea397c4f205cb6",
-    "4987c2e9871b79d6",
     "5a092b27d85c8b1c",
     "38a3d5d9f699ad08",
     "b4c6e6d192bc8c9d",
@@ -356,79 +385,48 @@
     "78b7d7690d32d77a",
     "943219cf0099d09b",
     "34843615233b6923",
-    "3cd790680840dbb9",
     "f62fa8058ecadb0a",
     "77fdb97e7266ac4c",
     "0fd2b7fca4892375",
-    "6aad5c927df5ccbe",
     "26d98951a391139c",
     "a51ae5c64dfed5df",
-    "4a8b010b1d17972d",
     "53a173edf09a7633",
     "484e031ed0049542",
     "91ba80e4c7fb1a8d",
     "fc0314e8624b7590",
     "15215460b9320288",
     "50f77e7876613ad0",
+    "b7c1d0d756916191",
+    "a45c403502f49a97",
     "9749e4171b3a3451",
     "847b321488a5a851",
-    "2f708f7a94aa522c",
-    "8ff67652421963cc",
-    "e1c32543ab991cd7",
-    "29030c46a5cdf7d1",
-    "4f4c7c7f5f311a94",
-    "c6a4507f4b94dd5e",
-    "5e7cc40a91b7802a",
-    "e44f3c40bd4b952b",
-    "e827ebd076d4561f",
-    "568b0b2d832d4815",
-    "3a45ab05b37edf6a",
-    "6dfa9b238b46ec52",
-    "a6cfaa7a9503cb30",
-    "237b1d6ad5dc089a",
-    "867498d0bb31e0cd",
-    "037b3eb21946afce",
-    "a501a6d851008d57",
-    "8e279bfaef1f4074",
-    "704dc3eb62013522",
-    "ef232dcd1cd24bc5",
-    "6d28ba93aa547da1",
-    "560e646b8fda1cd9",
-    "a6a9410c8f7d5c31",
-    "7d41e59b9f5c22d5",
-    "3a619ca9b58fad2e",
-    "a33e62ca67c66ae8",
-    "19477aea21d0532d",
-    "a20e661bb4ed33b2",
-    "d784d187f9d60374"
+    "2f708f7a94aa522c"
   ],
   "riskCases": {
     "RC_83970893aa10": {
       "caseId": "RC_83970893aa10",
-      "canonicalEventTitle": "예멘 후티 반군 홍해 선박 피격 및 사우디-UAE 군사 개입 확대",
+      "canonicalEventTitle": "호르무즈 해협 유조선 피격 및 기뢰 폭발로 인한 중동 항로 위기",
       "assessmentStatus": "ALERT",
-      "severity": "CRITICAL",
+      "severity": "HIGH",
       "firstSeen": "2026-08-21T07:17:02.338Z",
-      "lastUpdated": "2026-10-18T13:15:52.020Z",
-      "lastAnalyzed": "2026-10-18T13:15:52.020Z",
-      "riskType": "지정학적 및 항로 마비 리스크",
+      "lastUpdated": "2026-10-18T17:19:12.968Z",
+      "lastAnalyzed": "2026-10-18T17:19:12.968Z",
+      "riskType": "물류리스크",
       "facts": [
-        "사우디아라비아 해안 인근에서 상선(유조선)이 미상 발사체에 피격당함.",
-        "UAE가 후티 반군의 공세에 대응하여 사우디와 협력해 예멘 분쟁에 재개입하기로 합의함.",
-        "후티 반군이 아덴 및 타이즈 등 예멘 주요 지역을 포위/공격하고 연합군이 호데이다 무기 밀수 거점을 공습함.",
-        "제프리스(Jefferies) 등 금융기관이 후티-사우디 전쟁 격화로 홍해 항로 및 석유 인프라 위협을 경고함."
+        "호르무즈 해협에서 유조선 2척이 기뢰와 접촉해 화재 발생 (2026-10-18 알자지라)",
+        "선박 피격 보고가 이어지는 가운데 이란이 미군 공격 재개 시 '새로운 작전 계획'을 언급함 (CNBC)",
+        "이란이 호르무즈 해협 재개방을 위한 제안 수용을 미국에 촉구함 (로이터)"
       ],
       "inferences": [
-        "홍해 및 바브엘만데브 해협의 안보 위협이 장기화·격화되어 수에즈 운하 정상 통항 재개가 단기적으로 완전히 불가능함.",
-        "유럽향 한국산 철강 수출 선박은 아프리카 희망봉 우회가 강제되어 운송 리드타임(최소 10~15일 추가)과 운임 할증이 지속될 수밖에 없음.",
-        "사우디 서부 홍해 연안 항구(제다 등) 기항 위험 프리미엄이 급상승함."
+        "호르무즈 해협 내 실질적 선박 운항 위험으로 정기선 및 벌크선사의 통항 기피 및 운항 중단 가능성 고조",
+        "중동 걸프만(GCC) 기항 선박에 대한 전쟁위험할증료(War Risk Surcharge)의 즉각적인 폭등 불가피"
       ],
       "assumptions": [
-        "글로벌 주요 선사들이 홍해 통항 중단 및 희망봉 우회 항로 유지를 지속할 것임."
+        "사우디아라비아(담맘), UAE(제벨알리) 등 페르시아만 내부 항구로 향하는 철강 수송선도 동일한 위험에 노출됨"
       ],
       "missingEvidence": [
-        "벌크/컨테이너 선사별 아시아-유럽 항로 전쟁위험할증료(WRS)의 구체적 인상 폭",
-        "사우디 제다항 등 홍해 연안 주요 항구의 양하 거부 또는 정박 체선 일수"
+        "컨테이너선 및 일반 화물 벌크선의 실제 기항 중단 공식 선언 여부",
+        "선사별 전쟁위험할증료 인상 공지 내역 및 인상 폭"
       ],
       "exposure": {
         "products": [
@@ -438,30 +436,26 @@
           "COLOR"
         ],
         "regions": [
-          "Europe",
-          "GCC"
+          "GCC",
+          "Korea Export"
         ],
         "routes": [
-          "한국-유럽(수에즈/희망봉)",
-          "한국-사우디 서부(홍해)"
+          "한국-중동(호르무즈 해협 통과 페르시아만 기항)",
+          "삼국간 인도/중국-GCC 항로"
         ],
         "tradeMeasures": []
       },
       "causalChain": [
         {
-          "step": "후티 반군의 상선 타격 지속 및 사우디·UAE의 군사적 재개입으로 분쟁 격화",
+          "step": "호르무즈 해협 내 선박 기뢰 폭발 및 군사적 긴장 고조로 해상 보안 위험 극대화",
           "state": "CONFIRMED"
         },
         {
-          "step": "수에즈 운하 회피 및 희망봉 우회 항로 고착화, 홍해 기항 선박의 전쟁위험할증료 급증",
-          "state": "CONFIRMED"
+          "step": "해운사 운항 기피, 우회 운송, 선박 보험료(전쟁보험료) 및 해상 운임 급등",
+          "state": "CONDITIONAL"
         },
         {
-          "step": "한국발 유럽 및 GCC(사우디 서부)향 도금강판 운송 기간 14일 이상 연장 및 해상운임 고공행진",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "유럽 바이어의 납기 지연 리스크로 인한 발주 주저 및 터키/유럽 내 로컬 공급사 선호",
+          "step": "GCC행 철강 수출 화물의 납기 지연, 운임 인상 전가 분쟁 및 신규 선적 중단",
           "state": "CONDITIONAL"
         }
       ],
@@ -473,28 +467,27 @@
         "freight": "UP",
         "leadTime": "UP",
         "compliance": "NEUTRAL",
-        "competition": "UP",
+        "competition": "NEUTRAL",
         "opportunity": "NEUTRAL"
       },
       "scores": {
-        "evidenceQuality": 3,
+        "evidenceQuality": 2,
         "exposureProximity": 3,
-        "causalStrength": 3,
+        "causalStrength": 2,
         "businessMateriality": 3,
         "urgency": 2
       },
-      "threat": "유럽향 수출 리드타임 대폭 지연과 고운임 지속으로 유럽 바이어들이 지리적으로 인접한 터키, 인도 또는 유럽 역내 GI/COLOR 밀로부터 조달을 대체할 위험; 사우디 제다향 화물의 해상 운송 차질.",
-      "opportunity": "",
+      "threat": "GCC향 도금강판 수출 화물의 물류 마비, 운임/보험료 급등으로 인한 계약 취소 및 인도 불능 사태",
+      "opportunity": "GCC 역외 우회 항로(오만 소하르, 사우디 제다 홍해측 등) 물류망 선제 확보 시 반사이익",
       "timeHorizon": "NOW",
       "watchSignals": [
-        "수에즈 운하 통항 선박 수 통계",
-        "주요 선사(HMM, 머스크 등)의 희망봉 우회 유지 공지 및 전쟁위험할증료(War Risk Surcharge) 변동"
+        "주요 글로벌 정기선사(MSC, Maersk, CMA CGM)의 호르무즈 해협 통항 중단 공지",
+        "로이즈 해상보험협회(JWC)의 위험지역 지정 및 전쟁위험할증료 요율표 변경"
       ],
-      "counterScenario": "국제 연합 해군의 호위 작전 강화 또는 외교적 정전 협정 타결로 홍해 안전 항로가 조기 복원되는 경우.",
+      "counterScenario": "미-이란 간 외교적 협상 타결로 호르무즈 해협 안전 통항이 단기간 내 회복될 경우",
       "suggestedActions": [
-        "유럽향 수출 계약 시 리드타임 버퍼를 최소 3주 이상 선반영하여 납기 지체 지체상금(LD) 리스크 방지",
-        "사우디 서부(제다)향 선적 건에 대해 동부 담맘(Dammam) 양하 후 내륙 운송 대안 검토",
-        "운임 상승분을 반영한 유연한 가격 연동 조항 유지"
+        "GCC행 진행 중인 선적 건의 선하증권(B/L) 및 해상적하보험 전쟁약관 보장 범위 긴급 점검",
+        "신규 GCC 오퍼 발행 시 CIF/CFR 조건을 중단하고 FOB 조건으로 전환하거나 선박 운임 변동 조항 삽입"
       ],
       "evidenceFingerprints": [
         "31a61c76d3227b87",
@@ -2179,7 +2172,8 @@
         "23f048d3e1d31341",
         "5ff18ceb52c586ee",
         "07d06310a3130245",
-        "db941a096bd70698"
+        "db941a096bd70698",
+        "09dbef728a0a8318"
       ],
       "evidenceIndices": [
         202,
@@ -2194,12 +2188,6 @@
         288
       ],
       "history": [
-        {
-          "date": "2026-10-13T07:45:05.524Z",
-          "status": "ALERT",
-          "severity": "HIGH",
-          "newEvidenceCount": 9
-        },
         {
           "date": "2026-10-14T00:45:44.616Z",
           "status": "ALERT",
@@ -2312,6 +2300,12 @@
           "date": "2026-10-18T13:15:52.020Z",
           "status": "ALERT",
           "severity": "CRITICAL",
+          "newEvidenceCount": 1
+        },
+        {
+          "date": "2026-10-18T17:19:12.968Z",
+          "status": "ALERT",
+          "severity": "HIGH",
           "newEvidenceCount": 1
         }
       ]
@@ -14787,25 +14781,24 @@
     },
     "RC_ec0d6088c5f3": {
       "caseId": "RC_ec0d6088c5f3",
-      "canonicalEventTitle": "인도 정부 2047 국가 철강 정책 비전(6억 400만 톤 목표) 수립",
+      "canonicalEventTitle": "인도 신규 철강 정책, 2047년까지 6.04억 톤 생산능력 목표",
       "assessmentStatus": "INFO",
       "severity": "LOW",
       "firstSeen": "2026-10-12T07:19:43.672Z",
-      "lastUpdated": "2026-10-18T13:15:52.020Z",
+      "lastUpdated": "2026-10-18T17:19:12.968Z",
       "lastAnalyzed": "2026-10-18T13:15:52.020Z",
-      "riskType": "경쟁/수급 리스크",
+      "riskType": "경쟁환경",
       "facts": [
-        "인도 정부가 2047년까지 자국 조강 생산능력을 6억 400만 톤으로 확대하는 국가 철강 정책(Vision 2047) 초안을 마련함 (기사 [7], [181])"
+        "인도 정부가 신규 철강 정책을 통해 2047년까지 조강 생산능력 6억 400만 톤 달성을 목표로 제시함 (2026-10-18)"
       ],
       "inferences": [
-        "초장기적으로 인도의 자급률 상승 및 잉여 판재류의 아시아/중동 역외 수출 물량 확대로 공급 과잉이 유발될 수 있음"
+        "인도가 전 세계 최대 규모의 증설을 추진하며 중장기적으로 글로벌 철강 잉여 공급을 주도할 잠재력"
       ],
       "assumptions": [
-        "인도 정부의 대규모 설비 증설 프로젝트가 계획대로 인프라·자본 조달을 거쳐 실현될 것임"
+        "인도 내수 인프라 수요를 초과하는 물량이 글로벌 판재류 수출 시장으로 방출될 것임"
       ],
       "missingEvidence": [
-        "도금강판(GI/GL/COLOR) 및 냉연(CRC) 등 판재류 부문별 구체 증설 계획 및 연도별 마일스톤",
-        "초안 단계 이후 실제 승인 및 정책 집행 세부 법안"
+        "2047년 장기 비전 외 2026-2027년 단기 실행 계획 및 품목별(냉연/도금 등) 구체적 증설 로드맵"
       ],
       "exposure": {
         "products": [],
@@ -14817,27 +14810,23 @@
       },
       "causalChain": [
         {
-          "step": "인도 정부 Vision 2047 국가 철강 정책 초안 수립",
+          "step": "인도 정부의 2047년 6.04억 톤 철강 생산능력 장기 목표 설정",
           "state": "CONFIRMED"
         },
         {
-          "step": "장기적 인도 내 제철 및 가공 설비 대규모 신증설 진행",
+          "step": "향후 수십 년간 인도 대형 밀의 대대적 생산설비 확충",
           "state": "CONDITIONAL"
         },
         {
-          "step": "인도산 판재류 생산 증가로 인한 수입 대체 및 역외 수출 확대",
-          "state": "UNCONFIRMED"
-        },
-        {
-          "step": "아시아 시장 내 한국산 철강재와의 가격 경쟁 심화",
+          "step": "글로벌 철강재 공급 과잉에 따른 판재류 판가 장기적 하방 압력",
           "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
-        "price": "UNKNOWN",
+        "price": "DOWN",
         "cost": "NEUTRAL",
         "demand": "NEUTRAL",
-        "sales": "UNKNOWN",
+        "sales": "DOWN",
         "freight": "NEUTRAL",
         "leadTime": "NEUTRAL",
         "compliance": "NEUTRAL",
@@ -14851,16 +14840,15 @@
         "businessMateriality": 0,
         "urgency": 0
       },
-      "threat": "장기적으로 인도 로컬 밀의 생산능력 팽창으로 인한 아시아 시장 판재류 가격 덤핑 및 경쟁 심화",
-      "opportunity": "",
+      "threat": "초장기(2047년 목표) 정책 목표로서 현재 당사의 단기 수출 및 트레이딩 영업에 미치는 실질적 위협은 미미함",
+      "opportunity": "삼국간 무역에서 향후 인도산 저가 열연 모재 소싱 풀 확대 가능성",
       "timeHorizon": "LONG_TERM",
       "watchSignals": [
-        "인도 주요 철강사(Tata, JSW 등)의 도금라인 신규 투자 공시",
-        "인도 철강 정책의 공식 내각 승인 및 예산 배정"
+        "인도 주요 철강사(JSW, Tata, AM/NS)의 연간 실제 설비 증설(CAPEX) 집행률"
       ],
-      "counterScenario": "2047년 목표의 20년 이상 장기 비전으로 현 시점 철강 무역 및 수출 마진에 미치는 실질적 영향은 전혀 없음",
+      "counterScenario": "인도 자체 내수 경제 성장에 따른 조강 소비량 급증으로 수출 여력이 크지 않을 경우",
       "suggestedActions": [
-        "현시점 추가 조치 불필요, 장기 모니터링 대상으로만 분류"
+        "초장기 목표이므로 모니터링 대상으로만 분류하고 즉각적 경영 조치는 배제"
       ],
       "evidenceFingerprints": [
         "6be84695965aa703",
@@ -20582,29 +20570,25 @@
     },
     "RC_89c80fb4d6ee": {
       "caseId": "RC_89c80fb4d6ee",
-      "canonicalEventTitle": "베트남 주요 철강사(호아팟·TVP·빈메탈 등) 대외 브랜드 인증 및 설비 증설",
-      "assessmentStatus": "INFO",
+      "canonicalEventTitle": "베트남 GDP 대비 신용비율 155% 및 건자재 시장 안정화 난제",
+      "assessmentStatus": "WATCH",
       "severity": "LOW",
       "firstSeen": "2026-10-17T04:50:57.503Z",
-      "lastUpdated": "2026-10-17T11:37:55.335Z",
-      "lastAnalyzed": "2026-10-17T11:37:55.335Z",
-      "riskType": "경쟁 리스크",
+      "lastUpdated": "2026-10-18T17:19:12.968Z",
+      "lastAnalyzed": "2026-10-18T17:19:12.968Z",
+      "riskType": "수요리스크",
       "facts": [
-        "TVP Steel이 노동훈장을 수상하며 30주년 기념식 개최 (기사 [5], [79])",
-        "Hoa Phat이 8회 연속 국가 브랜드 인증 획득, Tonmat 및 Son Ha 등 판재류/단열 패널 기업들 브랜드 선정 (기사 [47], [58], [68])",
-        "VinMetal이 Danieli와 협력하여 베트남에 70만 톤 규모의 레일 및 구조용 압연 라인 개발 파트너십 체결 (기사 [95])"
+        "베트남의 GDP 대비 신용 비율이 155%에 도달했으며, 전국 건축자재 시장 안정화가 과제로 대두됨 (2026-10-18)"
       ],
       "inferences": [
-        "대부분의 뉴스는 베트남 정부의 의례적인 '국가 브랜드 선정' 및 기념행사 홍보성 기사임",
-        "VinMetal 건은 철도/형강 설비 투자로 당사 주력인 박판 판재류(CRC, GI, GL, COLOR)와 직접적인 품목 경합 관계가 아님",
-        "호아팟 등 베트남 밀의 코팅 판재류 부문에서 단기적인 신규 공급 충격이나 생산능력 급증 증거는 확인되지 않음"
+        "베트남 부동산 및 건설 업계의 유동성 경색 및 부실 채권 위험이 높아져 정부 차원의 건자재 시장 관리/개입 불가피"
       ],
       "assumptions": [
-        "단순 브랜드 인증 보도가 판재류 생산량이나 수출 공세 확대로 직결되지는 않는다."
+        "건설 경기 침체 시 건자재용 아연도금/갈바륨(GI/GL) 및 컬러강판 수요가 둔화될 것임"
       ],
       "missingEvidence": [
-        "베트남 판재류 밀(Hoa Sen, Nam Kim, Hoa Phat 등)의 실질적인 GI/GL/PPGI 설비 증설 데이터",
-        "동남아(ASEAN) 시장 내 베트남산 판재류의 수출 단가 인하 및 밀어내기 수출 정황"
+        "베트남 정부의 구체적인 건자재 시장 개입 조치(가격 통제, 수입 제한, 프로젝트 감축 등)",
+        "강건재(루핑/사이딩용 컬러강판 등) 수입량 감소율 데이터"
       ],
       "exposure": {
         "products": [
@@ -20620,46 +20604,47 @@
       },
       "causalChain": [
         {
-          "step": "베트남 주요 철강 기업들의 브랜드 수상 및 구조재 설비 협약",
+          "step": "베트남 신용 비율 과다에 따른 금융 리스크 및 건자재 시장 불안",
           "state": "CONFIRMED"
         },
         {
-          "step": "베트남 코팅강판 업계의 공급 캐파 급증 및 대외 수출 공세 심화",
-          "state": "UNCONFIRMED"
+          "step": "베트남 현지 건설 프로젝트 지연 및 수입 강건재 수요 둔화",
+          "state": "CONDITIONAL"
         },
         {
-          "step": "동남아 시장 내 한국산 GI/GL/COLOR 수출 가격 및 점유율 압박",
-          "state": "UNCONFIRMED"
+          "step": "베트남향 도금/컬러강판 수출 감소 및 바이어 대금 결제 지연 위험 발생",
+          "state": "CONDITIONAL"
         }
       ],
       "impactVectors": {
-        "price": "NEUTRAL",
+        "price": "DOWN",
         "cost": "NEUTRAL",
-        "demand": "NEUTRAL",
-        "sales": "NEUTRAL",
+        "demand": "DOWN",
+        "sales": "DOWN",
         "freight": "NEUTRAL",
         "leadTime": "NEUTRAL",
         "compliance": "NEUTRAL",
-        "competition": "NEUTRAL",
+        "competition": "UP",
         "opportunity": "NEUTRAL"
       },
       "scores": {
         "evidenceQuality": 1,
-        "exposureProximity": 1,
-        "causalStrength": 0,
-        "businessMateriality": 0,
-        "urgency": 0
+        "exposureProximity": 2,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 1
       },
-      "threat": "현시점에서 당사 코팅강판 사업에 미치는 실질적 위협 요인 없음 (홍보성/타품목 이벤트).",
-      "opportunity": "없음",
-      "timeHorizon": "LONG_TERM",
+      "threat": "베트남향 건자재용 GI, GL, COLOR 수출 부진 및 현지 고객사 결제 유동성 악화에 따른 신용 리스크",
+      "opportunity": "",
+      "timeHorizon": "1-3_MONTHS",
       "watchSignals": [
-        "Hoa Phat Dung Quat 2 프로젝트의 열연/냉연 본격 양산 일정",
-        "베트남산 아연도금/칼라강판의 대동남아 수출 통계"
+        "베트남 중앙은행의 부동산/건설 부문 대출 규제 정책",
+        "현지 철강 바이어의 L/C 개설 지연 및 결제 기일 연장 요청 빈도"
       ],
-      "counterScenario": "베트남 로컬 업체들의 브랜드 가치 제고가 자국 내수 시장 방어용에 그치고 수출 시장 확대와는 무관한 경우.",
+      "counterScenario": "베트남 정부의 공공 인프라 투자 조기 집행을 통해 민간 건설 부진이 상쇄될 경우",
       "suggestedActions": [
-        "해당 기사들은 단순 홍보성 동향으로 판단하고 추가 대응 조치 불필요 (WATCH 해제)"
+        "베트남 거래선에 대한 외상 매출(D/A, D/P) 비중 축소 및 확정 취소불능 L/C 위주 거래 통제",
+        "무역보험공사 단기수출보험 부보 한도 점검"
       ],
       "evidenceFingerprints": [
         "e44f3c40bd4b952b",
@@ -20667,7 +20652,8 @@
         "ebb35a7c05f09f2a",
         "7d3dbb559f391e87",
         "50f77e7876613ad0",
-        "e415ead1d2a74cba"
+        "e415ead1d2a74cba",
+        "ade98a0fd4d63e3f"
       ],
       "evidenceIndices": [
         5,
@@ -20685,6 +20671,12 @@
           "status": "INFO",
           "severity": "LOW",
           "newEvidenceCount": 4
+        },
+        {
+          "date": "2026-10-18T17:19:12.968Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
         }
       ]
     },
@@ -29799,6 +29791,375 @@
       "history": [
         {
           "date": "2026-10-18T13:15:52.020Z",
+          "status": "INFO",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_919c00c89709": {
+      "caseId": "RC_919c00c89709",
+      "canonicalEventTitle": "EU 철강 수입 규제 강화로 인한 한국산 수출 급감",
+      "assessmentStatus": "WATCH",
+      "severity": "MEDIUM",
+      "firstSeen": "2026-10-18T17:19:12.968Z",
+      "lastUpdated": "2026-10-18T17:19:12.968Z",
+      "lastAnalyzed": "2026-10-18T17:19:12.968Z",
+      "riskType": "무역규제",
+      "facts": [
+        "EU의 수입 규제 강화 영향으로 경북 지역 철강 수출액이 3년 새 반토막 수준으로 급감함 (2026-10-17 보도)"
+      ],
+      "inferences": [
+        "EU 세이프가드 쿼터 축소 및 CBAM 등 복합 규제가 포항 등 경북권 주요 제철/가공 업체의 유럽 수출 위축을 초래함"
+      ],
+      "assumptions": [
+        "경북 소재 철강사의 주력 수출 품목에 냉연 및 도금강판이 다수 포함되어 있을 것임"
+      ],
+      "missingEvidence": [
+        "기사 헤드라인 외 규제 세부 항목(세이프가드 품목별 쿼터 소진율, 반덤핑 관세율, CBAM 비용 등) 미제시",
+        "CRC, GI, GL, COLOR 등 당사 핵심 제품군별 구체적 수출 타격 규모 미확인"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [
+          "Europe",
+          "Korea Export"
+        ],
+        "routes": [
+          "한국-유럽 해상 운송"
+        ],
+        "tradeMeasures": [
+          "EU 철강 세이프가드",
+          "CBAM"
+        ]
+      },
+      "causalChain": [
+        {
+          "step": "EU의 역내 철강 수입 규제(세이프가드 쿼터 및 탄소국경조정제도 등) 집행 강화",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "한국산(경북권 등) 철강재의 對EU 수출 통관 제한 및 관세 부담 증가로 수출량 반토막",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "한국 도금강판 수출업체의 對EU 수출 쿼터 조기 소진 및 마진 축소",
+          "state": "CONDITIONAL"
+        }
+      ],
+      "impactVectors": {
+        "price": "NEUTRAL",
+        "cost": "UP",
+        "demand": "DOWN",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "UP",
+        "compliance": "UP",
+        "competition": "UP",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 2,
+        "causalStrength": 2,
+        "businessMateriality": 2,
+        "urgency": 1
+      },
+      "threat": "EU 쿼터 축소 및 잔여 쿼터 조기 소진으로 인한 對EU 도금강판 수출 물량 급감 및 관세(25%) 부과 위험",
+      "opportunity": "EU 역내 가격 프리미엄 지속 시 쿼터 내 고부가 컬러강판 선별 고마진 수주",
+      "timeHorizon": "1-3_MONTHS",
+      "watchSignals": [
+        "EU 세이프가드 국가별/글로벌 쿼터 잔여량 및 소진율 공시",
+        "한국철강협회 및 관세청 對EU 판재류 수출 통계 추이"
+      ],
+      "counterScenario": "유럽 현지 밀 공급 부족으로 쿼터 외 할당관세 면제 조치가 도입되거나 CBAM 대응 체계가 조기 안정화될 경우",
+      "suggestedActions": [
+        "對EU 수출 계약 시 세이프가드 분기별 쿼터 개시 시점(Quarter opening) 맞춤 선적 스케줄링",
+        "규제 리스크가 큰 범용 GI/GL 물량을 동남아 및 중동(GCC) 시장으로 전환 추진"
+      ],
+      "evidenceFingerprints": [
+        "20d3099beafbb5c9"
+      ],
+      "evidenceIndices": [
+        199
+      ],
+      "history": [
+        {
+          "date": "2026-10-18T17:19:12.968Z",
+          "status": "WATCH",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_95e01ceebf74": {
+      "caseId": "RC_95e01ceebf74",
+      "canonicalEventTitle": "현대제철 당진공장 설비 정비 중 근로자 사망 사고",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-10-18T17:19:12.968Z",
+      "lastUpdated": "2026-10-18T17:19:12.968Z",
+      "lastAnalyzed": "2026-10-18T17:19:12.968Z",
+      "riskType": "공급망리스크",
+      "facts": [
+        "현대제철 당진공장에서 설비 정비 작업 중 근로자 사망 사고가 발생함 (2026-10-18 보도)"
+      ],
+      "inferences": [
+        "고용노동부의 중대재해처벌법 및 산업안전보건법에 따른 현장 조사와 작업중지 명령(Work Stop Order) 발령 가능성"
+      ],
+      "assumptions": [
+        "사고가 발생한 설비가 열연(HRC) 또는 냉연/도금 라인과 연계된 핵심 공정일 경우 모재 조달 차질 발생 가능"
+      ],
+      "missingEvidence": [
+        "사고 발생 라인(제강, 열연, 냉연, 후판, 특수강 등)의 구체적 위치 및 설비 명칭",
+        "고용노동부의 작업중지 명령 범위(해당 설비 국한인지 라인/공장 전체인지) 및 기간"
+      ],
+      "exposure": {
+        "products": [
+          "CRC",
+          "GI"
+        ],
+        "regions": [
+          "Korea Export"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "현대제철 당진제철소 정비 작업 중 사망 사고 발생",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "노동당국의 현장 조사 및 관련 라인에 대한 작업중지 명령 발령",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "열연/냉연 모재 생산 중단으로 당사 도금용 원자재 조달 차질 및 납기 지연",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "NEUTRAL",
+        "cost": "UP",
+        "demand": "NEUTRAL",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "UP",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 2,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 1
+      },
+      "threat": "현대제철 당진공장 작업중지에 따른 열연 코일(HRC) 모재 공급 지연 및 판재류 납기 지연",
+      "opportunity": "",
+      "timeHorizon": "DAYS",
+      "watchSignals": [
+        "고용노동부 당진공장 작업중지 명령 범위 및 해제 시점",
+        "현대제철 판재류 영업 부서의 코일 출하 지연 통보 여부"
+      ],
+      "counterScenario": "사고 라인이 봉형강/특수강 라인이거나 부속 보조설비에 국한되어 열연/냉연 코일 생산에 지장이 없을 경우",
+      "suggestedActions": [
+        "현대제철 발주 HRC/풀하드 모재의 배정 라인 및 현재 코일 생산/출하 스케줄 확인",
+        "지연 우려 시 포스코산 모재 또는 수입재 재고 파악"
+      ],
+      "evidenceFingerprints": [
+        "bfd58647793409bd"
+      ],
+      "evidenceIndices": [
+        98
+      ],
+      "history": [
+        {
+          "date": "2026-10-18T17:19:12.968Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_c1434301dfaa": {
+      "caseId": "RC_c1434301dfaa",
+      "canonicalEventTitle": "베트남 하띤성 대규모 투자 유치 및 전략 철강 기술 개발",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-10-18T17:19:12.968Z",
+      "lastUpdated": "2026-10-18T17:19:12.968Z",
+      "lastAnalyzed": "2026-10-18T17:19:12.968Z",
+      "riskType": "경쟁환경",
+      "facts": [
+        "베트남 하띤성이 경제구역 및 산업단지에 170조 동 이상의 신규 투자 자본을 유치함 (2026-10-18)",
+        "전략적 철강 제품 기술 내재화 및 생산 역량 고도화 추진 보도 (Vietnam.vn)"
+      ],
+      "inferences": [
+        "포모사 하띤(Formosa Ha Tinh Steel) 및 연계 철강 가공 밸류체인의 기술력과 설비 확충이 가속화될 것임"
+      ],
+      "assumptions": [
+        "신규 투자 및 기술 고도화가 단순 상공정에 그치지 않고 냉연 및 표면처리(GI, GL) 등 고부가 판재류로 확장될 것임"
+      ],
+      "missingEvidence": [
+        "170조 동 투자 중 실제 철강 판재류/도금 라인 투자 금액 및 증설 규모",
+        "구체적인 상업 가동 시점 및 목표 생산 품목"
+      ],
+      "exposure": {
+        "products": [
+          "CRC",
+          "GI",
+          "GL"
+        ],
+        "regions": [
+          "Asia"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "베트남 하띤성 대규모 투자 유치 및 철강 기술 고도화 추진",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "베트남 로컬 밀의 고품질 판재류/도금강판 생산능력 확충",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "동남아(ASEAN) 및 삼국간 무역 시장에서 한국산 도금재 점유율 잠식 및 단가 인하 경쟁 격화",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "DOWN",
+        "cost": "NEUTRAL",
+        "demand": "NEUTRAL",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "UP",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 2,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 0
+      },
+      "threat": "중장기적으로 베트남산 고품질 GI/GL의 역내 공급 확대로 한국산 도금강판의 ASEAN 수출 마진 압박",
+      "opportunity": "베트남 내 도금용 기재(HRC) 가공 기지 확충 시 삼국간 무역 원자재 소싱처 다변화 가능",
+      "timeHorizon": "LONG_TERM",
+      "watchSignals": [
+        "포모사 하띤(FHS) 및 호아팟(Hoa Phat)의 도금강판 신규 설비 증설 발표",
+        "베트남 내 판재류 자급률 추이"
+      ],
+      "counterScenario": "투자 자금이 인프라/에너지 분야에 편중되어 실제 철강 증설로 이어지지 않거나 베트남 내수 소비로 전량 흡수될 경우",
+      "suggestedActions": [
+        "베트남발 경쟁 심화에 대비해 일반 스펙 GI 대신 고기능성 컬러강판(COLOR) 및 특수 도금강판(GL) 프리미엄화 가속"
+      ],
+      "evidenceFingerprints": [
+        "37340dbc27433fd0",
+        "f19535e0752b8834"
+      ],
+      "evidenceIndices": [
+        113,
+        115
+      ],
+      "history": [
+        {
+          "date": "2026-10-18T17:19:12.968Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 2
+        }
+      ]
+    },
+    "RC_9877c21324b9": {
+      "caseId": "RC_9877c21324b9",
+      "canonicalEventTitle": "오리사 고등법원, JSW스틸의 69.6억 루피 철광석 로열티 청구 파기",
+      "assessmentStatus": "INFO",
+      "severity": "LOW",
+      "firstSeen": "2026-10-18T17:19:12.968Z",
+      "lastUpdated": "2026-10-18T17:19:12.968Z",
+      "lastAnalyzed": "2026-10-18T17:19:12.968Z",
+      "riskType": "경쟁환경",
+      "facts": [
+        "인도 오리사주 고등법원이 JSW 스틸에 부과되었던 약 69.6억 루피(₹696 Cr) 규모의 철광석 광구 관련 대금 청구를 취소(파기) 판결함 (2026-10-18)"
+      ],
+      "inferences": [
+        "JSW 스틸의 우발 채무 및 원가 부담이 경감되어 업스트림 원가 경쟁력이 유지됨"
+      ],
+      "assumptions": [
+        "단일 광구 로열티 소송 승소가 JSW 스틸의 완제품(열연/도금 등) 수출 단가 인하로 직접 연결됨"
+      ],
+      "missingEvidence": [
+        "오리사주 정부의 대법원 상고 여부",
+        "JSW 스틸의 판재류 및 도금강판 글로벌 수출 가격 변동 여부"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [
+          "Asia"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "오리사 고법의 JSW 스틸 철광석 대금 69.6억 루피 부과 취소 판결",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "JSW 스틸의 단기 비용 부담 감소",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "JSW 스틸의 완제품 가격 인하로 글로벌 도금강판 시장 경쟁 가열",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "NEUTRAL",
+        "cost": "NEUTRAL",
+        "demand": "NEUTRAL",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 2,
+        "exposureProximity": 1,
+        "causalStrength": 0,
+        "businessMateriality": 0,
+        "urgency": 0
+      },
+      "threat": "개별 철강사의 특정 광구 우발채무 취소 건으로, 당사 도금강판 비즈니스에 대한 파급력은 극히 미미함",
+      "opportunity": "",
+      "timeHorizon": "UNKNOWN",
+      "watchSignals": [
+        "인도 정부의 광물 로열티 정책 변화 여부"
+      ],
+      "counterScenario": "오리사주 정부 상고로 법적 분쟁이 장기화되거나 전체 원가에서 차지하는 비중이 미미하여 수출 가격에 영향이 없을 경우",
+      "suggestedActions": [
+        "사업적 연관성이 극히 낮으므로 추가 분석 없이 종료"
+      ],
+      "evidenceFingerprints": [
+        "05b0389a882b92c8"
+      ],
+      "evidenceIndices": [
+        104
+      ],
+      "history": [
+        {
+          "date": "2026-10-18T17:19:12.968Z",
           "status": "INFO",
           "severity": "LOW",
           "newEvidenceCount": 1
