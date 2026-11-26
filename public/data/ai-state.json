@@ -1,132 +1,406 @@
 {
-  "lastAnalyzedAt": "2026-11-26T04:55:31.400Z",
+  "lastAnalyzedAt": "2026-11-26T08:49:14.634Z",
   "analyzedFingerprints": [
+    "a88cc997c6a9266a",
+    "c26b954424feea92",
+    "4edb571d23911e69",
+    "294296ad7d0b0229",
+    "3cf690e4131e2d56",
+    "e77f40bc3cf71f4d",
+    "7505083fb9887ef4",
+    "13308ebf2ed9e7fe",
+    "a0303002ca1c23cb",
+    "f96eac3a52bca2dc",
+    "4adcf11477b1c51d",
+    "f1ee1fa7d6e2af28",
+    "826924faa2896974",
+    "c32ac4ea3db00059",
+    "a42eca56e80d478a",
+    "887c8a10e2f555a7",
+    "3f646378aa745984",
+    "856348998f31f03a",
+    "ceec0dcb9375ec20",
+    "f740904ccee0c6c6",
+    "1e91149db7382705",
+    "923b468edb16c9e1",
+    "fcb6150bae25e43f",
+    "807aae4fb613bcdb",
+    "77475443d6c8157d",
+    "3b48e5502d646c0f",
+    "d9eb979d3b2d3b4f",
+    "096aa6ff42fc1d2f",
+    "0d3e55c4df156be6",
+    "39bb4b52a8cc090e",
+    "01f9a5bebcd5a178",
+    "e6199ce9dea0a854",
+    "e1415ef645c19e2e",
+    "a5530a2b00e7ca9b",
+    "3cd37f3ee56a6523",
+    "4745c59873f1d482",
+    "248e4e86c5fe695b",
+    "11f710642ba12219",
+    "8e9ad2e342654b85",
+    "f455b6bbbc25954e",
+    "c820851903f06152",
+    "479d4031f739b70f",
+    "78efb72555630f83",
+    "a92a699c2025afb5",
+    "94657733fa1a8d73",
+    "d3f88e78bbca503f",
+    "0ceb6b9e67bf7124",
+    "960ee0bfcb678adf",
+    "a2fbfca277edd88c",
+    "16f68f42716f95c5",
+    "f653ffda63847cfb",
+    "1f319e67db9b67a5",
+    "361e3b32ea06a06c",
+    "a649f3ff7a805731",
+    "ebb472c94fa1c248",
+    "695236591774912c",
+    "d44efe228509ca15",
+    "1d822fa836adc3c9",
+    "3669d126993e8a26",
+    "38b745adb78ce05d",
+    "99c90667201d2eda",
+    "e9ae991142280a89",
+    "dfbfeaf5ae3b2e51",
+    "8994a242d789bba0",
+    "a5cd93e9ef470ddd",
+    "479cf82acc9f3e39",
+    "916bdbf03677770c",
+    "3f63c5950663a361",
+    "8178a4e212ee1e0b",
+    "6572d0cdeb881dd2",
+    "e6c516d889c0ccf1",
+    "f51bcb776a63ab03",
+    "4cc19f2b299d50d1",
+    "75bfc8c45005f45d",
+    "714b4bc910d3aa64",
+    "31601e84dc4030ef",
+    "9ae3b5fd987c3e5e",
+    "5995cd442c4b144a",
+    "58b15b8e15d489f4",
+    "c4aea9434e362db4",
+    "aa13dd2bc73629bf",
+    "63f34b5458c2eaa9",
+    "a37d126fab2cbb4d",
+    "8c1fd30baa6a195b",
+    "c67a0b6eb021a805",
+    "0c95baf1c0caf9c9",
+    "233a8f49037923b5",
+    "e035526d27c2c4a7",
+    "1bf36c0007db1d7c",
+    "450d8ef31cf43931",
+    "73d7d00b1d31151e",
+    "ac24f9ec90790389",
+    "9b3b2d98c786f92e",
+    "9bfac5a11efcd373",
+    "2b15c2f1477b0dba",
+    "ae7e783e6df5d42c",
+    "1f006ec1fce06116",
+    "3edf29943b9b8faa",
+    "b314d8ba4142d182",
+    "5ece1ecd7a7cd7cc",
+    "5f5b4c93dfd863e3",
+    "b02af3a90654cc5c",
+    "4d4ef79717419a30",
+    "6a49352158840846",
+    "1cf6a98deb0141f4",
+    "c71ca084df2dd250",
+    "2eb52f42ed5a4b71",
+    "a29f4c73a169e463",
+    "7ddbc452bf0cd292",
+    "50e2bf2eadf68e15",
+    "59899f3a60cacdd2",
+    "82842686a70357d1",
+    "85c20eeedff34444",
+    "116e2819fb10dbe0",
+    "5bf7c2fba55d0e9c",
+    "bec0c8a1f4b053ba",
+    "55d78928be0f4756",
+    "785833b3707735ce",
+    "bdbef5a55127bef5",
+    "ea3fb693db406a8b",
+    "9ed1bf196247b773",
+    "1732a8b80c22114a",
+    "06c209823071bf16",
+    "650d099000699791",
+    "8184e9b7f61981c5",
+    "8ea6805509a9c258",
+    "9ca1930db68b2219",
+    "d44b36cfafba0c82",
+    "69a45d941ee49245",
+    "89d4c45c5a3872ed",
+    "80145de6a8df785c",
+    "382c404b023585ab",
+    "619c92798d5967de",
+    "76c219d1d0cc0b63",
+    "6a505f70515cb1e2",
+    "936926aca0de04d5",
+    "637d2708ccc8b913",
+    "4e832620254b3489",
+    "f4b875dccda14a65",
+    "859ccc6c77d83865",
+    "a9c6394e076b7e89",
+    "d5477530e3035413",
+    "6a7a07923b27c9de",
+    "2dcc21d7e17dde18",
+    "4cf8ae10af8dc812",
+    "6d5492623edc17d0",
+    "16fcffd760b5de4f",
+    "4fe2922f76b7c750",
+    "7083b2a7b5561889",
+    "88af26071f1e447e",
+    "b36c24bf18e87398",
+    "f4c78e74051a0a14",
+    "035b9b99c10808c8",
+    "a0f1263897d68164",
+    "34c28119d5826e65",
+    "27d89818664ff30a",
+    "ab871349bb724e49",
+    "f1d7cc5f64c6679a",
+    "0c1269927814e804",
+    "200a80fe2f33ad6f",
+    "754931a8af1bb18a",
+    "0c944b3a5d43c56e",
+    "b198f90fae65e9ae",
+    "31b0ec44af3a0e4a",
+    "aec203e8c377e781",
+    "d09f22773d76e5d8",
+    "6e19dda148c13671",
+    "fed6d34b3c3bbc5a",
+    "c7500bf0d4a927f6",
+    "ce5cf16eaf09b711",
+    "fa0914d3ee559cc9",
+    "4fea1b70e6be5368",
+    "4645356523d61ff2",
+    "d748f5d9b4372fb1",
+    "fca9d2a3862cde7a",
+    "e8827c33df11a6c5",
+    "73d47113d88c5579",
+    "04920032b0f6fd15",
+    "7fcd1ca1c26fe033",
+    "c5fad650ae10e143",
+    "11cae4d286869103",
+    "bbf341b790fdfdae",
+    "75f019bcc7fc7ab0",
+    "3631aa9e8ed555c0",
+    "e682a24279ed5eab",
+    "0f3e772123126b48",
+    "82899f9abf03a9c1",
+    "2a42640b8205799a",
+    "785609131cf1499f",
+    "535e1f96a96acdce",
+    "d1adf973bc5a3665",
+    "aac009c5dc638800",
+    "d08e36fdd19257b9",
+    "623d50c309f0fd60",
+    "daf4d2a09b571b7e",
+    "295d40f6bc2db3eb",
+    "30d29ea299d51c2d",
+    "dbfb4d7fc816b3fb",
+    "77af79ab200fb363",
+    "7f1feb69b75cfc8e",
+    "7df93d331f5c9381",
+    "bc5bf7a6d6ecf6eb",
+    "0d0f558743928ac3",
+    "ce40a5423af2c50b",
+    "7c17e93da1e912da",
+    "99dc124712f87d4e",
+    "3a8c764e0fbbc29c",
+    "1949d20c77b1ffa9",
+    "6663eca238c35cec",
+    "0e6e545c90c419dd",
+    "e5bd543249d87449",
+    "ae6c3291c258bebe",
+    "4572ec20a5404e0d",
+    "fb68625c1525d0f1",
+    "b4b86fc8f7220d15",
+    "2ee539f1f43e0e83",
+    "98f7b2d18bf554a9",
+    "63dc6940cc1ce90b",
+    "d08636f6d25262be",
+    "125ac0fc60db952a",
+    "1325a3498c61cdf2",
+    "aca3d02eccf7129c",
+    "da8193745a5dd182",
+    "e4b1821cbfb6e841",
+    "6ff6603563949530",
+    "bf0cff143b8cfe06",
+    "8cab125879446e11",
+    "a38ddf746e11f8b5",
+    "32d25143a9694c58",
+    "80392a92c4814799",
+    "6f8a198ef39fda24",
+    "59a6322066352699",
+    "06d3a6636e366a17",
+    "ab37075001d179df",
+    "38735c7f507eae78",
+    "0ad206185093d94d",
+    "6bc400314fcaf483",
+    "a13f9e3b8c4624ee",
+    "d37773d362d6351d",
+    "fc27ec6014552606",
+    "79e23c31c0579ed8",
+    "67f75388ecebb34c",
+    "dfe66358496f7804",
+    "ac30250ee05f94a1",
+    "9f78298a116510d6",
+    "9dbc9720941a7430",
+    "c79883d7c65b7a04",
+    "0421012320f9a25a",
+    "d70a72dfdc7822b4",
+    "7cb6d509f861d99a",
+    "b1785d656df1a4ed",
+    "dc9a75c20f33d6ca",
+    "cea6b82b2b4e3bd2",
+    "94607698415fe63e",
+    "15e1ad64299e808a",
+    "4a3154ae14e7220f",
+    "496c29251730ba74",
+    "8419064e7028e6cd",
+    "f135b7b50c3157c4",
+    "87785f9eba19b777",
+    "7f0978262f4ec47d",
+    "7b639f208ef7f45d",
+    "89d2f273a3e8d55c",
+    "df33f22c82ce4910",
+    "7f846d21b72d8684",
+    "b5090986f50918f0",
+    "4ba50505f02f28d5",
+    "3af1b0db902c72e2",
+    "dd6d155c2019076e",
+    "859cfc7795dd746d",
+    "3040c463f1e38577",
+    "a9c2bd0b8c5d5f2f",
+    "a9c95ece1bcab0b0",
+    "698bc2332136e0ee",
+    "195eaa51dcf6c60b",
+    "dedd37b4218f412e",
+    "5c7dcadc60054096",
+    "c03e20cf01b949b3",
+    "f1db789019085ba2",
+    "6f08b56981c9bf50",
+    "adfbaf2943683935",
+    "708215aae02edc1e",
+    "e2ff9f7645978468",
+    "d983e53030e09d2a",
+    "d0d8535131568c1f",
+    "6d0fce929d75a1ef",
+    "1ab13ec92a384980",
+    "e3f8497a665e5b7a",
+    "a4a7060a0c70107d",
+    "7884814aa1f5bf89",
+    "1c7757c23314780b",
+    "0f1e596ae639d55c",
+    "0cfd612d25d7ac39",
+    "7217917e6365b54e",
+    "d5198411726f5dbe",
+    "df45fe562fd02840",
+    "3931e5781aa26653",
+    "a9938e17b444fdc0",
+    "743322c17bd2336e",
+    "0e2b197a44c6fe23",
+    "fd8fd6b519a749e2",
+    "92dfcbf00d1ccff0",
+    "8a9fad098091f699",
+    "23630b4253e4cb37",
+    "6b0b2bbc17d739de",
+    "05ee324f7a97183f",
+    "42e8c7f4c4e198d4",
+    "bdd4ab04438439ca",
+    "2cf93e8612d1b1bc",
+    "027894da4bf58844",
+    "d4298ba0cd8d779d",
+    "e42acf456460227b",
+    "55a7194ccf63577b",
+    "515edab179232873",
+    "335b719e888e8ab0",
+    "1ac90500ae62fa93",
+    "6b5afbd62440164f",
+    "8c50ce2c01488f20",
+    "ec4d7d44bb1c61eb",
+    "3e9b2683452e2922",
+    "c98ec87adb053dc1",
+    "e2bbae6281978011",
+    "22f72dfb1679e87d",
+    "b45f995970b05796",
+    "a638eed24eaca650",
+    "5222b583fa5b177a",
+    "8681f62faeb91b46",
+    "ebdee09ec29b7366",
+    "007c92f2f785f2f7",
+    "6b2a84e98ac023cd",
+    "3dd86e48c036d58f",
+    "34951e9b247b3fbd",
+    "e80df7ccf4f07c46",
+    "0a763cda715aeca4",
+    "c67f09b1b1b3a457",
+    "2bae93262483f9d2",
+    "f8b1640e10d71fd8",
+    "0a2c710db072b996",
+    "12430cfbbf052881",
+    "50ffbbd33ade3fa1",
+    "761a9f0036b61733",
+    "1de076c1e143e1f6",
+    "93a9c0e592cbc31b",
+    "acb68533ea0aa85f",
+    "1d7093453dbcd23f",
+    "f6fe24a27fe82505",
+    "e1ef3016a81c7e79",
+    "7a6c228bf71e5566",
+    "4e90541d8987a463",
+    "55c6701a040058c5",
+    "d8592671bada25ae",
+    "c8c716f6a2f1e672",
+    "9bf91778f4064645",
+    "cb45e5418a52f8de",
+    "b0e695998ea79ebc",
     "ea04d1ef522993a2",
-    "154fed1581d4eca3",
-    "f85124b041cf419d",
     "d371dff349e9cc80",
     "f9ee13ac1c389914",
-    "eccd3a1060bfab53",
+    "a11e8b7f550da93c",
+    "bb68b302c3439ba1",
     "869515ffb8f78091",
-    "f4d0c63e2c89ae89",
+    "f9aa044d15cc6405",
     "62bae399c22da50c",
+    "33f929e774a3582b",
     "1f6df4414c31875d",
     "630fe7c43fa5d7b1",
     "99e22e6717431425",
+    "11e9d79e7b0ff9cf",
     "879c45cba7103cda",
     "ecf39654b133767b",
+    "eee2f8e482c91dba",
     "de6fdd675f0a6b0a",
-    "6e8d0111c2e32ac2",
+    "597523fad4680834",
     "fac61998f600cffe",
-    "44f5f41941506ab3",
+    "4c58c664c01537f3",
     "1ff1da48683b612e",
-    "3dba3f48b3ce8729",
-    "455a7e64b51e7642",
     "35b3e1a5c3557ef6",
+    "3f4d3ed7f8dda0f8",
     "50bb2ae6e99ca051",
     "f7822f8dcac1f30d",
     "2664a0416bc22ceb",
-    "419498fa58030031",
+    "67bec4e2c78f0a3a",
+    "010bcfda9cfffad3",
     "09e0b0f1b62806fd",
     "4345f768af18d85e",
     "8e25bd2045fc34df",
-    "30b151fa9e57367a",
-    "53874dfcf66a7073",
+    "463c8e06e3517c54",
+    "1020b9b0bc875bef",
     "012dc9d86c49c7ad",
+    "27165ffdca1ad52b",
+    "200bacc557045410",
     "7c44f8634d0921b9",
-    "849abd87f8c94cde",
+    "36f148e26f3e7eed",
+    "091443208c3e96c2",
     "920c568e3e6773c6",
     "ab762578f3cccc66",
     "bdba0de3d2a0f7e1",
     "1b041857e34b4363",
-    "0e00c467ecfc913a",
-    "b536a76dad1c8852",
-    "0b31fea32df35f5a",
-    "c13cbb6f93d082f4",
-    "841c937dd27d8209",
-    "f112c9337ab46235",
-    "89ae860c30b0582e",
-    "6b657630ba049cfb",
-    "bb68b302c3439ba1",
-    "7cfaac8472ac4651",
-    "c7bda9cfbcd804ff",
-    "60cda2bb5aebbdb1",
-    "4e06b3bd057f2c38",
-    "9c6250494f494539",
-    "644d9f5883fa10fa",
-    "16e6492ae0ffc362",
-    "dd6044c7a1a1e4ab",
-    "0c574c9bcfb74685",
-    "0cb84f33f0cbe387",
-    "6c5dc8eddab47258",
-    "a0facf16888034f0",
-    "eacd10fac1e5cd7c",
-    "3d3539ae1100b09c",
-    "b3e2cc7c5685f03e",
-    "e63c810de0c67a56",
-    "8bf8156a5dcf4e42",
-    "4459bbf7c8388c06",
-    "4010b9137a2a3519",
-    "7725b55dea25044d",
-    "91dd46c55c3e87ef",
-    "7ff6162c1da92e68",
-    "c65577bea1f72fea",
-    "b35753ff6cb361f6",
-    "05e3226db979b9d8",
-    "0b2ed46d13f2bc3e",
-    "797400b1d894540f",
-    "7d5598d559d303f8",
-    "0443e4f5d976ea15",
-    "42c05700c527cbe0",
-    "ea66f46c40c64e3a",
-    "c34942fa7a9e098c",
-    "a715fc4c79a6e42b",
-    "cbdf20199330a1d5",
-    "8258f061bb6695da",
-    "20c2e75b4516c836",
-    "7ccbe07447b49ed4",
-    "72c4eca3abb0b649",
-    "c1006f6359e88e13",
-    "be6a1f696607d003",
-    "6fb220d97f4c71a9",
-    "fb128c463b1d04c9",
-    "0af5ca464c85ccc5",
-    "266676e7bbe55974",
-    "2e6148c3ad148941",
-    "371d83ac13f1630c",
-    "bc0418e42225f0a3",
-    "2b9b37ec25fcb5ac",
-    "9c07d35638e60207",
-    "fde56e5c1de527c1",
-    "1b7ad1242e95a4ab",
-    "07eeca36862eafcd",
-    "a08bfb960232f3c7",
-    "f1f62914d14c71ef",
-    "ee737fd27ada1603",
-    "61f83adde60922df",
-    "dd015783142af59e",
-    "5022a08fbad16bf4",
-    "81df0eb84f16383d",
-    "2f86654a675f3788",
-    "41d4007db6b3c817",
-    "88e72461fead491e",
-    "0270263dd696e741",
-    "2164f3ea43cdcc6c",
-    "e548fd6cd69bb38d",
-    "89608b34553f7543",
-    "45bf62b7c39582b7",
-    "535c03841950a3b4",
-    "26046b67179cfbbe",
-    "278ac427acc284b6",
-    "c2222afae56b33a0",
-    "f8c13df5c3c1c0be",
-    "e98f898fc03c21d6",
-    "0985eecfb9494967",
-    "0b920d44285e336d",
-    "73474db5e39fccb4",
-    "704767dacf5bbb8a",
-    "fba2047e1aa5009d",
-    "4b73ff4c51aeede8"
+    "12493f01a6f681d8",
+    "b536a76dad1c8852"
   ],
   "riskCases": {
     "RC_83970893aa10": {
@@ -5498,492 +5772,6 @@
           "status": "WATCH",
           "severity": "LOW",
           "newEvidenceCount": 5
-        }
-      ]
-    },
-    "RC_a5fef5f8039a": {
-      "caseId": "RC_a5fef5f8039a",
-      "canonicalEventTitle": "동국씨엠 AI 데이터센터 결로방지용 프리미엄 컬러강판 개발",
-      "assessmentStatus": "WATCH",
-      "severity": "MEDIUM",
-      "firstSeen": "2026-11-12T08:13:00.218Z",
-      "lastUpdated": "2026-11-12T08:13:00.218Z",
-      "lastAnalyzed": "2026-11-12T08:13:00.218Z",
-      "riskType": "시장 수요 및 경쟁 환경",
-      "facts": [
-        "동국씨엠이 AI 데이터센터 내부 결로 및 진동을 방지하는 특수 기능성 컬러강판(DK Shield 등)을 개발함",
-        "데이터센터 공조 소재 및 내장재 시장으로 컬러강판 적용처를 확대 추진 중"
-      ],
-      "inferences": [
-        "AI 데이터센터 투자 확대에 따라 프리미엄 기능성 컬러강판 시장 수요 증가 기대",
-        "경쟁사의 프리미엄 시장 선점으로 당사 일반 건재용 컬러강판의 수익성 방어 압박 가능성"
-      ],
-      "assumptions": [
-        "데이터센터용 기능성 컬러강판의 시장 규모가 단기간 내 급격히 확대될 것임"
-      ],
-      "missingEvidence": [
-        "해당 제품의 실제 해외 수출 실적 및 해외 상업 데이터센터 고객사 승인 여부"
-      ],
-      "exposure": {
-        "products": [
-          "COLOR"
-        ],
-        "regions": [
-          "Korea Export"
-        ],
-        "routes": [],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "동국씨엠, AI 데이터센터용 특수 기능성 컬러강판 개발 및 출시",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "글로벌 AI 데이터센터 건설 수요 확대로 기능성 COLOR 제품군 수요 증가",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "프리미엄 시장 경쟁 심화 또는 신규 고부가가치 수출 시장 창출",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "NEUTRAL",
-        "cost": "NEUTRAL",
-        "demand": "UP",
-        "sales": "NEUTRAL",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "UP",
-        "opportunity": "UP"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 2,
-        "causalStrength": 2,
-        "businessMateriality": 1,
-        "urgency": 1
-      },
-      "threat": "국내 경쟁사의 AI 데이터센터용 고부가가치 시장 선점으로 인한 프리미엄 제품군 주도권 상실 위험",
-      "opportunity": "AI 데이터센터 등 고기능성 컬러강판 신규 용도 시장 개척 및 신제품 소싱/트레이딩 기회",
-      "timeHorizon": "3-6_MONTHS",
-      "watchSignals": [
-        "글로벌 빅테크 데이터센터 스펙 지정 동향",
-        "동국씨엠 및 경쟁사의 기능성 컬러강판 해외 양산 및 공급 계약"
-      ],
-      "counterScenario": "데이터센터 공조 소재로 컬러강판 대신 타 소재(알루미늄 패널, 스테인리스 등)가 주력으로 선호될 경우 시장 확장이 제한될 수 있음",
-      "suggestedActions": [
-        "기능성/고내식 컬러강판 포트폴리오 점검 및 데이터센터향 프로젝트 소싱 가능성 타진"
-      ],
-      "evidenceFingerprints": [
-        "907bba1bb512fd96",
-        "e723780a95bbed9a",
-        "32bf80db04807ee7",
-        "1154150ff0e61f2f",
-        "951a1435db2d674c"
-      ],
-      "evidenceIndices": [
-        22,
-        105,
-        128,
-        131,
-        172
-      ],
-      "history": [
-        {
-          "date": "2026-11-12T08:13:00.218Z",
-          "status": "WATCH",
-          "severity": "MEDIUM",
-          "newEvidenceCount": 5
-        }
-      ]
-    },
-    "RC_6bf76aa4103b": {
-      "caseId": "RC_6bf76aa4103b",
-      "canonicalEventTitle": "아시아개발은행, 동남아 2040년까지 인프라 투자에 7조 달러 이상 필요 전망",
-      "assessmentStatus": "INFO",
-      "severity": "LOW",
-      "firstSeen": "2026-11-12T08:13:00.218Z",
-      "lastUpdated": "2026-11-12T08:13:00.218Z",
-      "lastAnalyzed": "2026-11-12T08:13:00.218Z",
-      "riskType": "거시 수요 장기 전망",
-      "facts": [
-        "아시아개발은행(ADB)이 2040년까지 동남아시아 인프라 개발에 7조 달러 이상의 자금이 필요하다고 발표함"
-      ],
-      "inferences": [
-        "동남아 지역의 도로, 교량, 건자재, 공장 건설에 따른 장기적인 도금 및 컬러강판 기초 수요가 하방 지지됨"
-      ],
-      "assumptions": [
-        "ADB 등 다자개발은행의 인프라 투자가 계획대로 집행될 것임"
-      ],
-      "missingEvidence": [
-        "단기/중기(1~3년 내) 구체적 프로젝트 발주 일정 및 도금강판 직접 수요량"
-      ],
-      "exposure": {
-        "products": [],
-        "regions": [
-          "Asia"
-        ],
-        "routes": [],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "ADB, 동남아 2040 장기 인프라 자금 수요 보고서 발표",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "동남아 각국 정부의 인프라 및 공장/주택 건설 프로젝트 점진적 실행",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "건설용 도금강판(GI/GL/COLOR)의 장기 소비 기반 유지",
-          "state": "UNCONFIRMED"
-        }
-      ],
-      "impactVectors": {
-        "price": "NEUTRAL",
-        "cost": "NEUTRAL",
-        "demand": "UP",
-        "sales": "NEUTRAL",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "NEUTRAL",
-        "opportunity": "UP"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 1,
-        "causalStrength": 1,
-        "businessMateriality": 0,
-        "urgency": 0
-      },
-      "threat": "없음 (단기 실질 영향 없음)",
-      "opportunity": "장기적으로 동남아향 건자재용 도금 및 컬러강판 수출 물량 기반 확보",
-      "timeHorizon": "LONG_TERM",
-      "watchSignals": [
-        "ASEAN 주요국(베트남, 인도네시아, 태국)의 건설 승인 및 인프라 예산 집행률"
-      ],
-      "counterScenario": "글로벌 경기 둔화나 재정 부족으로 인프라 프로젝트 투자가 지연될 경우 장기 수요 창출 미흡",
-      "suggestedActions": [
-        "장기 참고 자료로 활용하며 단기 수주 활동에는 별도 영향 없음"
-      ],
-      "evidenceFingerprints": [
-        "e164f6441bcc1760"
-      ],
-      "evidenceIndices": [
-        188
-      ],
-      "history": [
-        {
-          "date": "2026-11-12T08:13:00.218Z",
-          "status": "INFO",
-          "severity": "LOW",
-          "newEvidenceCount": 1
-        }
-      ]
-    },
-    "RC_6c9399e53c2d": {
-      "caseId": "RC_6c9399e53c2d",
-      "canonicalEventTitle": "멕시코, 아시아산 철강 우회수출 단속 강화 및 반덤핑 제소 추진",
-      "assessmentStatus": "ALERT",
-      "severity": "MEDIUM",
-      "firstSeen": "2026-11-12T08:13:00.218Z",
-      "lastUpdated": "2026-11-12T08:13:00.218Z",
-      "lastAnalyzed": "2026-11-12T08:13:00.218Z",
-      "riskType": "통상 규제 및 삼국간 무역 위험",
-      "facts": [
-        "멕시코 정부가 미국과의 관세 협상에 맞춰 철강 우회수출(anti-triangulation) 단속을 강화함",
-        "멕시코 주요 철강사 테르니움(Ternium)이 아시아산 철강에 대한 추가 반덤핑(AD) 제소를 검토/추진 중임"
-      ],
-      "inferences": [
-        "한국/아시아산 HRC/CRC를 멕시코로 가공 수출하거나, 멕시코를 거쳐 미국으로 우회 입고하는 삼국간(triangular) 트레이딩 경로에 엄격한 원산지 규제 및 AD 관세 부과 위험 증대"
-      ],
-      "assumptions": [
-        "미국-멕시코 간 USMCA 원산지 검증 강화 요구가 멕시코 정부의 아시아산 규제로 직결됨"
-      ],
-      "missingEvidence": [
-        "테르니움의 AD 제소 대상 구체적 HS 코드(CRC/GI/GL 등) 및 제소 시점",
-        "한국산 소재가 적용된 멕시코 임가공 제품의 우회 수입 판단 기준"
-      ],
-      "exposure": {
-        "products": [
-          "CRC",
-          "GI",
-          "GL",
-          "COLOR"
-        ],
-        "regions": [
-          "US"
-        ],
-        "routes": [
-          "Raw Material Origin (Asia/Korea) -> Processing/Intermediate (Mexico) -> Destination (US)"
-        ],
-        "tradeMeasures": [
-          "Anti-dumping",
-          "Anti-triangulation",
-          "Import control"
-        ]
-      },
-      "causalChain": [
-        {
-          "step": "미국-멕시코 철강 협상 및 Ternium의 아시아산 AD 제소 추진",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "멕시코 통관 당국의 아시아산 철강 통과/우회수출 수입 검사 엄격화",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "멕시코 거치 미주향 삼국간 트레이딩 물량 차단 및 수입 관세/규제 위험 증가",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "NEUTRAL",
-        "cost": "UP",
-        "demand": "DOWN",
-        "sales": "DOWN",
-        "freight": "NEUTRAL",
-        "leadTime": "UP",
-        "compliance": "UP",
-        "competition": "UP",
-        "opportunity": "NEUTRAL"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 2,
-        "causalStrength": 2,
-        "businessMateriality": 2,
-        "urgency": 1
-      },
-      "threat": "멕시코 경유 미국향 삼국간 트레이딩 및 멕시코 현지 가공향 수출 차단, 컴플라이언스 및 징벌적 관세 위험",
-      "opportunity": "미국 직수출 정식 쿼터/무관세 물량 확보 계약의 가치 상승",
-      "timeHorizon": "1-3_MONTHS",
-      "watchSignals": [
-        "Ternium의 AD 제소 공식 접수 여부 및 대상 품목",
-        "멕시코 수입인증제도(Mill Test Certificate 검증) 강화 지침"
-      ],
-      "counterScenario": "미-멕 철강 협상이 타결되고 한국산 소재의 원산지 증명이 명확하여 정식 우회수출이 아닌 가공공정으로 인정받는 경우 영향 최소화",
-      "suggestedActions": [
-        "멕시코향/경유 삼국간 트레이딩 건의 원산지 증빙 및 가공 비율 사전 점검",
-        "북미향 거래선 대상 통관 컴플라이언스 리스크 긴급 조사"
-      ],
-      "evidenceFingerprints": [
-        "34ac82af9b46d8a9",
-        "b9003cbb7507bc8d",
-        "bce868423eb8191d",
-        "45113e40f220a206",
-        "8d18cd3c874a2f0c"
-      ],
-      "evidenceIndices": [
-        208,
-        224,
-        247,
-        293,
-        321
-      ],
-      "history": [
-        {
-          "date": "2026-11-12T08:13:00.218Z",
-          "status": "ALERT",
-          "severity": "MEDIUM",
-          "newEvidenceCount": 5
-        }
-      ]
-    },
-    "RC_f8ef761525e3": {
-      "caseId": "RC_f8ef761525e3",
-      "canonicalEventTitle": "LME 알루미늄 현물 프리미엄 사상 최고치 달성 및 공급 부족 격화",
-      "assessmentStatus": "ALERT",
-      "severity": "HIGH",
-      "firstSeen": "2026-11-12T08:13:00.218Z",
-      "lastUpdated": "2026-11-12T08:13:00.218Z",
-      "lastAnalyzed": "2026-11-12T08:13:00.218Z",
-      "riskType": "원자재 가격 위험",
-      "facts": [
-        "런던금속거래소(LME) 알루미늄 시장이 수십 년 만에 최대 공급 부족에 직면함",
-        "LME 재고가 1990년 이후 최저 수준으로 떨어지면서 알루미늄 현물 프리미엄(Cash Premium)이 사상 최고치인 톤당 $151 달성"
-      ],
-      "inferences": [
-        "갈바륨(GL: 55% 알루미늄 - 43.5% 아연 - 1.5% 시리콘) 강판 코팅용 원자재인 알루미늄 수급 차질 및 가격 상승으로 GL 제조 원가 인상 압박 발생"
-      ],
-      "assumptions": [
-        "알루미늄 프리미엄 상승세가 지속되어 국내외 도금 제조사의 코팅 원자재 구매 단가에 즉시 반영됨"
-      ],
-      "missingEvidence": [
-        "제강사별 알루미늄 잉곳/알로이 장기 계약 물량 비율 및 원가 이전 가능 여부"
-      ],
-      "exposure": {
-        "products": [
-          "GL"
-        ],
-        "regions": [
-          "Korea Export"
-        ],
-        "routes": [],
-        "tradeMeasures": []
-      },
-      "causalChain": [
-        {
-          "step": "LME 알루미늄 재고 급감 및 현물 프리미엄 사상 최고치 기록",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "GL(갈바륨) 코팅용 알루미늄 원자재 구매 원가 인상",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "GL 제조 마진 축소 또는 GL 수출 오퍼 가격 인상으로 가격 경쟁력 약화",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "UP",
-        "cost": "UP",
-        "demand": "NEUTRAL",
-        "sales": "DOWN",
-        "freight": "NEUTRAL",
-        "leadTime": "NEUTRAL",
-        "compliance": "NEUTRAL",
-        "competition": "UP",
-        "opportunity": "NEUTRAL"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 3,
-        "causalStrength": 3,
-        "businessMateriality": 2,
-        "urgency": 2
-      },
-      "threat": "GL 강판 원가 상승에 따른 마진 압박 및 알루미늄 비중이 적은 GI(아연도금) 대비 GL 마진 약화",
-      "opportunity": "원가 인상을 명분으로 한 GL 수출 판매가 전가 및 오퍼가 인상",
-      "timeHorizon": "WEEKS",
-      "watchSignals": [
-        "LME 알루미늄 현물/3개월물 스프레드 및 프리미엄 추이",
-        "국내 주요 도금 제조사(포스코, 현대제철, 동국제강 등)의 GL 오퍼가 변동"
-      ],
-      "counterScenario": "알루미늄 재고가 재반등하거나 아연 가격과의 상대적 차이로 인해 GI 대체 수요가 늘어날 경우 GL 원가 충격 일부 완화",
-      "suggestedActions": [
-        "GL 포트폴리오의 마진 구조 재산출 및 알루미늄 원가 인상분 반영 오퍼가 설정",
-        "GI 대안 물량 제안 등 신속한 대체 마케팅 준비"
-      ],
-      "evidenceFingerprints": [
-        "db5e40bd5b408e1a",
-        "3d1ef0116602de6c",
-        "aeb25f69a5987dc2"
-      ],
-      "evidenceIndices": [
-        252,
-        269,
-        283
-      ],
-      "history": [
-        {
-          "date": "2026-11-12T08:13:00.218Z",
-          "status": "ALERT",
-          "severity": "HIGH",
-          "newEvidenceCount": 3
-        }
-      ]
-    },
-    "RC_46429da80cf8": {
-      "caseId": "RC_46429da80cf8",
-      "canonicalEventTitle": "일본, 고내식 도금강판 합금 성분 기준 차등 과세 추진",
-      "assessmentStatus": "ALERT",
-      "severity": "MEDIUM",
-      "firstSeen": "2026-11-12T08:13:00.218Z",
-      "lastUpdated": "2026-11-12T08:13:00.218Z",
-      "lastAnalyzed": "2026-11-12T08:13:00.218Z",
-      "riskType": "통상 규제 및 관세 비관세 장벽",
-      "facts": [
-        "일본 정부가 고내식 도금강판의 '합금 성분' 조성에 따라 차등 과세를 추진 중임",
-        "제외 기준에 대한 명확한 근거를 제시하지 않고 있어 비관세 장벽 논란 발생"
-      ],
-      "inferences": [
-        "한국산 고내식 도금강판(PosMAC, 마그네슘/알루미늄 복합 도금강판 등)의 대일 수출 시 세제 불이익 또는 입증 과제 부담 증가"
-      ],
-      "assumptions": [
-        "일본 정부의 과세 기준이 자국 철강사(Nippon Steel, JFE 등)에 유리하고 아시아산 고내식 강판 수입을 억제하기 위한 조치임"
-      ],
-      "missingEvidence": [
-        "세부 합금 성분 과세 기준(Mg, Al 함량 비율 등) 및 구체적 과세 이행 시점"
-      ],
-      "exposure": {
-        "products": [
-          "GI",
-          "GL"
-        ],
-        "regions": [
-          "Asia"
-        ],
-        "routes": [
-          "Korea -> Japan"
-        ],
-        "tradeMeasures": [
-          "Differential taxation",
-          "Non-tariff barrier"
-        ]
-      },
-      "causalChain": [
-        {
-          "step": "일본, 고내식 도금강판 합금 성분에 따른 차등 과세 단독 추진",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "한국산 삼원계/고내식 도금강판 수입 시 과세 부담 및 통관 서류 요구 강화",
-          "state": "CONDITIONAL"
-        },
-        {
-          "step": "대일본 고내식 도금강판 수출 가격 경쟁력 저하 및 수출량 감소",
-          "state": "CONDITIONAL"
-        }
-      ],
-      "impactVectors": {
-        "price": "DOWN",
-        "cost": "UP",
-        "demand": "DOWN",
-        "sales": "DOWN",
-        "freight": "NEUTRAL",
-        "leadTime": "UP",
-        "compliance": "UP",
-        "competition": "UP",
-        "opportunity": "NEUTRAL"
-      },
-      "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 3,
-        "causalStrength": 2,
-        "businessMateriality": 2,
-        "urgency": 1
-      },
-      "threat": "일본향 프리미엄 고내식 도금강판 수출 위축 및 통관 관세 부담 증가",
-      "opportunity": "일반 GI/GL 제품으로의 전환 공급 타진",
-      "timeHorizon": "1-3_MONTHS",
-      "watchSignals": [
-        "일본 재무성/경제산업성의 고내식 도금강판 과세 상세 가이드라인 발표",
-        "한국 철강협회 및 제조업체의 통상 대응 경과"
-      ],
-      "counterScenario": "한국산 주요 고내식 도금 제품 성분이 과세 면제 대상 조건에 들어맞거나 한국 정부의 통상 항의로 과세안이 철회/유예될 수 있음",
-      "suggestedActions": [
-        "대일 수출 주력 도금강판의 합금 성분 명세(Al, Mg %) 사전 파악",
-        "일본 바이어와 통관 세제 변경 모니터링 체계 구축"
-      ],
-      "evidenceFingerprints": [
-        "6b14c46b2d677452"
-      ],
-      "evidenceIndices": [
-        259
-      ],
-      "history": [
-        {
-          "date": "2026-11-12T08:13:00.218Z",
-          "status": "ALERT",
-          "severity": "MEDIUM",
-          "newEvidenceCount": 1
         }
       ]
     },
