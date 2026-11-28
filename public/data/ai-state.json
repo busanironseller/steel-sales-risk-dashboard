@@ -1,285 +1,352 @@
 {
-  "lastAnalyzedAt": "2026-11-28T03:41:01.924Z",
+  "lastAnalyzedAt": "2026-11-28T10:10:00.976Z",
   "analyzedFingerprints": [
+    "d936bf922d112625",
+    "2554e587abc0e849",
+    "184450a7545d5fce",
+    "9d85832133f6f949",
+    "9c8142d3f4af06e1",
+    "58532e4b79ba39f8",
+    "8da812c21e4bdd0d",
+    "4e9975e99665cbaf",
+    "aa6b76c7abb6de91",
+    "47a39e8638a7d8e4",
+    "0d6289fc64d9ab08",
     "7fd2c9e08842c230",
+    "8707cd44c9111b11",
+    "ba37a40eaab6189e",
+    "2c3c7514c5d542e3",
+    "e8c55bfcd98f7d3e",
+    "bf847afd5f791977",
+    "665d74296974d6aa",
+    "edd16453359e3e37",
+    "41d78bfe34dbeb80",
+    "fd5abfcbe0e15e28",
+    "4ce3f3d6217b7f4e",
+    "d588a620ecb9ef20",
+    "5139c582a568ab5f",
+    "2c65ab9ec7c2f6de",
+    "8115e02504ec096d",
+    "55530338418b6126",
+    "7f1ce6cbd32d1f39",
+    "a6c51f0c0bcad4e5",
+    "0f7895a16715d7e9",
+    "3f1774838e7dc70b",
+    "e04c38ce89456e24",
+    "b54b39442f5f188b",
+    "ed2eb64db1340902",
+    "fd9a882a574befc6",
+    "4aa38f4a46a3903b",
+    "4041261638279fa4",
+    "7a111bca20bc9736",
+    "24caff689d3f3cca",
+    "ae5539b29fb37ef8",
+    "4e353c8396e316f1",
+    "c3a8d352d5807c49",
+    "34812263fed23c93",
+    "b9b94fdfa5bd14ab",
+    "903c08e7d268e1ab",
+    "737c0f9c88de44c1",
+    "cd3cc2f6a3eaff2c",
+    "7c38b5e03d1ce662",
+    "8813dea626a3847a",
+    "e5662e6844659869",
     "a35d778f29c4a242",
-    "8d63acda9f7b571b",
+    "a99017c4eceb111a",
     "da72df8515eae67f",
     "22da227586487464",
-    "ee01b5176fb96fa4",
-    "11d6bc9d6240cf9b",
-    "b84f96f6d8ffbaf0",
-    "9391d95eb73da758",
-    "9d84b7f9cbf34438",
     "5a8a84018551bd31",
-    "5d571e3c895c6096",
+    "92f2d910a0e049ca",
+    "11d6bc9d6240cf9b",
+    "9391d95eb73da758",
+    "43b49277e5903d27",
+    "9c3579365dc93870",
     "b0d6da1d4638f298",
     "08de9ee4781bd8a8",
-    "43b49277e5903d27",
+    "5dc1ae767558883b",
     "7a7b1366a7aea67a",
-    "a2b7bf6d617c2d00",
-    "5d85633bf7c6ebcb",
+    "39e49a65f1dd6c17",
     "b4c425a337e715a0",
-    "625a28b21268dc90",
     "3ece531d1e666e50",
+    "72e3da801263d968",
     "c4f24867a9ad374d",
+    "e9d27303e312a454",
     "fd324bb622fb4b80",
     "f6d71f100c848b7d",
     "fe0718711911c19b",
+    "f7ed5e17074bb874",
+    "524203e915f8c1fe",
     "9bfb3d6c81f72c73",
     "c05b5812f5aa3bd9",
     "03416407ea93cc1a",
-    "b9e97895a28d8145",
-    "dbaa9345ef0906c5",
+    "d5170a5965a8bc41",
+    "5aa180c9a4e49b2b",
+    "8512e831c0018d3c",
     "b8200b62dd3a015e",
+    "877ebbf6351ffd2f",
     "41f08476e21d8140",
     "e98b93b4e89d15a5",
-    "9253ac95e825106d",
-    "298993ff15a684ca",
-    "f935f36589502fe4",
+    "bb0f2f2ac3482535",
+    "83e511bbf4cfc9e4",
     "10b894987fa2be85",
-    "b07961bd6e4c4147",
+    "2ea5c94670c42035",
     "16ba03730952fb20",
-    "220b0f817c0573f7",
-    "6da021869af316cd",
+    "0921ad275d5b77eb",
+    "61c5542ee6191814",
     "6dc6b6ca2f216229",
     "1343b032ac0a938a",
-    "e00c915a07fb785d",
-    "87812c5462b5c6bc",
     "d42ae39f85673c9a",
     "a2b6d6e794684769",
-    "93c2d175312e589f",
+    "966c6dfc9dbc5722",
+    "a341f102675ec07d",
+    "bda425e8304d8723",
+    "04d61bf81d530848",
+    "f3255b69eef22c4e",
     "5ada0f7c7216fec4",
     "9b9958e3edc0aa51",
     "b2e56d7a62c7b130",
-    "0135a3adf09fd845",
+    "b900d32491a0bf76",
     "b6ddee1a4642f467",
     "9ed1879bd2c98773",
+    "e84df17379e81266",
     "3f499477a69d2e65",
     "35ba43dccd1501a4",
+    "67c540505679b075",
     "6a7bf054f025cf2b",
     "ba5a3f87a7e499e0",
-    "c21848fe5fe0557c",
+    "5d6ffe379caeb167",
+    "601c9dcd51f238c9",
     "7c44df03ffd7663e",
-    "be23cfc89084b33c",
-    "82ceb9d7e524b910",
+    "8974a00a8df46b26",
     "ce6b3285b46a10ac",
-    "da103865fc7dec03",
     "4851dc93d29c3c9b",
     "4e8cfdea12ede9c7",
+    "2ce5615dd305f7a6",
+    "cd7814b52b325a7d",
     "f56e98a2f0460ed7",
-    "63ad6b3540d845e4",
     "4c22711b30d91d63",
+    "86dc9c0ce9020505",
     "f82a9555c6a3f179",
-    "1bfaa37c31ea5e4d",
-    "1e3f076514079bad",
+    "11f600263227d755",
+    "82644a1b11089b4d",
+    "3debf9103630a06c",
     "c5cddb33097c91e9",
-    "9d19d5f75cb59110",
     "599efcdc2c63e682",
     "e15a298979d47a25",
-    "3debf9103630a06c",
+    "7c4f2d23a8bd56d3",
     "bdbc63cd6c189d1c",
+    "1662455c31d02dc5",
     "ff98ef70992bcd2d",
     "62ef005bb290ed71",
-    "a24bb3355a41ce72",
+    "bb4adde3d8540e10",
+    "0e8bca72b1d003f3",
     "cc4ed0fae1c16ef2",
-    "04f18a95d852e481",
     "2944541c31d0e97d",
-    "e262bffc2f3502da",
-    "1e7f2a0af9efb492",
     "3dba48941eaa7699",
-    "f90fe6a1afe2c4cb",
+    "782d87fa8a1ca020",
+    "3f3094a2623d41e7",
+    "6cfc0ea38d1e3e53",
     "ad306f4864b1c785",
     "8dc2f8b2ae4839ca",
-    "1c26961382e744df",
+    "6c4461f4afc361ed",
     "06f5b425d739a655",
+    "91d21db3c34a3760",
+    "b56e7bf05b220869",
     "509765486563c152",
     "40ad84303cd0168c",
     "b2e3564e35e30fda",
+    "575ec07e056561b7",
     "1c7dbdf95a13a0d4",
-    "1c7465009851fcb2",
+    "0dde64ad995f9ebe",
     "b4bfac5fa794b333",
-    "7280786dc75fccce",
+    "18b9ba3665496e41",
+    "20abcd33d1fcc11b",
+    "e0ec483311f90c63",
     "8773dfb5308f3bbe",
     "e50ad88a812e86e2",
-    "ea563e8b67b91321",
     "7bc55c2b5020130d",
     "47ad1cfeee9fab10",
-    "85d646c2146bdf5d",
     "12f79ed67f37f73d",
     "f4cc3f3d680ee2fd",
-    "087edc785ac3d817",
-    "41ffc7379e929436",
+    "298993ff15a684ca",
     "df2a81192db8cd6e",
-    "c7dba0cfd3bde262",
-    "4d9eb62f423747a0",
     "ce0dd3c04330f0df",
     "50b01991b8e4a321",
+    "12d9fadcb1b2f3fe",
+    "82ceb9d7e524b910",
     "381d0dd157bb7e21",
-    "750827a172194ab3",
+    "698a4282568bf936",
     "2f86a12a7f67ad21",
-    "2ec78da52df0c1a2",
+    "87812c5462b5c6bc",
+    "143eb99e7845c75d",
+    "4b9dadcf8357060c",
     "1f37cd31b80ca0ae",
-    "9c22694ba22960df",
     "2859c0c570f38187",
+    "2c909f7fec3da996",
     "640adec146188798",
+    "454e1de630f3a845",
     "63b9d463222d9942",
+    "47f7c8f4f2eecaf6",
     "2562c694878f7d10",
     "15ee601a65ba0cbf",
     "0ee67d69c2c22cb4",
     "fc365674e911fcb4",
-    "80219bbb1d112951",
+    "703cb5f88445bc21",
     "c93b2887328b97d1",
     "8dac2ede66dff5e3",
     "5de39fb8755ec812",
     "ba5b3a0dea89238c",
-    "c3ff0c76e093d11f",
     "e12a3a1a324422a2",
+    "a204c1cd8b1ea779",
+    "658064bfcd8e3f19",
     "a94277df90c0494f",
     "ac61419c906b0643",
     "68165ab75a7ae01f",
+    "db5a7a35c85c6c8f",
+    "ab31fe63493ded66",
     "3742740dfa3789f0",
     "4cbaa6d69c43810d",
     "0bdc71eca022933e",
     "d65e2b260714801c",
     "9736e226b1f614a0",
     "4765052f8e3c9f89",
+    "0bd1db2bb8ed7e96",
     "a8a3752fe80232b2",
-    "2e680d22f9af8f2c",
-    "d8c3a02550e27896",
     "3d73cb6c83fdd2cc",
-    "1c4615b6d7e13a7f",
-    "04637ed00f4703aa",
     "99a69c8b3591c46e",
+    "f26e962c6271ea15",
     "ca9f649e21850f8c",
     "aac752831837bef0",
-    "8f917784527c78ec",
-    "74e151f5351afee7",
-    "05de9da9276730e4",
+    "7dfd96ad04aacdec",
+    "7bbd2cd00e79763e",
     "5d4e8e56c0517c67",
     "9751a574d85c8c50",
     "e1623250c834df38",
-    "e9e45d3ba6c0a49c",
+    "557aeb4de67baef5",
     "8be8db03fbeb754f",
     "e0be3543c9acf583",
-    "39272bc665cbde17",
+    "84d24e328c9005cb",
+    "46c1af56f2ed07e1",
     "95ad5d358c7aa127",
+    "25223cef2d13de26",
     "23da89b3020da833",
-    "fc31dfeb15c89e8a",
     "3bf19bea5dc01552",
     "dba8a738dbff1af4",
-    "1da6ac390bf3d1ab",
+    "9e6f9fd78859f382",
     "2c30c63cd0bcba52",
     "1ee4dde02f477635",
-    "7a35ae0b3f85e942",
+    "645422c2d6d7d2c6",
+    "439afea58604067a",
     "fd08a67a0094fe5c",
     "613965f979922b5f",
-    "5a72439a94826772",
     "184534b3dc20b7a1",
     "584b5b7c6150cc96",
     "c8b2f151a7fd9cfa",
+    "daa0bf0e1e9a572f",
     "9fbfe0bc60e73953",
     "8d00c22d36c706fb",
+    "8556317c3a45887b",
     "5e2820f52c9b6f71",
     "fd3d45859df357a9",
     "a922f77abfb183bc",
     "30322777eae079a9",
+    "9d19d5f75cb59110",
     "7029cf6d1fb64ea6",
     "412fc8647cf683b5",
-    "ca9bc756ef4909ee",
     "50532020a982e4cc",
     "1eac058e39eefb6e",
     "3d0ca584a960e719",
+    "efda795aab455c2c",
     "a8fed32db64c5755",
-    "a93667af7c462fc6",
+    "fecb7d79552f74bd",
     "c82a5ac1e2d7db66",
     "c220a9c7411bd9be",
     "ba3112bda6dd7c90",
     "a0b00f012306d8a5",
+    "476093dcc6af60a8",
     "63da2c5914d90762",
-    "1b36b1121510a3fd",
     "dd99d20f508186b5",
     "1d1def3ac65f1414",
     "6959eab11d9f4c3a",
+    "4253ddcdf455b5fb",
     "f0a9ea39d3adb29d",
+    "12b015f6ce43fcc7",
+    "3c124d8db8d57a4f",
     "14b0c6cafdc0edc4",
     "a79655c5ab287205",
+    "31782d20df582901",
+    "42509ec2efa79569",
+    "12d4f030c8d1cb7b",
+    "04637ed00f4703aa",
     "aebc8e0007c1cb73",
     "0a71ef84e6356669",
-    "f95e95cd6082f11e",
     "515807152eb4f8ee",
     "6af737de1453bc70",
-    "f9e4a3720797660e",
     "57124b42d5b1e2fc",
     "644a657b84dd6a2e",
-    "d1f9ff47c4a6a3df",
+    "51bb06aad167fac1",
+    "8492dfb87af50e93",
     "1b023fd92717bbd4",
-    "a2e17f257d5aa1af",
+    "83128b1a87a77bb0",
     "78e8a78e5c70fc33",
-    "4b11a6184747cb96",
     "a256430aee5afa32",
     "b4fc61a8e3b9f713",
     "8929c82f868982e8",
-    "eb68221defffb18c",
     "2ec5e605e42285b2",
-    "b4e7febd31f4e0d4",
     "f2868627aef7c8db",
     "590dcc40d6de5f11",
     "77d4f59854b0a354",
     "7893ef2a8732ec2b",
     "73cc27b66d00fadd",
     "c88592932b42986d",
-    "3d8432a709fdc84a",
-    "6cb3bddaa15feb02",
-    "47fd8d024eef85d3",
+    "b117b1f81ad8f3fe",
     "e4f8c770ab8e9d27",
+    "29dccd98abf6c8cb",
     "99e9df28bb69f547",
     "11e4fd1b153eaa0d",
     "36f85f49bb8d78f8",
     "e3e9f3af60d2c6da",
-    "5417f7159f7f6555",
     "d655f512844f6a06",
-    "38da384e7707109c",
     "c427f483c7a178a6",
     "fdaf6cc943abc73d",
     "0ee42e7c6eee28bf",
-    "3e76ba91168dcd4c",
     "1a82e96e8bea3b5e",
     "351e40728bb83dab",
     "c8622b92507ff014",
+    "29acf806e9ede4bb",
     "02b30c9477a96e8d",
-    "b71554bff04526e1",
+    "4a473b321a6bc802",
     "6cc03e121e20a174",
     "2aecf783f2f9316a",
     "a61474665eb5058c",
     "2db639750d77fdfb",
     "6c80cbc6d1c2b136",
-    "c4db44b40a82b460",
+    "614246abb602f6ad",
+    "5c709ecc9931e317",
     "0b17f0de5b140e5a",
     "8dea39b9bb797a98",
     "57fe736aa05412f1",
     "23686651a37d02b5",
-    "dec509c210b45891",
     "348b968124d6bb17",
     "18ff80655b703550",
-    "11aeb7b53a60eae9",
     "de9c3697a51cfbe2",
     "5065396ef36ae0c1",
     "3da07092fde8b447",
     "96a7e4356ba66b0b",
+    "c7dba0cfd3bde262",
     "a287985bb7598f3d",
     "43706cd208ed6b1a",
     "324553ec1e7d71a3",
+    "a13a59dabbd9b4f4",
     "72d5bcbcce8b65ff",
     "6968e42e20d83f16",
+    "b56c6ea84af2f5be",
     "7194051a29414de8",
-    "ea3743938dafd1a6",
     "478e90df90a0fe91",
-    "ec1a9a75f4efd5a2",
     "271158c092f62a33",
     "9c55897a907cc0ac",
-    "8ac45255adea545d",
     "3c96eac19e0569e5",
+    "0d5bbe439c497085",
     "6f194bbf13dcbcc6",
     "79842028abbe4f3f",
     "4faa4f1a2686af16",
@@ -291,21 +358,21 @@
     "0176d09d24d0ab01",
     "5889298010b807a3",
     "3cf3858867efb0ed",
+    "a4e39bc21839e0ed",
     "0ebcf522052a0c56",
+    "96081105b3ea6c83",
     "a557d7ac64a4a1a8",
-    "3a96110417e73d3c",
     "6d92e2ce0a995134",
     "37133e7c422f1bda",
     "961d472377b925c5",
     "52ab02bf65093c10",
+    "8b500506e64bbb91",
     "6ca6145addf78018",
     "099aea63559d42dc",
-    "3b6375762d39c688",
     "972d669398221c7e",
     "bd9bdb90cfddb01c",
     "c0d76d948868404d",
     "cf2333cb4feb5038",
-    "73fbceacfece6501",
     "6c217daa19528cda",
     "027c03e3a5886cd3",
     "9af9189a8591e11e",
@@ -313,121 +380,52 @@
     "04dfe425070dbb61",
     "2945bdf0e74d8fe6",
     "07c1cca723c90d8d",
+    "64ae722074b3290f",
     "16c1f5ae53cb4c2c",
     "5ec63be78041f414",
     "472f21747d5e3a4d",
-    "e0e70c733fa96884",
     "8f551281f9beeb86",
     "a2e9f937ab4c0c2a",
     "64f41165053ab3ec",
+    "c05d03f68fa76a2d",
+    "60f9d6f52fb2a93d",
     "32066d6b6aea7f33",
-    "0549608ed3f3485c",
-    "5dd2e97a64e707dd",
     "9d940e42dd5d672a",
-    "3722f7c658e58c67",
+    "3dfb3b61af4bd418",
     "f8299ea5a098f5cf",
-    "ecd89f629a1bfa67",
-    "4ce930617a16b73c",
-    "c7d97549e1c82c83",
+    "42033ef008b1f07d",
     "3a5aeee46242bc67",
     "116aa70ab9bfa511",
     "9822dfb8342781fe",
     "5230b37bd75de7f3",
     "8b0a49ddb1ffb7e9",
     "851a21826371ab4a",
-    "70b1f51ee2633463",
-    "846fc52652f9f8ca",
-    "fa6b082087620015",
-    "cb89a84fe6c8f24d",
-    "0fda1418b33500f3",
-    "2a8e9c185e265171",
-    "2287b847cb8bdc7a",
-    "899f5aa011ee6294",
-    "4fe1b77dcb81de1c",
-    "e21bbcaa481b69d5",
-    "a5c212613a478cdf",
-    "b8fa47e45d45c7ad",
-    "80d94a420084c053",
-    "687ddda7dd06ed09",
-    "307c1ae2ea0e252b",
-    "0d3222d14b09efc9",
-    "e32976bfb37c4d60",
-    "5dce403d596393b4",
-    "0ac630c515b67cff",
-    "7027484cb8908520",
-    "1ed526d9a802a402",
-    "d44e85d6f3cd8479",
-    "4925d1f664b50de3",
-    "18e185947d1b7ce2",
-    "090dae59aaeec1a9",
-    "1f22dced9fb2c0f0",
-    "42bb7e943dd7503b",
-    "ba903bb4b385254b",
-    "30757325294eb539",
-    "0e7fb3dd627a0975",
-    "32555ec8bcdf1d39",
-    "82dea291bb856c8d",
-    "ac1ce4ce0a13901d",
-    "fd567828ebc57635",
-    "610e0a71576bc8f1",
-    "17adc1abd3a7367e",
-    "86ef2bdae949ed1c",
-    "b3a95d826103c657",
-    "f8c1c8c3efeeaa01",
-    "c0fcbcfb5fcef1d5",
-    "30c271cbe394c342",
-    "067cfa2dd07825af",
-    "661f88bad3925f24",
-    "442d0a3d986670b2",
-    "d38caeee3586a0e1",
-    "e44a81a2aec7aedd",
-    "50eb495cbf768b94",
-    "0ecebadb3ff70d61",
-    "0c660a3c6d545ec2",
-    "ed389db0693c82e1",
-    "1e0a162969d70ea7",
-    "58cdea94f25c47aa",
-    "5e078ded2159e384",
-    "43eda5dd1c3dab2f",
-    "d2103e7e310c6f87",
-    "ead2f25eadbb9fb6",
-    "8805c3493e8e59d3",
-    "05ad2805484a0a0e",
-    "ddbaa6d30f5b32bd",
-    "352e95b46cc6d1ea",
-    "bd00e855beacbd50",
-    "ccb083b141af2c72",
-    "27bc30494c704dea",
-    "aff8b7c168337eba",
-    "a043b4aed8ea24ac",
-    "eea54601cbe9afe8"
+    "70b1f51ee2633463"
   ],
   "riskCases": {
     "RC_83970893aa10": {
       "caseId": "RC_83970893aa10",
-      "canonicalEventTitle": "중동 군사적 긴장 급증 및 호르무즈/홍해 해상 물류 차질",
+      "canonicalEventTitle": "중동 지정학적 긴장에 따른 호르무즈·홍해 해상 물류 차질",
       "assessmentStatus": "ALERT",
-      "severity": "HIGH",
+      "severity": "MEDIUM",
       "firstSeen": "2026-08-21T07:17:02.338Z",
-      "lastUpdated": "2026-11-27T21:39:30.207Z",
-      "lastAnalyzed": "2026-11-27T21:39:30.207Z",
-      "riskType": "물류 및 해상 운임",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "물류",
       "facts": [
-        "쿠웨이트 및 사우디 정유시설(라스타누라, 자잔) 대상 드론/미사일 공격 발생 및 인명 피해 발생",
-        "호르무즈 해협 및 홍해 내 선박 공격 우려로 WTI 및 유가가 급등($85~$98 도달/상승세)",
-        "후티 반군의 위협으로 홍해 우회 선박 증가 및 UNCTAD의 2026년 해상 무역 성장률 0% 전망"
+        "사우디 홍해 항구 입항 선박 수 급감 보고",
+        "호르무즈 해협 내 유조선 피격 및 나포 등 군사적 긴장 고조",
+        "중동 충돌 확산에 따른 수프라막스 벌크선 및 해상 수송 수요 변동"
       ],
       "inferences": [
-        "중동 지정학적 위기 고조로 해상 할증료(Bunker Adjustment Factor, War Risk Surcharge) 급등",
-        "GCC향 수출 노선 및 홍해를 경과하는 유로존(EU)향 강판 수출의 운임 상승 및 리드타임 대폭 연장",
-        "에너지 가격 상승으로 인한 글로벌 철강 제조 비용 전반의 인플레이션 압력"
+        "중동 주요 해협의 위험 증대로 해운 선사들의 유연 항로 선택 및 위험 할증료 부과 가능성이 올라감",
+        "GCC 및 유럽향 철강재 수출 운임 상승 및 수송 리드타임 지연 발생 우려"
       ],
       "assumptions": [
-        "호르무즈 해협 및 홍해 봉쇄 불안이 단기간 내 해소되지 않고 수개월간 지속될 것임"
+        "국내 표면처리강판 수출 선박이 홍해 또는 중동 해역을 통과하거나 해당 지역 할증 운임을 적용받을 것임"
       ],
       "missingEvidence": [
-        "국내 주요 선사(HMM 등)의 GCC/EU 노선 긴급 할증료(WRS) 인상 폭",
-        "중동 주요 항구(제다, 담맘, 제벨알리 등) 하역 정상 작동 여부"
+        "한국발 GCC/유럽향 정기선 및 벌크선의 실제 우회율 및 해상 위험 할증료(War Risk Surcharge) 구체 인상액"
       ],
       "exposure": {
         "products": [
@@ -438,32 +436,33 @@
         ],
         "regions": [
           "GCC",
-          "Europe"
+          "Europe",
+          "Korea Export"
         ],
         "routes": [
-          "Suez/Red Sea",
+          "Red Sea",
           "Strait of Hormuz"
         ],
         "tradeMeasures": []
       },
       "causalChain": [
         {
-          "step": "중동 주요 정유시설 및 해협 선박 공격 심화로 유가 급등 및 해상 위험 고조",
+          "step": "홍해 및 호르무즈 해협 내 선박 피격 등 지정학적 위기 고조",
           "state": "CONFIRMED"
         },
         {
-          "step": "선사들의 희망봉 우회 항로 채택 및 전쟁위험할증료 부과로 운임/리드타임 급등",
-          "state": "CONFIRMED"
-        },
-        {
-          "step": "GCC 및 EU향 수출 강판의 CFR/CIF 단가 상승, 계약 지연 및 물류 차질 발생",
+          "step": "주요 선사들의 수에즈 운하 우회(희망봉 운항) 및 해상 위험 할증료 인상",
           "state": "CONDITIONAL"
+        },
+        {
+          "step": "한국발 유럽/GCC향 강판 수출 물류비 증가 및 인도 기한 지연으로 마진 압박",
+          "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
         "price": "UP",
         "cost": "UP",
-        "demand": "DOWN",
+        "demand": "NEUTRAL",
         "sales": "DOWN",
         "freight": "UP",
         "leadTime": "UP",
@@ -473,23 +472,22 @@
       },
       "scores": {
         "evidenceQuality": 2,
-        "exposureProximity": 3,
-        "causalStrength": 3,
-        "businessMateriality": 3,
+        "exposureProximity": 2,
+        "causalStrength": 2,
+        "businessMateriality": 2,
         "urgency": 2
       },
-      "threat": "운임 급등 및 유류할증료 전가로 물류비 상승, 납기 지연으로 인한 GCC/EU 바이어 계약 취소 risk",
-      "opportunity": "해당 지역 내 현지 재고 보유자의 경우 물류 프리미엄을 반영한 단기 가격 인상 기회",
-      "timeHorizon": "NOW",
+      "threat": "GCC 및 유럽향 수출 물류비 상승과 납기 지연에 따른 계약 이행 차질 및 수익성 악화",
+      "opportunity": "물류 안정성이 확보된 아시아 지역으로의 대체 물량 배정 및 물류비 연동 판매가 인상 추진",
+      "timeHorizon": "DAYS",
       "watchSignals": [
-        "컨테이너 및 벌크선 운임지수(SCFI, BDI) 중동/유럽 노선 추이",
-        "선사들의 유류할증료 및 전쟁위험할증료(WRS) 공식 공지",
-        "호르무즈 해협 실제 통행 제한 여부"
+        "해운선사별 중동 위험 할증료(War Risk Surcharge) 공지",
+        "한국-유럽/중동 노선 컨테이너/벌크 운임 지수"
       ],
-      "counterScenario": "미국 등 국제사회의 신속한 개입으로 군사 충돌이 조기 소강상태로 전환될 경우 운임 원복 가능",
+      "counterScenario": "해상 군사 호위 강화로 주요 해협 운항이 정상화되고 운임 상승폭이 제한되는 경우",
       "suggestedActions": [
-        "GCC 및 EU 바이어 대상 CFR 조건 계약 시 운임 변동 연동 조항(Freight Escalation Clause) 삽입",
-        "납기 연장 가능성에 대한 바이어 사전 안내 및 우회 항로 선복 선제 확보"
+        "GCC 및 유럽 바이어와의 CFR/CIF 계약 조건 내 운임 연동 조항 점검",
+        "선사별 운송 리드타임 확정 및 대체 우회 항로 물류비 사전 반영"
       ],
       "evidenceFingerprints": [
         "31a61c76d3227b87",
@@ -2993,7 +2991,28 @@
         "eea54601cbe9afe8",
         "3940e7e3dae7e4b7",
         "c4315569c0ef1ae9",
-        "308c2259cb280323"
+        "308c2259cb280323",
+        "9d85832133f6f949",
+        "8707cd44c9111b11",
+        "2c3c7514c5d542e3",
+        "8115e02504ec096d",
+        "7f1ce6cbd32d1f39",
+        "cd3cc2f6a3eaff2c",
+        "fd324bb622fb4b80",
+        "f3255b69eef22c4e",
+        "3f499477a69d2e65",
+        "ce6b3285b46a10ac",
+        "62ef005bb290ed71",
+        "cc4ed0fae1c16ef2",
+        "782d87fa8a1ca020",
+        "18b9ba3665496e41",
+        "12d9fadcb1b2f3fe",
+        "47f7c8f4f2eecaf6",
+        "50532020a982e4cc",
+        "3c124d8db8d57a4f",
+        "b4fc61a8e3b9f713",
+        "6968e42e20d83f16",
+        "77f14c8a00ed1e97"
       ],
       "evidenceIndices": [
         202,
@@ -3008,18 +3027,6 @@
         288
       ],
       "history": [
-        {
-          "date": "2026-11-21T23:05:44.570Z",
-          "status": "ALERT",
-          "severity": "HIGH",
-          "newEvidenceCount": 9
-        },
-        {
-          "date": "2026-11-21T23:05:44.570Z",
-          "status": "WATCH",
-          "severity": "LOW",
-          "newEvidenceCount": 2
-        },
         {
           "date": "2026-11-21T23:05:44.570Z",
           "status": "ALERT",
@@ -3127,6 +3134,18 @@
           "status": "ALERT",
           "severity": "HIGH",
           "newEvidenceCount": 20
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 16
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "ALERT",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 5
         }
       ]
     },
@@ -3626,26 +3645,26 @@
     },
     "RC_cd98f6c248d8": {
       "caseId": "RC_cd98f6c248d8",
-      "canonicalEventTitle": "EU 및 영국 CBAM(탄소국경조정제도) 이행 규정 확정 및 적용 대상 확대",
+      "canonicalEventTitle": "EU CBAM 2027년 인증서 이행 규칙 구체화 및 규제 준비 가속",
       "assessmentStatus": "ALERT",
-      "severity": "MEDIUM",
+      "severity": "HIGH",
       "firstSeen": "2026-10-04T17:32:02.122Z",
-      "lastUpdated": "2026-11-27T21:39:30.207Z",
-      "lastAnalyzed": "2026-11-27T21:39:30.207Z",
-      "riskType": "환경/규제",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "환경규제",
       "facts": [
-        "EU가 2027년 시행 예정인 CBAM 인증서 이행 규칙을 발표함 (기사 [171])",
-        "영국 철강업계의 CBAM 불평등 조항 개정 요구 및 영국 정부의 CBAM 예외 적용 추진 (기사 [48], [50], [85], [192])",
-        "CARES 등 검증 기관의 CBAM 검증 인증 획득 진행 (기사 [200])"
+        "EU가 2027년부터 시행될 CBAM 인증서 구매 및 이행 세부 규칙 발표",
+        "영국, 노르웨이, 아이슬란드 등 주변국의 CBAM 적용 및 면제 논의 확산"
       ],
       "inferences": [
-        "유럽향 철강재 수출 시 탄소 배출량 보고 및 검증 비용, CBAM 인증서 구매 비용 부담 가중"
+        "2026년까지의 배출량 보고 유예기간이 끝나고 2027년부터 실질적인 CBAM 비용 부담이 발생하므로 바이어들의 탄소 배출량 요구 강화",
+        "한국산 강판(CRC, GI, GL, COLOR)의 탄소 집약도 데이터 구비 필수화"
       ],
       "assumptions": [
-        "한국산 표면처리강판의 배출량 데이터가 EU/UK CBAM 검증 기준을 충족해야 함"
+        "EU 바이어들은 2027년 인증서 비용 부담을 최소화하기 위해 2026년 하반기부터 공급망 내 탄소 배출량이 적은 철강재 선호 경향 강화"
       ],
       "missingEvidence": [
-        "제품별(CRC/GI/GL/COLOR) 내재 배출량 산정 방식 및 한국 K-ETS 인정 범위"
+        "제품별(CRC, GI, GL, COLOR) EU 산정 탄소 배출 기본값(Default value) 확정치 및 인증서 가격 추정치"
       ],
       "exposure": {
         "products": [
@@ -3664,22 +3683,22 @@
       },
       "causalChain": [
         {
-          "step": "EU 및 영국의 CBAM 이행 가이드라인 및 인증 규칙 최종 발표",
+          "step": "EU 2027년 CBAM 인증서 구매 및 이행 규칙 세부 발표",
           "state": "CONFIRMED"
         },
         {
-          "step": "유럽향 수출 강재에 대한 실시간 배출량 검증 및 인증서 구매 의무화",
+          "step": "유럽 수입업자들의 2026-2027년 공급망 탄소배출 데이터 검증 및 탄소비용 반영 오퍼 요구",
           "state": "CONDITIONAL"
         },
         {
-          "step": "탄소 비용 및 행정 절차 비용 발생에 따른 유럽 시장 수출 가격 경쟁력 변화",
-          "state": "CONDITIONAL"
+          "step": "탄소 데이터 미비 또는 고탄소 원자재 사용 강판의 유럽 수출 경쟁력 상실 및 컴플라이언스 비용 증가",
+          "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
         "price": "UP",
         "cost": "UP",
-        "demand": "NEUTRAL",
+        "demand": "DOWN",
         "sales": "DOWN",
         "freight": "NEUTRAL",
         "leadTime": "NEUTRAL",
@@ -3690,21 +3709,21 @@
       "scores": {
         "evidenceQuality": 2,
         "exposureProximity": 3,
-        "causalStrength": 2,
-        "businessMateriality": 2,
+        "causalStrength": 3,
+        "businessMateriality": 3,
         "urgency": 1
       },
-      "threat": "탄소 배출량 검증 부담 및 CBAM 인증서 구매 비용 가중으로 대유럽 가격 경쟁력 약화",
-      "opportunity": "저탄소 고품질 한국산 표면처리강판의 친환경 프리미엄 확보 및 고탄소 경쟁국(중국 등) 배제 효과",
+      "threat": "EU CBAM 실질 인증서 부담에 따른 수입재 가격 상승 및 배출 데이터 미비 시 유럽 수출 차단 리스크",
+      "opportunity": "저탄소 HRC 소재를 활용한 한국산 GI/GL/COLOR 제품의 탄소 경쟁력 확보 시 고탄소 경쟁국(중국 등) 물량 대체",
       "timeHorizon": "3-6_MONTHS",
       "watchSignals": [
-        "EU CBAM 인증서 가격 산정 및 K-ETS 상계 인정 범위 발표",
-        "영국 CBAM 세부 시행안 확정 여부"
+        "EU 집행위 CBAM 세부 이행법안(Implementing Acts) 확정 공고",
+        "유럽 탄소배출권(EUA) 가격 추이"
       ],
-      "counterScenario": "국내 K-ETS 탄소 비용이 100% 인정되어 추가 CBAM 인증서 구매 부담이 최소화되는 경우",
+      "counterScenario": "EU가 산업계 반발로 CBAM 인증서 이행 시기를 추가 연기하거나 기준을 대폭 완화하는 경우",
       "suggestedActions": [
-        "HRC부터 도금/컬러강판까지의 전 과정 탄소배출량(LCA) 산정 데이터 체계 점검",
-        "유럽 수입업체와 CBAM 탄소 비용 분담 및 보고 절차 사전 협의"
+        "수출용 표면처리강판의 원자재(HRC)부터 공정별 탄소 배출량(Embedded Emissions) 산정 체계 구축",
+        "EU 바이어향 CBAM 제출용 검증 데이터 사전 준비"
       ],
       "evidenceFingerprints": [
         "54fc118376e4b377",
@@ -3733,7 +3752,10 @@
         "6c80cbc6d1c2b136",
         "72d5bcbcce8b65ff",
         "271158c092f62a33",
-        "8ac45255adea545d"
+        "8ac45255adea545d",
+        "f6d71f100c848b7d",
+        "e12a3a1a324422a2",
+        "a287985bb7598f3d"
       ],
       "evidenceIndices": [
         202,
@@ -3817,6 +3839,18 @@
           "status": "ALERT",
           "severity": "MEDIUM",
           "newEvidenceCount": 7
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 2
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "ALERT",
+          "severity": "HIGH",
+          "newEvidenceCount": 1
         }
       ]
     },
@@ -4760,24 +4794,26 @@
     },
     "RC_c3a986b1b38b": {
       "caseId": "RC_c3a986b1b38b",
-      "canonicalEventTitle": "EU 포장 및 포장폐기물 규제(PPWR) 대응 국내 실무 교육 실시",
-      "assessmentStatus": "WATCH",
-      "severity": "LOW",
+      "canonicalEventTitle": "아르셀로미탈의 유럽 내 전기로(EAF) 확충 및 생산 자산 인수",
+      "assessmentStatus": "ALERT",
+      "severity": "MEDIUM",
       "firstSeen": "2026-11-02T18:14:43.879Z",
-      "lastUpdated": "2026-11-25T12:35:42.383Z",
-      "lastAnalyzed": "2026-11-25T12:35:42.383Z",
-      "riskType": "규제/환경",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "경쟁동향",
       "facts": [
-        "국내 KCL 및 지역 상공회의소 등에서 국내 수출 기업을 대상으로 EU PPWR(포장 및 포장폐기물 규제) 대응 실무 교육이 개최됨"
+        "ArcelorMittal Poland의 Tameh 인수 검토",
+        "ArcelorMittal 히혼(Gijon) 전기로(EAF) 강재 생산 설비 가동 준비"
       ],
       "inferences": [
-        "EU로 수출되는 철강 코일(CRC, GI, GL, COLOR) 포장 시 사용하는 방청 포장재, 목재 패키징, 스트랩 등의 재활용성 및 친환경 규격 준수 의무가 강화될 수 있음"
+        "유럽 현지 대형 밀의 전기로 저탄소 강재 생산 능력이 확대됨에 따라 역외 수입재에 대한 현지 바이어의 종속성 감소 가능성",
+        "유럽 내 저탄소 표면처리강판 공급 과잉 또는 로컬재선호 경향 강화"
       ],
       "assumptions": [
-        "철강 코일 자체보다 제품 포장재(Packaging)에 대한 규제 준수 비용 및 관련 증빙 서류 제출 의무가 발생할 수 있음"
+        "히혼 EAF 설비에서 생산된 소재가 유럽 내 자동차 및 건축용 판재류 시장으로 공급될 것임"
       ],
       "missingEvidence": [
-        "철강 포장재에 적용되는 세부 PPWR 규정 내용, 예외 조항 및 실질 적용 시점"
+        "히혼 EAF 생산 라인의 연간 판재류 생산 능력 및 상업 생산 가동 시점"
       ],
       "exposure": {
         "products": [
@@ -4789,56 +4825,52 @@
         "regions": [
           "Europe"
         ],
-        "routes": [
-          "Korea-EU"
-        ],
-        "tradeMeasures": [
-          "PPWR Compliance"
-        ]
+        "routes": [],
+        "tradeMeasures": []
       },
       "causalChain": [
         {
-          "step": "EU PPWR 규제 발효에 따른 정부 및 민간 기관의 수출기업 대응 교육 개최",
+          "step": "ArcelorMittal 유럽 전기로(EAF) 신규 가동 및 공급망 자산 인수 추진",
           "state": "CONFIRMED"
         },
         {
-          "step": "철강 포장재(비닐, 방청지, 목재, 스트랩)의 재활용 기준 미달 시 통관 지연 또는 친환경 포장재 교체 요구",
+          "step": "유럽 내 로컬 저탄소 판재류 공급 물량 증가 및 로컬재 선호",
           "state": "CONDITIONAL"
         },
         {
-          "step": "EU 수출용 강판 포장 원가 증가 및 규제 준수 검증 절차에 따른 부대 비용 발생",
+          "step": "한국산 강판의 대유럽 수출 수요 감소 및 가격 압박",
           "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
-        "price": "NEUTRAL",
-        "cost": "UP",
-        "demand": "NEUTRAL",
-        "sales": "NEUTRAL",
+        "price": "DOWN",
+        "cost": "NEUTRAL",
+        "demand": "DOWN",
+        "sales": "DOWN",
         "freight": "NEUTRAL",
-        "leadTime": "UP",
-        "compliance": "UP",
-        "competition": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "UP",
         "opportunity": "NEUTRAL"
       },
       "scores": {
-        "evidenceQuality": 1,
-        "exposureProximity": 1,
-        "causalStrength": 1,
-        "businessMateriality": 1,
+        "evidenceQuality": 2,
+        "exposureProximity": 2,
+        "causalStrength": 2,
+        "businessMateriality": 2,
         "urgency": 1
       },
-      "threat": "EU 수출 시 친환경 포장 소재 전환에 따른 단위당 포장 원가 상승 및 증빙 서류 미비 시 통관 지연 위험",
-      "opportunity": "친환경 규격 포장재 선제 도입을 통한 EU 고객사 거래 안정성 제고",
+      "threat": "유럽 현지 밀의 그린스틸/EAF 강판 공급 증대로 한국산 강판의 유럽 시장 내 입지 축소",
+      "opportunity": "유럽 현지 전기로 고철 원가 상승에 따른 유럽 내 수입재 가격 하한선 지지 효과",
       "timeHorizon": "3-6_MONTHS",
       "watchSignals": [
-        "EU PPWR 세부 시행 지침 발표",
-        "산업부 및 KCL의 철강 전용 포장재 표준 가이드라인"
+        "ArcelorMittal 히혼 EAF 상업 가동 공지",
+        "유럽 내 고철(Scrap) 가격 및 그린스틸 그린프리미엄 수준"
       ],
-      "counterScenario": "철강 제품의 일회성 단순 보호용 방청 포장재에 대해 예외 조항이나 충분한 유예 기간이 부여될 경우 물류 원가 영향은 미미함",
+      "counterScenario": "유럽 현지 전기로 가동 비용(전력비, 고철비) 상승으로 현지재 가격 경쟁력이 저하되는 경우",
       "suggestedActions": [
-        "EU 수출용 철강 코일 포장 자재의 재활용 성분 및 친환경 소재 여부 사전 점검",
-        "포장 외주 협력업체의 EU PPWR 대응 현황 파악"
+        "유럽 현지 밀의 전기로 강재 가격 및 그린 프리미엄 동향 모니터링",
+        "한국산 강판의 품질 및 가격 경쟁력을 강조한 유통선 재정비"
       ],
       "evidenceFingerprints": [
         "c732c624359fab5a",
@@ -4854,7 +4886,9 @@
         "43b75437657dc6f9",
         "eba0269aa8297c95",
         "ac80a1afc2bc940a",
-        "750ae5f98db18751"
+        "750ae5f98db18751",
+        "476093dcc6af60a8",
+        "ee9e4bdf1e8c9b15"
       ],
       "evidenceIndices": [
         71,
@@ -4909,6 +4943,12 @@
           "date": "2026-11-25T12:35:42.383Z",
           "status": "WATCH",
           "severity": "LOW",
+          "newEvidenceCount": 2
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "ALERT",
+          "severity": "MEDIUM",
           "newEvidenceCount": 2
         }
       ]
@@ -11402,25 +11442,27 @@
     },
     "RC_9f7f0fc9789a": {
       "caseId": "RC_9f7f0fc9789a",
-      "canonicalEventTitle": "중국 철강 내수 둔화에 따른 아시아/GCC 시장 저가 덤핑 우려",
+      "canonicalEventTitle": "중국 철강 경기 둔화 및 정부 시장 지원책 발표에 따른 잉여 물량 수출 압력",
       "assessmentStatus": "WATCH",
       "severity": "MEDIUM",
       "firstSeen": "2026-11-20T02:48:22.833Z",
-      "lastUpdated": "2026-11-25T09:04:26.394Z",
-      "lastAnalyzed": "2026-11-25T09:04:26.394Z",
-      "riskType": "경쟁 심화 및 가격 하락",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "시장 수급 / 경쟁 리스크",
       "facts": [
-        "중국 내수 철강 수요 약화로 철광석 가격 하락세 및 철강 업황 둔화 우려 지속"
+        "중국 부동산 경기 침체 지속으로 철강 수요 부진 및 철광석 가격 약세 지속",
+        "중국 국무원이 시장 지원을 강조하는 정오 성명을 이례적으로 발표함."
       ],
       "inferences": [
-        "중국 내 수습되지 못한 잉여 도금강판 및 컬러강판 물량이 아시아(ASEAN) 및 중동(GCC) 시장으로 저가 덤핑 밀어내기 수출될 위험 증가"
+        "중국 내수 철강 수요 회복이 더딜 경우, 중국 제철소들은 잉여 도금/컬러강판을 아시아 및 GCC 등 해외 시장으로 저가 오퍼할 가능성이 높음.",
+        "국무원 지원책의 실질 효과가 미흡할 경우 저가 덤핑 수출 유인이 지속될 것임."
       ],
       "assumptions": [
-        "중국 철강사들이 감산 대신 수출 확대를 선택하여 해상 오퍼 가격을 적극적으로 인하할 것이다"
+        "당사가 ASEAN 및 GCC 시장에서 중국산 GI/GL/COLOR 제품과 경쟁 중임."
       ],
       "missingEvidence": [
-        "중국산 GI/GL/PPGI의 아시아/GCC 향 최근 오퍼 가격 인하 폭",
-        "중국의 11/12월 철강 수출 통계 및 감산 정책 실시 여부"
+        "중국 국무원 성명에 따른 세부 철강 감산 및 부양 조치 내역",
+        "중국 주요 밀(Mill)의 실제 GI/GL 수출 오퍼가 하락 폭"
       ],
       "exposure": {
         "products": [
@@ -11433,27 +11475,30 @@
           "Asia",
           "GCC"
         ],
-        "routes": [],
+        "routes": [
+          "China to ASEAN",
+          "China to GCC"
+        ],
         "tradeMeasures": []
       },
       "causalChain": [
         {
-          "step": "중국 내수 철강 수요 부진 및 철광석/철강 가격 둔화",
+          "step": "중국 내수 철강 수요 부진 지속 및 중국 정부 시장 지원 성명 발표",
           "state": "CONFIRMED"
         },
         {
-          "step": "중국 철강사들의 아시아/GCC향 저가 도금강판 밀어내기 수출 확대",
+          "step": "내수 소화 불능으로 중국산 GI/GL/COLOR 해외 저가 밀어내기 수출 지속",
           "state": "CONDITIONAL"
         },
         {
-          "step": "ASEAN 및 GCC 시장 내 한국산 도금/컬러강판 가격 경쟁력 약화 및 판가 하락",
-          "state": "CONDITIONAL"
+          "step": "아시아 및 GCC 시장 내 한국산 도금강판 가격 하락 압력 및 수주 경합 심화",
+          "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
         "price": "DOWN",
         "cost": "NEUTRAL",
-        "demand": "DOWN",
+        "demand": "NEUTRAL",
         "sales": "DOWN",
         "freight": "NEUTRAL",
         "leadTime": "NEUTRAL",
@@ -11468,23 +11513,26 @@
         "businessMateriality": 2,
         "urgency": 1
       },
-      "threat": "아시아 및 GCC 시장에서 중국산 저가 재와의 가격 경쟁 격화로 한국산 수출 수주 및 마진 축소",
-      "opportunity": "",
+      "threat": "중국산 저가 코팅강판 오퍼 물량 증가로 인한 아시아/GCC 수출 가격 하락 및 마진 축소",
+      "opportunity": "중국 정부의 강력한 감산 또는 경기 부양책 실효 시 글로벌 철강 가격 반등에 따른 마진 개선 기회",
       "timeHorizon": "1-3_MONTHS",
       "watchSignals": [
-        "중국 내수 HRC 및 도금재 현물 가격 지수(Mysteel 등)",
-        "중국 주요 밀(Mill)들의 아시아/GCC향 수출 오퍼가 추이"
+        "중국 대형 제철소의 주간 GI/GL 해외 오퍼 가격",
+        "중국 국무원/발개위의 세부 철강 감산 지침 및 재정 지원책 발표"
       ],
-      "counterScenario": "중국 정부가 강력한 철강 감산 조치나 수출 환급세 폐지/수출세 부과 등 억제책을 내놓을 경우 저가 밀어내기가 둔화될 수 있음",
+      "counterScenario": "중국 정부가 강력한 철강 감산 및 내수 부양책을 즉시 시행하여 중국산 오퍼 가격이 반등할 가능성",
       "suggestedActions": [
-        "아시아/GCC 바이어 대상 고품질/고도금량 등 차별화 강종 위주 마케팅 강화",
-        "중국산 오퍼 가격 추이를 신속 파악하여 경쟁력 있는 최적 오퍼 시점 포착"
+        "중국산 오퍼가 일일 모니터링 강화",
+        "범용재 가격 경쟁 지양 및 고내식성(GL/고기능 COLOR) 차별화 제품 영업 강화"
       ],
       "evidenceFingerprints": [
         "e4cb4648f68fa221",
         "61617ced748b75a6",
         "d653635047db4ac2",
-        "1bc171d449346270"
+        "1bc171d449346270",
+        "9c8142d3f4af06e1",
+        "08de9ee4781bd8a8",
+        "86dc9c0ce9020505"
       ],
       "evidenceIndices": [
         106,
@@ -11502,6 +11550,12 @@
           "status": "WATCH",
           "severity": "MEDIUM",
           "newEvidenceCount": 2
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 3
         }
       ]
     },
@@ -13524,27 +13578,25 @@
     },
     "RC_5d11e3ad2a1e": {
       "caseId": "RC_5d11e3ad2a1e",
-      "canonicalEventTitle": "일본 금리 인상 전망 및 엔화 변동성",
+      "canonicalEventTitle": "일본 신사 지붕 수리 자재의 구리에서 철강 전환",
       "assessmentStatus": "WATCH",
       "severity": "LOW",
       "firstSeen": "2026-11-21T01:24:29.943Z",
-      "lastUpdated": "2026-11-21T01:24:29.943Z",
-      "lastAnalyzed": "2026-11-21T01:24:29.943Z",
-      "riskType": "환율/경쟁력위험",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "틈새 수요 기회 리스크",
       "facts": [
-        "일본 인플레이션 상승 및 BOJ 금리 인상 가능성 86% 보도",
-        "일본 3분기 GDP 0.1% 감소"
+        "구리 도난 사건 증가로 일본 신사 지붕 수리 자재가 구리에서 철강재로 전환되고 있음 (기사 [44])"
       ],
       "inferences": [
-        "BOJ 금리 인상 시 엔화 강세 전환 가능성",
-        "엔화 강세 시 일본 철강사의 달러 표시 수출 오퍼 가격 상승 가능성"
+        "일본 내 지붕재 시장에서 고내식 도금강판(GL) 및 고급 COLOR 강판 대체 수요 발생 가능성"
       ],
       "assumptions": [
-        "엔화 절상이 일본 철강사들의 달러 표시 수출가 인상으로 이어짐"
+        "한국산 고내식 갈바륨(GL) 및 특수 컬러강판이 일본 신사 지붕재 대체 수요에 진입 가능함"
       ],
       "missingEvidence": [
-        "BOJ의 실제 금리 인상 여부 및 정확한 시기",
-        "일본 주요 철강사의 표면처리강판 수출 오퍼가 변화"
+        "일본 신사 지붕재 교체로 인한 실질 철강 수요 톤수",
+        "일본 내수 밀 자재 우선 채택 여부 및 수입재 진입 장벽"
       ],
       "exposure": {
         "products": [
@@ -13560,15 +13612,15 @@
       },
       "causalChain": [
         {
-          "step": "일본 물가 상승 및 BOJ 금리 인상 가능성 고조",
+          "step": "일본 내 구리 도난 방지를 위한 신사 지붕재의 철강 전환 trend",
           "state": "CONFIRMED"
         },
         {
-          "step": "BOJ 금리 인상에 따른 엔화 절상(강세) 전환",
+          "step": "고내식 GL 및 내후성 COLOR 강판 지붕재 수요 증가",
           "state": "CONDITIONAL"
         },
         {
-          "step": "일본산 표면처리강판 달러 오퍼가 상승으로 아시아 시장 내 한국산 경쟁력 제고",
+          "step": "한국산 특수 도금/컬러강판의 일본 틈새 시장 수출 기회 형성",
           "state": "UNCONFIRMED"
         }
       ],
@@ -13580,34 +13632,34 @@
         "freight": "NEUTRAL",
         "leadTime": "NEUTRAL",
         "compliance": "NEUTRAL",
-        "competition": "DOWN",
+        "competition": "NEUTRAL",
         "opportunity": "UP"
       },
       "scores": {
         "evidenceQuality": 1,
-        "exposureProximity": 2,
+        "exposureProximity": 1,
         "causalStrength": 1,
         "businessMateriality": 1,
         "urgency": 1
       },
-      "threat": "엔화 약세가 계속 유통될 경우 일본산 저가 표면처리강판과의 경쟁 지속",
-      "opportunity": "엔화 강세 전환 시 아시아 시장에서 일본산 대비 한국산 GI, GL, COLOR의 가격 경쟁력 반사이익 확보",
-      "timeHorizon": "1-3_MONTHS",
+      "threat": "",
+      "opportunity": "일본 시장 내 고내식 GL 및 내후성 COLOR 강판 제품의 틈새 수출 판로 개척 가능성",
+      "timeHorizon": "3-6_MONTHS",
       "watchSignals": [
-        "BOJ 통화정책회의 결과 및 기준금리 결정",
-        "USD/JPY 환율 추이",
-        "아시아 시장 내 일본 철강사 달러 오퍼가"
+        "일본 건자재 시장 내 수입 도금/컬러강판 동향",
+        "일본 문화재/건축 자재 인증 기준"
       ],
-      "counterScenario": "일본 경기 부진으로 BOJ가 금리 인상을 연기하거나 엔화 약세 기조가 유지되는 경우",
+      "counterScenario": "일본 내 전통 신사 보수재는 국산 철강재 선호도가 매우 높아 수입재 침투가 어려울 수 있음",
       "suggestedActions": [
-        "아시아 시장 내 일본산 경쟁 제품(GI/GL) 달러 오퍼가 동향 점검"
+        "일본 유통 바이어 타겟 고내식 GL 및 COLOR 제품 사양 안내 모색"
       ],
       "evidenceFingerprints": [
         "e6e2dd6f039b0ae6",
         "7f6ba0cdcd9b1e99",
         "5fcd854203fbbd39",
         "9dba673b692a88fd",
-        "f8f161f795def796"
+        "f8f161f795def796",
+        "b9b94fdfa5bd14ab"
       ],
       "evidenceIndices": [
         59,
@@ -13622,6 +13674,12 @@
           "status": "WATCH",
           "severity": "LOW",
           "newEvidenceCount": 5
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
         }
       ]
     },
@@ -19532,24 +19590,25 @@
     },
     "RC_d1775cdbcf90": {
       "caseId": "RC_d1775cdbcf90",
-      "canonicalEventTitle": "파나마 운하 일일 선박 통과 예약 슬롯 증대",
+      "canonicalEventTitle": "파나마 운하 가뭄에 따른 통항 제한",
       "assessmentStatus": "WATCH",
-      "severity": "MEDIUM",
+      "severity": "LOW",
       "firstSeen": "2026-11-23T00:15:29.375Z",
-      "lastUpdated": "2026-11-25T12:35:42.383Z",
-      "lastAnalyzed": "2026-11-25T12:35:42.383Z",
-      "riskType": "물류/해운",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "물류 및 운임 리스크",
       "facts": [
-        "파나마운하청(ACP)이 운하 일일 선박 예약 슬롯(Vessel Booking Slots) 수를 증대함"
+        "엘니뇨 가뭄으로 인해 파나마 운하 선박 통항 대수 제한 발표 (기사 [79])"
       ],
       "inferences": [
-        "파나마 운하 통행 대기 시간이 단축되어 아시아발 미 동안(USEC) 및 남미향 철강 해상 운송 리드타임과 체선료/체류비 부담이 완화될 것임"
+        "미국 동안으로 운송하는 해상 수송 경로의 우회 및 대기 시간이 증가할 수 있음"
       ],
       "assumptions": [
-        "증대된 슬롯으로 인해 컨테이너선 및 벌크선의 파나마 운하 정체가 해소되고 운임 할증금이 인하될 것임"
+        "한국발 미동안향 도금/컬러 강판 물량 중 파나마 운하 경유 비중이 존재함"
       ],
       "missingEvidence": [
-        "철강 운송 선박에 직접 적용되는 파나마 운하 운임 할증료(Surcharge) 감면 여부"
+        "파나마 운하의 일일 구체적 통항 제한 대수 및 대기 일수",
+        "미국 동안 항로의 실질 체선료 및 운임 인상폭"
       ],
       "exposure": {
         "products": [
@@ -19562,58 +19621,60 @@
           "US"
         ],
         "routes": [
-          "Korea-US East Coast"
+          "Asia-US East Coast via Panama Canal"
         ],
         "tradeMeasures": []
       },
       "causalChain": [
         {
-          "step": "파나마 운하 일일 통과 예약 슬롯 수 증가 공식 발표",
+          "step": "파나마 운하 가뭄으로 통항 선박 수 제한",
           "state": "CONFIRMED"
         },
         {
-          "step": "미 동안/남미행 선박의 파나마 운하 대기 시간 단축 및 물류 정체 해소",
+          "step": "미국 동안행 선박 체증 및 체선료/우회 운임 증가",
           "state": "CONDITIONAL"
         },
         {
-          "step": "미 동안향 강판 수출 물류 리드타임 단축 및 해상 운임 안정을 통한 물류비 절감",
+          "step": "한국발 미국향 수출 철강재의 리드타임 연장 및 물류비 부담 가중",
           "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
         "price": "NEUTRAL",
-        "cost": "DOWN",
+        "cost": "UP",
         "demand": "NEUTRAL",
-        "sales": "UP",
-        "freight": "DOWN",
-        "leadTime": "DOWN",
+        "sales": "NEUTRAL",
+        "freight": "UP",
+        "leadTime": "UP",
         "compliance": "NEUTRAL",
         "competition": "NEUTRAL",
-        "opportunity": "UP"
+        "opportunity": "NEUTRAL"
       },
       "scores": {
-        "evidenceQuality": 2,
+        "evidenceQuality": 1,
         "exposureProximity": 2,
         "causalStrength": 2,
         "businessMateriality": 1,
-        "urgency": 2
+        "urgency": 1
       },
-      "threat": "없음 (해상 물류 환경 개선 호재)",
-      "opportunity": "미 동안 및 미주 지역향 강판 수출 납기 경쟁력 향상 및 해상 물류비 감소",
-      "timeHorizon": "DAYS",
+      "threat": "미국 동안향 수출 물량의 운임 상승 및 납기 지연으로 인한 수주 경쟁력 약화",
+      "opportunity": "",
+      "timeHorizon": "1-3_MONTHS",
       "watchSignals": [
-        "파나마 운하 통과 대기 선박 수 및 평균 대기 일수",
-        "미 동안(USEC) 해상 운임 지수"
+        "파나마 운하 수위 모니터링 및 일일 통항 허용 선박 수",
+        "미서안 양하 후 내륙 수송(IPI) 대체 운임 변동"
       ],
-      "counterScenario": "이상 기후로 인한 가뭄 재발 시 파나마 운하 통행 제한이 재차 강화될 수 있음",
+      "counterScenario": "강우량 회복으로 운하 통항 제한이 해제되거나 미서안 대체 물류망이 원활할 경우 물리적 영향 제한적",
       "suggestedActions": [
-        "미 동안 및 남미향 물류 선사별 파나마 운하 경유 스케줄 및 운임 할인 여부 점검"
+        "미동안향 물량에 대한 미서안 양하 후 내륙 수송 경로 운임 비교 분석",
+        "선사별 파나마 운하 대기 스케줄 모니터링"
       ],
       "evidenceFingerprints": [
         "55f3c2616abfccf5",
         "779f0774c62820c6",
         "b09a3b1950f1c5ac",
-        "3d6f2613516127b6"
+        "3d6f2613516127b6",
+        "d5170a5965a8bc41"
       ],
       "evidenceIndices": [
         182
@@ -19635,6 +19696,12 @@
           "date": "2026-11-25T12:35:42.383Z",
           "status": "WATCH",
           "severity": "MEDIUM",
+          "newEvidenceCount": 1
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
           "newEvidenceCount": 1
         }
       ]
@@ -24776,26 +24843,27 @@
     },
     "RC_684a4d4ce3c4": {
       "caseId": "RC_684a4d4ce3c4",
-      "canonicalEventTitle": "미국 무역법 301조 과잉생산 조사 종료 및 16개국 대상 추가 관세 발표 임박",
-      "assessmentStatus": "ALERT",
+      "canonicalEventTitle": "미국의 아시아 14개국 대상 Section 301 추가 관세 인상 추진",
+      "assessmentStatus": "WATCH",
       "severity": "MEDIUM",
       "firstSeen": "2026-11-25T12:35:42.383Z",
-      "lastUpdated": "2026-11-25T12:35:42.383Z",
-      "lastAnalyzed": "2026-11-25T12:35:42.383Z",
-      "riskType": "통상/관세",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "통상정책",
       "facts": [
-        "미국 트럼프 행정부가 제조업 과잉생산 조사를 마치고 중국, EU, 대만, 인도 등 16개 주요 무역 상대국을 대상으로 무역법 301조 추가 관세를 조만간 발표할 예정임",
-        "국내 철강 업계는 직접 관세 타격뿐만 아니라 대만·중국·인도산 철강재의 제3국 밀어내기 수출 및 우회 수입 가능성에 촉각을 곤두세우고 있음"
+        "미국 정부가 중국, 인도, 인도네시아, 일본 등 14개 경제권을 대상으로 Section 301 추가 관세(최대 25%) 인상안 제안",
+        "중국 국제무역촉진위원회(CCPIT) 및 주요 아시아 국가들의 관세안 철회 촉구 및 반발"
       ],
       "inferences": [
-        "대만, 인도, 중국, EU 등의 대미 수출 강판 및 철강 부품에 301조 관세가 부과되면, 미주 direct/indirect 수출이 타격을 받으며, 미주로 진입하지 못한 물량이 아시아, EU, 중동 등 제3국으로 밀어내기 수출되어 글로벌 강판 가격이 하락할 수 있음",
-        "삼국간 무역(예: 대만/인도/베트남 거점 제3국 트레이딩)에 대한 미국의 우회 수출 조사 및 규제 위험이 급증함"
+        "아시아 주요 철강 수출국의 대미 수출이 제한될 경우, 잉여 물량이 유럽, 아시아 등 제3국으로 전환될 위험 존재",
+        "삼국간 무역(한국 중개 아시아산 철강재 대미 수출) 물량의 규제 리스크 증가"
       ],
       "assumptions": [
-        "미국 301조 신규 관세 품목에 철강 제품(HRC, CRC, 도금강판) 및 그 가공 부품이 포함될 것임"
+        "제시된 Section 301 대상 품목에 철강 하공정 제품 및 아시아 주요 철강 수출 품목이 포함될 것임"
       ],
       "missingEvidence": [
-        "미 301조 최종 고시 대상 세부 HS Code, 타겟 대상국별 정확한 관세율 및 한국 직간접 포함 여부"
+        "Section 301 관세 대상 세부 HS 코드 세분 내역 및 한국산 포함 여부",
+        "최종 관세 결정 및 시행 시기"
       ],
       "exposure": {
         "products": [
@@ -24806,35 +24874,31 @@
         ],
         "regions": [
           "US",
-          "Europe",
-          "Asia"
+          "Asia",
+          "Europe"
         ],
-        "routes": [
-          "Korea-US",
-          "Triangular-Trade"
-        ],
+        "routes": [],
         "tradeMeasures": [
-          "Section 301 Tariffs",
-          "Anti-circumvention"
+          "Section 301"
         ]
       },
       "causalChain": [
         {
-          "step": "미 무역법 301조 과잉생산 조사 종료 및 16개국 대상 추가 관세 준비 보도",
+          "step": "미국 Section 301 대상 14개국 추가 관세 검토안 발표",
           "state": "CONFIRMED"
         },
         {
-          "step": "대만·중국·인도·EU 등에 대한 대미 철강 관세 장벽 대폭 고조",
+          "step": "대상 아시아 국가들의 대미 수출 차단 및 잉여 물량의 아시아/유럽 시장 밀어내기 수출",
           "state": "CONDITIONAL"
         },
         {
-          "step": "미주향 삼국간 트레이딩 물량 차질 및 대상국 철강재의 아시아·유럽 시장 밀어내기 공세로 글로벌 도금강판 시장가 하락",
+          "step": "유럽 및 아시아 시장 내 아시아산 덤핑 물입 유입으로 경쟁 심화 및 한국산 판재류 판매가 하락",
           "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
         "price": "DOWN",
-        "cost": "UP",
+        "cost": "NEUTRAL",
         "demand": "DOWN",
         "sales": "DOWN",
         "freight": "NEUTRAL",
@@ -24845,23 +24909,22 @@
       },
       "scores": {
         "evidenceQuality": 2,
-        "exposureProximity": 3,
-        "causalStrength": 2,
-        "businessMateriality": 3,
+        "exposureProximity": 2,
+        "causalStrength": 1,
+        "businessMateriality": 2,
         "urgency": 1
       },
-      "threat": "미국향 직접 및 삼국간 수출길 축소, 타국산 철강재의 제3국 밀어내기로 인한 아시아/유럽 시장 강판 오퍼가 하락 심화",
-      "opportunity": "한국이 미 301조 관세 대상에서 제외되거나 예외를 인정받을 경우 대미 도금강판 direct 수출 우위 가능성",
+      "threat": "미국 시장 진입이 막힌 아시아산 잉여 강판의 제3국 유입으로 유럽 및 아시아 시장 내 가격 경쟁 가열",
+      "opportunity": "관세 제재 대상국 제품을 대체할 한국산 제품의 대미 직수출 반사이익 가능성",
       "timeHorizon": "1-3_MONTHS",
       "watchSignals": [
-        "미 USTR 301조 과잉생산 조사 최종 발표문 및 세부 관세율",
-        "대만, 인도, 중국 주요 철강사의 해외 오퍼가 변동"
+        "미국 USTR의 Section 301 최종 대상 품목 공고",
+        "중국·인도·동남아산 철강재의 대유럽/대아시아 수출 물량 변화"
       ],
-      "counterScenario": "미국의 신규 관세 대상에 철강 품목이 대거 제외되거나 16개국 조치가 유예될 경우 시장 타격은 경감될 수 있음",
+      "counterScenario": "미국 내 제조업 부담 및 통상 마찰 우려로 301조 관세 대상에서 주요 철강 품목이 제외되거나 세율이 대폭 하향 조정되는 경우",
       "suggestedActions": [
-        "미 USTR 301조 관세 세부 고시 발표 즉시 분석 체계 가동",
-        "대만/인도/베트남 거점 삼국간 무역 건의 원산지 및 우회 수입 통상 리스크 점검",
-        "미주 외 유럽/GCC 대체 판매처 소싱 사전 점검"
+        "대미 수출 거래선 원산지 검증 및 301조 관세 대상 품목 모니터링",
+        "유럽 및 동남아 시장 내 중국/인도산 밀어내기 수입재 가격 동향 추적"
       ],
       "evidenceFingerprints": [
         "0c46a585ce651a53",
@@ -24880,7 +24943,19 @@
         "17ca2c5c8409c0b8",
         "879edb11243b86be",
         "2ba04b162e88b84e",
-        "b34c6a299e48a849"
+        "b34c6a299e48a849",
+        "99a69c8b3591c46e",
+        "8d00c22d36c706fb",
+        "a256430aee5afa32",
+        "d655f512844f6a06",
+        "57fe736aa05412f1",
+        "3da07092fde8b447",
+        "4faa4f1a2686af16",
+        "c0d76d948868404d",
+        "04dfe425070dbb61",
+        "5ec63be78041f414",
+        "f8299ea5a098f5cf",
+        "5230b37bd75de7f3"
       ],
       "evidenceIndices": [
         219,
@@ -24907,6 +24982,12 @@
           "status": "ALERT",
           "severity": "MEDIUM",
           "newEvidenceCount": 17
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 12
         }
       ]
     },
@@ -25771,29 +25852,27 @@
     },
     "RC_ea459cc0df46": {
       "caseId": "RC_ea459cc0df46",
-      "canonicalEventTitle": "미국 Section 301 관세 확대안 제안 및 삼국간/아시아 우회 무역 규제 강화 위험",
-      "assessmentStatus": "ALERT",
-      "severity": "MEDIUM",
+      "canonicalEventTitle": "미 트럼프 행정부의 관세 인상 제안 및 301/232조 관세 개편 논의",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
       "firstSeen": "2026-11-27T21:39:30.207Z",
-      "lastUpdated": "2026-11-27T21:39:30.207Z",
-      "lastAnalyzed": "2026-11-27T21:39:30.207Z",
-      "riskType": "무역 규제 위험",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "통상 정책 / 관세 리스크",
       "facts": [
-        "미국 정부가 14개 국가를 대상으로 통상법 301조 관세 부과/인상을 제안함",
-        "중국 국제무역촉진위원회(CCPIT) 및 주요 무역단체가 301조 관세 철회를 요구함",
-        "동남아시아(ASEAN) 국가들이 대미 무역 협정 및 우회 수출에 대한 재검토에 착수함"
+        "트럼프가 동맹국 15%, 중국 최대 40% 관세 부과 제안 등 신규 관세 정책 수립을 언급함.",
+        "미 공화당 내부 및 의회에서 Section 301/관세 권한 재검토 등 정책적 이견과 입법적 반발이 존재함."
       ],
       "inferences": [
-        "한국산 대미 직접 수출뿐만 아니라 동남아 가공 후 대미 재수출(삼국간/우회 무역) 전반에 관세 장벽이 높아질 위험",
-        "동남아 거점 소재 가공센터 및 가공공장을 거치는 대미 수출 경로의 규제 리스크 급증"
+        "관세 인상안의 실제 집행 여부는 미 의회와 행정부 간 조정 및 최종 행정명령 발효에 따라 달라질 정치적 불확실성이 높음.",
+        "실제 집행 시 대미 강판 직접 수출 가격 경쟁력 약화 및 아시아산 강판의 타 지역 우회 공급 압력이 고조될 수 있음."
       ],
       "assumptions": [
-        "제안된 301조 관세 대상 목록에 아시아 주요 철강 가공국 및 Coated Steel 품목이 포함될 것임",
-        "미국 행정부가 원산지 기준 강화 조치를 병행 시행할 것임"
+        "당사의 대미 코팅강판 직접 수출 또는 미국 쿼터/관세 연동 물량이 존재함."
       ],
       "missingEvidence": [
-        "301조 관세 대상 14개국 명단 및 대상 HSK/HS 코드",
-        "실제 집행 및 시행 일자"
+        "철강 품목(CRC, GI, GL, COLOR)별 세부 관세 인상률 및 적용 예외 규정 확정안",
+        "한국산 철강 Section 232 쿼터 체제 유지 여부"
       ],
       "exposure": {
         "products": [
@@ -25808,60 +25887,61 @@
           "Korea Export"
         ],
         "routes": [
-          "Korea -> ASEAN -> US"
+          "Korea to US"
         ],
         "tradeMeasures": [
-          "Section 301 Tariffs",
-          "Anti-Circumvention"
+          "Section 232",
+          "Section 301",
+          "Import Tariff"
         ]
       },
       "causalChain": [
         {
-          "step": "미 301조 관세 14개 대상국 확대안 및 고율 관세 제안 발표",
+          "step": "트럼프의 보편 관세 및 301/232조 관세 개편 발언",
           "state": "CONFIRMED"
         },
         {
-          "step": "동남아(ASEAN) 우회 가공 물량 및 한국발 가공재에 대한 검증 강화",
-          "state": "CONDITIONAL"
+          "step": "미 의회 및 공화당 내 입법 권한 재검토 및 정치적 논쟁 진통",
+          "state": "CONFIRMED"
         },
         {
-          "step": "미국향 삼국간 무역(한국 소재->아시아 가공->미국 수출) 통관 차질 및 관세 부과",
+          "step": "최종 행정명령 및 입법 확정을 통한 관세 인상 시행",
           "state": "UNCONFIRMED"
         },
         {
-          "step": "대미 수출 계약 취소 및 아시아 가공 거점 물량 감소",
+          "step": "대미 수출 차단 및 글로벌 철강 공급망 타 시장 우회 재편",
           "state": "UNCONFIRMED"
         }
       ],
       "impactVectors": {
-        "price": "NEUTRAL",
+        "price": "UNKNOWN",
         "cost": "UP",
         "demand": "DOWN",
         "sales": "DOWN",
         "freight": "NEUTRAL",
-        "leadTime": "UP",
+        "leadTime": "NEUTRAL",
         "compliance": "UP",
         "competition": "UP",
-        "opportunity": "NEUTRAL"
+        "opportunity": "UNKNOWN"
       },
       "scores": {
-        "evidenceQuality": 2,
-        "exposureProximity": 3,
-        "causalStrength": 2,
-        "businessMateriality": 3,
-        "urgency": 1
+        "evidenceQuality": 1,
+        "exposureProximity": 2,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 0
       },
-      "threat": "미국의 아시아 거점 대상 우회 수출 규제 확대로 인한 삼국간 가공 무역 통로 마비 및 대미 수출량 감소",
-      "opportunity": "한국 직수출 쿼터/무관세 물량의 차별적 우위 확보 가능성",
-      "timeHorizon": "1-3_MONTHS",
+      "threat": "관세 인상 확정 시 대미 수출 수주 급감 및 잉여 철강재의 아시아/유럽 시장 유입에 따른 글로벌 저가 경쟁 심화",
+      "opportunity": "타 경쟁국 대비 상대적으로 유용한 쿼터나 관세율 확보 시 대미 수출 수혜 가능성",
+      "timeHorizon": "3-6_MONTHS",
       "watchSignals": [
-        "미 USTR의 Section 301 최종 대상국 및 대상 품목 발표",
-        "ASEAN 국가발 대미 수출 철강재 원산지 판정 기준 변경 여부"
+        "미 미국 상무부(DOC) 및 무역대표부(USTR)의 관보 게재 및 정식 발표",
+        "미 의회의 통상 권한 관련 입법 추진 경과"
       ],
-      "counterScenario": "관세 제안이 업계 반발 및 통상 협상 과정에서 철회되거나 미뤄질 가능성",
+      "counterScenario": "미 의회의 반대 및 수입 물가 상승 우려로 보편 관세 도입이 무산되거나 기존 철강 쿼터 체제가 유지될 가능성",
       "suggestedActions": [
-        "ASEAN 지역 삼국간 거래처의 원산지 증명 및 우회 수입 규제 저촉 여부 사전 전수 점검",
-        "대미 직접 수출 가능 물량 배정 비율 재조정"
+        "미국 관세 정책 입법 및 관보 동향 주시",
+        "대미 수출 계약 시 관세 인상분 부담 책임(Incoterms 조항) 사전 명확화"
       ],
       "evidenceFingerprints": [
         "371804067eeefef9",
@@ -25870,7 +25950,13 @@
         "04dfe425070dbb61",
         "5ec63be78041f414",
         "5230b37bd75de7f3",
-        "cba2cb4137d655ad"
+        "cba2cb4137d655ad",
+        "8da812c21e4bdd0d",
+        "7c38b5e03d1ce662",
+        "4e8cfdea12ede9c7",
+        "7c4f2d23a8bd56d3",
+        "bdbc63cd6c189d1c",
+        "5de39fb8755ec812"
       ],
       "evidenceIndices": [
         213,
@@ -25887,6 +25973,12 @@
           "status": "ALERT",
           "severity": "MEDIUM",
           "newEvidenceCount": 7
+        },
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 6
         }
       ]
     },
@@ -26714,6 +26806,1336 @@
           "status": "WATCH",
           "severity": "LOW",
           "newEvidenceCount": 2
+        }
+      ]
+    },
+    "RC_115e475d42e9": {
+      "caseId": "RC_115e475d42e9",
+      "canonicalEventTitle": "일본 정부의 한국·중국산 용융아연도금강판(GI) 반덤핑 관세 최종 부과",
+      "assessmentStatus": "WATCH",
+      "severity": "MEDIUM",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "통상 규제 / 반덤핑 관세",
+      "facts": [
+        "일본 정부가 한국 및 중국산 용융아연도금강판(GI)에 대해 최대 38%~55.3% 수준의 반덤핑 관세를 5년간 부과 확정함."
+      ],
+      "inferences": [
+        "한국산 GI의 대일본 직접 수출 가격 경쟁력이 크게 악화되어 대일 수출량 감소가 불가피함.",
+        "일본으로 진입하지 못한 한국 및 중국산 잉여 GI 물량이 ASEAN 등 타 아시아 시장으로 우회 유입되어 역내 저가 경쟁을 심화시킬 가능성이 높음."
+      ],
+      "assumptions": [
+        "당사 또는 당사 협력 공급선의 대일 GI 수출 비중이 존재하거나, 아시아 역내 유통 가격 하락 영향에 노출되어 있음."
+      ],
+      "missingEvidence": [
+        "공급업체별 차등 부과된 세부 반덤핑 관세율 및 면제 업체 여부",
+        "일본 바이어의 관세 인상분 수용 가능 여부 및 계약 갱신 동향"
+      ],
+      "exposure": {
+        "products": [
+          "GI"
+        ],
+        "regions": [
+          "Asia",
+          "Korea Export"
+        ],
+        "routes": [
+          "Korea to Japan",
+          "Korea to ASEAN"
+        ],
+        "tradeMeasures": [
+          "Anti-Dumping Duty"
+        ]
+      },
+      "causalChain": [
+        {
+          "step": "일본 정부, 한국 및 중국산 GI 강판에 38%~55.3% 반덤핑 관세 부과 결정",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "대일본 GI 수출 마진 악화 및 대일 수출 물량 급감",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "잉여 GI 물량의 아시아(ASEAN) 시장 전환 공급으로 역내 가격 하락 및 수주 경쟁 심화",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "DOWN",
+        "cost": "NEUTRAL",
+        "demand": "DOWN",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "UP",
+        "competition": "UP",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 3,
+        "causalStrength": 2,
+        "businessMateriality": 2,
+        "urgency": 1
+      },
+      "threat": "대일본 GI 수출 차단 및 아시아 역내 중국/한국산 잉여 GI 물량 저가 투입에 따른 판매가 하락 및 마진 축소",
+      "opportunity": "규제 미포함 코팅강판(GL/COLOR) 또는 반덤핑 예외 제3국산 강판을 활용한 대일 삼국간 무역 판로 개척 가능성",
+      "timeHorizon": "1-3_MONTHS",
+      "watchSignals": [
+        "일본 재무성 덤핑관세 부과 세부 시행 세칙 공표",
+        "아시아(ASEAN) 시장 GI 오퍼 가격 추이",
+        "국내 주요 제철사의 대일 수출 물량 전환 동향"
+      ],
+      "counterScenario": "당사 협력 공급선의 관세율이 상대적으로 낮거나 관세 연동 계약을 통해 바이어가 관세를 부담할 경우 실질 타격은 제한적일 수 있음.",
+      "suggestedActions": [
+        "대일 GI 수출 건 건별 적용 관세율 및 바이어 계약 조건 재점검",
+        "대일 수출 대체 물량의 아시아/GCC 판로 사전 확보",
+        "제3국(베트남 등) 생산 GI를 활용한 대일 삼국간 무역 가능성 검토"
+      ],
+      "evidenceFingerprints": [
+        "aa6b76c7abb6de91",
+        "c05b5812f5aa3bd9"
+      ],
+      "evidenceIndices": [
+        9,
+        77
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 2
+        }
+      ]
+    },
+    "RC_d586e2fd8aad": {
+      "caseId": "RC_d586e2fd8aad",
+      "canonicalEventTitle": "아시아 완성차 업체의 미·유럽 생산 이전 및 자동차용 강판 수요 지형 변화",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "전방 수요 / 산업 구조 변화",
+      "facts": [
+        "중국 BYD 등 아시아 주요 완성차업체들이 프랑스 공장 인수 추진 등 유럽 및 미국으로 생산 기지를 이전 중임.",
+        "튀르키예 자동차 산업이 EU 'Made in EU' 원산지 규정 강화로 소외 리스크에 직면함."
+      ],
+      "inferences": [
+        "아시아 완성차업체의 해외 생산 이전으로 국내/아시아 기반 자동차용 CRC 및 GI 직접 공급 수요가 감소할 수 있음.",
+        "반면 현지 생산 공장향 소재 공급망 구축이나 해외 가공센터(SSC)를 활용한 공급 기회가 형성될 수 있음."
+      ],
+      "assumptions": [
+        "당사 거래선에 아시아 완성차 또는 Tier-1 부품사향 자동차용 CRC/GI 공급망이 포함되어 있음."
+      ],
+      "missingEvidence": [
+        "완성차 업체의 해외 현지 공장 본격 가동 시점",
+        "현지 공장의 철강 소재 현지 조달(Local Content) 의무 비율 수준"
+      ],
+      "exposure": {
+        "products": [
+          "CRC",
+          "GI"
+        ],
+        "regions": [
+          "Europe",
+          "US",
+          "Asia",
+          "Korea Export"
+        ],
+        "routes": [],
+        "tradeMeasures": [
+          "Local Content Requirement"
+        ]
+      },
+      "causalChain": [
+        {
+          "step": "아시아 완성차업체, 유럽·미국 현지 생산 공장 인수 및 이전을 추진",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "아시아/국내 생산 자동차용 CRC 및 GI 강판 직접 수요 감소",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "현지 부품 소재 국산화 규제로 아시아산 강판의 수입 대체 발생",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "NEUTRAL",
+        "cost": "NEUTRAL",
+        "demand": "DOWN",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "UP",
+        "competition": "UP",
+        "opportunity": "UP"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 2,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 0
+      },
+      "threat": "아시아 지역 내 완성차향 CRC/GI 강판 수요 감소 및 미·유럽 현지 국산화(Local Content) 규제에 따른 역외 강판 차단",
+      "opportunity": "유럽/미국 현지 공장향 소재 공급 입찰 참여 및 현지 무역/가공 기반 삼국간 무역 확장 기회",
+      "timeHorizon": "LONG_TERM",
+      "watchSignals": [
+        "BYD 등 아시아 OEM 현지 공장 완공 및 가동 시점",
+        "EU 'Made in EU' 세부 규률의 철강 소재 적용 범위"
+      ],
+      "counterScenario": "현지 철강사의 고품질 자동차용 도금강판 공급 부족으로 아시아산 고품질 GI 수입 지속될 가능성",
+      "suggestedActions": [
+        "완성차 해외 진출에 따른 1차 부품사(Tier-1) 공급망 변화 추적",
+        "미국/유럽 현지 수입 유통망 및 가공센터 연계 삼국간 무역 모델 타진"
+      ],
+      "evidenceFingerprints": [
+        "0d6289fc64d9ab08",
+        "5139c582a568ab5f",
+        "0ee67d69c2c22cb4",
+        "a204c1cd8b1ea779"
+      ],
+      "evidenceIndices": [
+        11,
+        24,
+        189,
+        197
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 4
+        }
+      ]
+    },
+    "RC_0ea57c79a89a": {
+      "caseId": "RC_0ea57c79a89a",
+      "canonicalEventTitle": "알루미늄 현물 프리미엄 $400/톤 돌파 및 갈바륨(GL) 원가 상승 압력",
+      "assessmentStatus": "ALERT",
+      "severity": "MEDIUM",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "원자재 가격 리스크",
+      "facts": [
+        "LME 알루미늄 현물 프리미엄이 숏스퀴즈 여파로 톤당 400달러를 돌파함.",
+        "LME가 숏스퀴즈 해소를 위해 긴급 규정을 출범함."
+      ],
+      "inferences": [
+        "갈바륨(GL) 도금층의 55%가 알루미늄으로 구성되어 있어 알루미늄 프리미엄 급등은 GL 생산 및 구매 원가 상승으로 즉각 연결됨.",
+        "LME 긴급 조치가 알루미늄 프리미엄을 조속히 안정시킬지가 원가 상승 지속 여부를 결정할 것임."
+      ],
+      "assumptions": [
+        "당사의 GL 도금강판 매입가에 알루미늄 프리미엄 인상분이 즉시 반영되는 원가 구조를 지님."
+      ],
+      "missingEvidence": [
+        "LME 긴급 조치 발표 후 알루미늄 프리미엄의 실제 진정 여부",
+        "국내외 제철소의 GL 도금 엑스트라(Extra) 가격 인상 공지 여부"
+      ],
+      "exposure": {
+        "products": [
+          "GL"
+        ],
+        "regions": [
+          "Korea Export",
+          "Asia",
+          "GCC",
+          "Europe"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "LME 알루미늄 현물 프리미엄 $400/톤 초과 급등 및 LME 긴급 규정 도입",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "제철소의 GL(Al 55% 함유) 도금 엑스트라 및 제조 원가 인상",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "수출 오퍼가로 원가 인상분 미전가 시 GL 수출 스프레드 축소 및 손실 발생",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "UP",
+        "cost": "UP",
+        "demand": "DOWN",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 2,
+        "exposureProximity": 3,
+        "causalStrength": 2,
+        "businessMateriality": 2,
+        "urgency": 1
+      },
+      "threat": "알루미늄 프리미엄 급등으로 인한 GL 매입 원가 급증 및 해외 바이어로의 판가 전가 실패 시 마진 감소",
+      "opportunity": "원가 인상 조작 전 선제적 GL 오퍼가 인상을 통한 이익률 방어 및 원가 연동형 오퍼 경쟁력 확보",
+      "timeHorizon": "WEEKS",
+      "watchSignals": [
+        "LME 알루미늄 현물 프리미엄 일일 수치 및 LME 시장 조치 결과",
+        "주요 제철소별 GL 도금 엑스트라 조정 공문"
+      ],
+      "counterScenario": "LME의 긴급 개입으로 숏스퀴즈가 빠르게 해소되어 알루미늄 프리미엄이 이전 수준으로 급락할 가능성",
+      "suggestedActions": [
+        "GL 신규 오퍼 시 알루미늄 원자재 연동 조건 명시 또는 유효기간 단축",
+        "알루미늄 프리미엄 추이 확인 후 제철소 매입가 인상 시점 맞추어 판가 반영"
+      ],
+      "evidenceFingerprints": [
+        "d42ae39f85673c9a"
+      ],
+      "evidenceIndices": [
+        95
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "ALERT",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_b3782b21d6d5": {
+      "caseId": "RC_b3782b21d6d5",
+      "canonicalEventTitle": "포스코·JSW 스틸 73억 달러 규모 인도 합작 제철소 설립 계약 체결",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "경쟁 / 신규 설비 증설",
+      "facts": [
+        "포스코와 인도 JSW 스틸이 73억 달러 규모의 인도 일관제철소 합작 설립 계약을 체결함."
+      ],
+      "inferences": [
+        "장기적으로 인도 내 HRC 기재 및 하공정(CRC/GI) 자급 능력이 향상되어 인도 내수 철강 시장 진입 장벽이 높아질 수 있음.",
+        "인도산 철강재의 아시아 및 GCC 시장향 물량이 증대되어 향후 삼국간 무역 및 역내 경쟁 구도에 변화를 줄 수 있음."
+      ],
+      "assumptions": [
+        "합작 제철소의 세부 생산 제품 라인업에 냉연(CRC) 및 도금(GI) 설비가 포함됨."
+      ],
+      "missingEvidence": [
+        "제철소 착공 및 완공 예정 연도",
+        "포스코의 한국 본사 생산 소재와 인도 합작법인 간의 역할 분담 및 마케팅 전략"
+      ],
+      "exposure": {
+        "products": [
+          "CRC",
+          "GI",
+          "GL"
+        ],
+        "regions": [
+          "Asia"
+        ],
+        "routes": [
+          "Korea to Asia",
+          "India to Asia/GCC"
+        ],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "포스코와 JSW 스틸, 73억 달러 합작 제철소 설립 계약 체결",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "제철소 건설 및 본격 가동 (다년간 소요)",
+          "state": "UNCONFIRMED"
+        },
+        {
+          "step": "인도 내 도금강판 자급률 상승 및 인도산 강판의 역내 수출 확대에 따른 경쟁 심화",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "DOWN",
+        "cost": "NEUTRAL",
+        "demand": "NEUTRAL",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "UP",
+        "opportunity": "UP"
+      },
+      "scores": {
+        "evidenceQuality": 2,
+        "exposureProximity": 2,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 0
+      },
+      "threat": "장기적으로 인도향 대인도 강판 수출 기회 감소 및 인도산 도금강판의 아시아/GCC 시장 저가 침투 가능성",
+      "opportunity": "포스코-JSW 인도 합작법인의 인도산 제품을 활용한 Middle East/ASEAN 대상 삼국간 무역(Triangular Trade) 새로운 소싱선 확보 기회",
+      "timeHorizon": "LONG_TERM",
+      "watchSignals": [
+        "인도 합작 제철소 착공식 및 세부 설비 포트폴리오(CRC/GI 포함 여부) 발표",
+        "포스코의 인도산 강판 해외 판매권 배정 전략"
+      ],
+      "counterScenario": "인도 내수 철강 수요 성장 속도가 생산 증설을 초과하여 인도산 제품의 해외 수출 여력이 제한적일 가능성",
+      "suggestedActions": [
+        "합작법인 완공 전까지 현지 유통 바이어 네트워크 지속 유지",
+        "인도산 철강재 소싱을 통한 삼국간 무역 파이프라인 형성 가능성 장기 검토"
+      ],
+      "evidenceFingerprints": [
+        "6c4461f4afc361ed"
+      ],
+      "evidenceIndices": [
+        148
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_a5e855bee4d5": {
+      "caseId": "RC_a5e855bee4d5",
+      "canonicalEventTitle": "브라질산 슬래브 수출 가격 $580/톤 상승",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "원자재 비용 리스크",
+      "facts": [
+        "브라질산 슬래브 수출 가격이 톤당 $580 상승 기록 (기사 [138])"
+      ],
+      "inferences": [
+        "글로벌 반제품(슬래브) 원가 상승이 열연(HRC) 기저 가격 지지 요인으로 작용할 수 있음"
+      ],
+      "assumptions": [
+        "브라질산 슬래브 가격 상승이 아시아 및 글로벌 HRC 오퍼 가격 상승으로 이전됨"
+      ],
+      "missingEvidence": [
+        "한국 밀(Mill)들의 브라질산 슬래브 구매 비중",
+        "아시아 열연(HRC) 시장 가격으로의 전가 여부"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "브라질산 수출 슬래브 가격 톤당 $580로 상승",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "글로벌 압연사들의 HRC 생산 원가 상승 및 오퍼가 인상",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "국내 도금/컬러강판 제조사의 HRC 소재 구매 원가 가중",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "UP",
+        "cost": "UP",
+        "demand": "NEUTRAL",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 1,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 1
+      },
+      "threat": "HRC 원자재 가격 상승에 따른 냉연 및 도금 제품 생산 원가 증가",
+      "opportunity": "원가 상승을 명분으로 한 도금/컬러 강판 수출 오퍼 가격 인상 추진 가능성",
+      "timeHorizon": "1-3_MONTHS",
+      "watchSignals": [
+        "동아시아 HRC 재세 오퍼 가격 및 거래 가격",
+        "국내 밀(포스코, 현대제철)의 HRC 내수/수출 공급가 변동"
+      ],
+      "counterScenario": "중국산 저가 HRC 유입 지속 시 슬래브 가격 상승분이 아시아 HRC 시장가에 전가되지 않고 상쇄될 수 있음",
+      "suggestedActions": [
+        "HRC 소재 조달 가격 추이 점검 및 도금 제품 오퍼가 반영 검토"
+      ],
+      "evidenceFingerprints": [
+        "bb4adde3d8540e10"
+      ],
+      "evidenceIndices": [
+        138
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_ecfb3e66bb5d": {
+      "caseId": "RC_ecfb3e66bb5d",
+      "canonicalEventTitle": "알제리 Qatari Steel(AQS) DRI 월간 생산량 사상 최대 달성",
+      "assessmentStatus": "INFO",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "경쟁 및 지역 수요 변화 리스크",
+      "facts": [
+        "알제리 Qatari Steel(AQS)이 2026년 9월 월간 DRI 생산 사상 최대치 달성 (기사 [121])"
+      ],
+      "inferences": [
+        "MENA 지역 내 기초 철강 원자재 자급률이 상승하여 봉형강 등 일부 철강 제품의 역내 공급이 증가함"
+      ],
+      "assumptions": [
+        "AQS의 DRI 생산 확대가 GCC 도금/컬러 판재류 수입 수요 둔화로 연결됨"
+      ],
+      "missingEvidence": [
+        "AQS DRI 생산 물량의 판재류(HRC/GI 등) 생산 연계 여부",
+        "GCC 역내 판재류 수입 대체 규모"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [
+          "GCC"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "알제리 AQS DRI 월간 생산 최고치 달성",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "MENA 지역 철강 소재 자급률 향상",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "GCC 시장 내 수입 판재류 수요 감소 및 가격 하락 압박",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "NEUTRAL",
+        "cost": "NEUTRAL",
+        "demand": "NEUTRAL",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 1,
+        "causalStrength": 1,
+        "businessMateriality": 0,
+        "urgency": 0
+      },
+      "threat": "MENA 지역 철강 자급률 상승에 따른 장기적 중동 수입 수요 둔화 가능성",
+      "opportunity": "",
+      "timeHorizon": "LONG_TERM",
+      "watchSignals": [
+        "AQS의 판재류(HRC/GI) 설비 증설 계획 여부",
+        "GCC 지역 GI/COLOR 수입 동향"
+      ],
+      "counterScenario": "AQS DRI 증산은 봉형강(Rebar) 중심 생산용이며 도금 및 컬러 강판 시장에는 직접적 영향이 없을 수 있음",
+      "suggestedActions": [
+        "AQS 제품 포트폴리오 점검 후 판재류 미생산 확인 시 모니터링 종료"
+      ],
+      "evidenceFingerprints": [
+        "2ce5615dd305f7a6"
+      ],
+      "evidenceIndices": [
+        121
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "INFO",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_6f2d4e96c060": {
+      "caseId": "RC_6f2d4e96c060",
+      "canonicalEventTitle": "UN 2026년 세계 해상 무역 성장률 0% 전망",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "물류 및 매크로 교역 침체 리스크",
+      "facts": [
+        "UN이 중동 분쟁 등 해상 지정학 리스크로 2026년 글로벌 해상 무역 성장률을 0%로 전망함 (기사 [64])"
+      ],
+      "inferences": [
+        "세계 물동량 성장이 정체되고 주요 항로 지정학 리스크로 인해 해상 물류비용 불확실성이 지속될 수 있음"
+      ],
+      "assumptions": [
+        "해상 무역 성장 정체가 한국발 철강 수출 물동량과 운임 수준에 불리하게 작용할 것임"
+      ],
+      "missingEvidence": [
+        "철강 품목군에 특화된 해상 물동량 및 운임 전망 데이터",
+        "유럽, GCC, 미국 등 주요 노선별 선복량 영향"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "UN, 2026년 해상 무역 성장률 0% 전망 발표",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "글로벌 해상 교역량 정체 및 항로 지정학적 우회 지속",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "한국 도금강판 수출 물류비 증가 및 해외 수요 침체",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "NEUTRAL",
+        "cost": "UP",
+        "demand": "DOWN",
+        "sales": "DOWN",
+        "freight": "UP",
+        "leadTime": "UP",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 1,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 1
+      },
+      "threat": "글로벌 경기 및 무역 정체로 인한 철강 수출 수요 부진 및 해상 물류비 변동성 가중",
+      "opportunity": "",
+      "timeHorizon": "3-6_MONTHS",
+      "watchSignals": [
+        "UNCTAD 해상 운송 보고서 업데이트",
+        "주요 컨테이너 및 벌크 운임 지수(SCFI, BDI)"
+      ],
+      "counterScenario": "중동 분쟁 등 지정학적 리스크 완화 시 해상 무역 정상화 및 운임 안정화 가능성",
+      "suggestedActions": [
+        "수출 노선별 해상 운임 유류할증료(BAF) 및 지정학 할증료 모니터링"
+      ],
+      "evidenceFingerprints": [
+        "7a7b1366a7aea67a"
+      ],
+      "evidenceIndices": [
+        64
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_81651095f350": {
+      "caseId": "RC_81651095f350",
+      "canonicalEventTitle": "이란 트럭 운전사 파업 및 통화 위기 심화",
+      "assessmentStatus": "INFO",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "지정학 및 내륙 물류 리스크",
+      "facts": [
+        "이란 내 화폐 위기와 정파 갈등으로 트럭 운전사 파업 연장 (기사 [162])"
+      ],
+      "inferences": [
+        "이란 통과 내륙 물류망 차질 및 역내 삼국간 무역 운송 지연 가능성"
+      ],
+      "assumptions": [
+        "중동 지역 삼국간 무역(Triangular Trade) 노선 중 이란 경유 육상 수송망이 활용됨"
+      ],
+      "missingEvidence": [
+        "당사 거래 물량 중 이란 경유 삼국간 무역 노선 포함 여부",
+        "GCC 인근 항만 통관 차질 여부"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [
+          "GCC"
+        ],
+        "routes": [
+          "Middle East transit routes"
+        ],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "이란 트럭 운전사 파업 및 화폐 위기 심화",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "이란 국경 및 중동 일부 육상 물류 네트워크 차질",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "중동 삼국간 무역 운송 지연 및 송금/환리스크 증대",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "NEUTRAL",
+        "cost": "UP",
+        "demand": "NEUTRAL",
+        "sales": "DOWN",
+        "freight": "UP",
+        "leadTime": "UP",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 1,
+        "causalStrength": 1,
+        "businessMateriality": 0,
+        "urgency": 1
+      },
+      "threat": "이란 경유 물류 차질 및 중동 지역 삼국간 거래 결제/대금 수금 불확실성",
+      "opportunity": "",
+      "timeHorizon": "DAYS",
+      "watchSignals": [
+        "이란 파업 진행 경과 및 통화 환율 동향",
+        "GCC 직항 해상 수송 루트 확보 여부"
+      ],
+      "counterScenario": "당사 중동 삼국간 무역이 GCC 직항 항만을 주로 이용할 경우 실질적 물류 피해 없음",
+      "suggestedActions": [
+        "중동 삼국간 무역 노선 중 이란 경유 물량 존재 여부 긴급 점검"
+      ],
+      "evidenceFingerprints": [
+        "8773dfb5308f3bbe"
+      ],
+      "evidenceIndices": [
+        162
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "INFO",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_c845b8e8cfad": {
+      "caseId": "RC_c845b8e8cfad",
+      "canonicalEventTitle": "인도-러시아 철강 산업 협력 및 이니셔티브 강화",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "경쟁사 원가 경쟁력 변화 리스크",
+      "facts": [
+        "INNOPROM India 2026에서 인도와 러시아 간 철강 분야 파트너십 강화 발표 (기사 [160])"
+      ],
+      "inferences": [
+        "인도가 러시아산 저가 철강 원자재를 확보할 경우 인도 철강사의 원가 경쟁력이 향상될 수 있음"
+      ],
+      "assumptions": [
+        "양국 협력이 인도산 GI, COLOR 강판의 아시아/유럽 오퍼가 인하로 이어짐"
+      ],
+      "missingEvidence": [
+        "인도 철강사들의 러시아산 원자재 실체적 도입 규모",
+        "인도산 도금 판재류의 아시아/유럽 수출 오퍼가 변화"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [
+          "Asia",
+          "Europe"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "인도-러시아 철강 산업 파트너십 강화 발표",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "인도 밀의 저가 원자재 확보로 제조 원가 개선",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "아시아 및 유럽 시장에서 인도산 도금강판 저가 공세 심화",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "DOWN",
+        "cost": "NEUTRAL",
+        "demand": "NEUTRAL",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "UP",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 1,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 0
+      },
+      "threat": "인도산 경쟁 기종의 원가 하락에 따른 아시아/유럽 수출 시장 내 가격 경쟁 가열",
+      "opportunity": "",
+      "timeHorizon": "LONG_TERM",
+      "watchSignals": [
+        "인도산 HRC 및 GI/COLOR 수출 오퍼가 변화",
+        "유럽/아시아 시장 내 인도산 판재류 점유율 변동"
+      ],
+      "counterScenario": "서방의 대러시아 제재 확대로 러시아 연계 인도산 철강재에 대한 제재 조치가 발효될 경우 수출 진출 제약 가능성",
+      "suggestedActions": [
+        "인도 주요 경쟁 밀(JWW, Tata 등)의 수출 오퍼 가격 지속 모니터링"
+      ],
+      "evidenceFingerprints": [
+        "20abcd33d1fcc11b"
+      ],
+      "evidenceIndices": [
+        160
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_e9eba8bfac0f": {
+      "caseId": "RC_e9eba8bfac0f",
+      "canonicalEventTitle": "중국 외 아연 제련소 감산 및 LME 아연 가격 상승",
+      "assessmentStatus": "ALERT",
+      "severity": "MEDIUM",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "원자재 비용 상승 리스크",
+      "facts": [
+        "중국 외 지역 아연 제련소 가동 중단으로 LME 아연 가격 상승 (기사 [207])",
+        "광동 지역 아연 프리미엄 주간 135위안/톤 상승 (기사 [364])",
+        "11월 저급 산화아연 가격은 보합세 유지 (기사 [348])"
+      ],
+      "inferences": [
+        "아연 공급 차질로 인한 아연 가격 및 프리미엄 상승이 GI 및 GL 강판 도금 원가 상승으로 직결됨"
+      ],
+      "assumptions": [
+        "LME 아연 가격 상승세가 유지되어 제조사의 아연 코팅 엑스트라 단가가 인상됨"
+      ],
+      "missingEvidence": [
+        "LME 아연 가격 상승 폭 및 유지가능 기간",
+        "국내/외 도금강판 제조사의 아연 Extra 인상 실행 여부"
+      ],
+      "exposure": {
+        "products": [
+          "GI",
+          "GL"
+        ],
+        "regions": [
+          "Korea Export",
+          "Europe",
+          "GCC",
+          "Asia",
+          "US"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "중국 외 아연 제련소 감산 및 LME 아연 가격 상승",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "GI 및 GL 강판 생산 원가(도금 부자재비) 상승",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "아연 엑스트라 인상으로 인한 수출 판매가 인상 압박 및 마진 감소 리스크",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "UP",
+        "cost": "UP",
+        "demand": "NEUTRAL",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 2,
+        "exposureProximity": 3,
+        "causalStrength": 2,
+        "businessMateriality": 2,
+        "urgency": 1
+      },
+      "threat": "아연 원자재 가격 및 프리미엄 급등에 따른 GI/GL 제조 원가 증가 및 판가 미전가 시 마진 축소",
+      "opportunity": "아연 가격 상승을 명분으로 GI/GL 도금 엑스트라 인상을 추진하여 판매 단가 상향 가능",
+      "timeHorizon": "WEEKS",
+      "watchSignals": [
+        "LME 아연 3개월물 가격 지수 및 아연 잉곳 프리미엄",
+        "주요 철강사(포스코, 현대제철 등)의 GI/GL 아연 Extra 가격 조정 안내"
+      ],
+      "counterScenario": "하류 산업 수요 부진으로 아연 가격 상승세가 둔화되거나 제련소 가동 재개 시 원가 부담 완화 가능",
+      "suggestedActions": [
+        "아연 가격 연동 GI/GL 도금 엑스트라 산정표 재점검",
+        "아연 가격 추가 상승 대비 GI/GL 수출 오퍼가 인상안 마련"
+      ],
+      "evidenceFingerprints": [
+        "d65e2b260714801c",
+        "79842028abbe4f3f",
+        "961d472377b925c5",
+        "70b1f51ee2633463"
+      ],
+      "evidenceIndices": [
+        207,
+        348,
+        364,
+        400
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "ALERT",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 4
+        }
+      ]
+    },
+    "RC_129dd317e9bb": {
+      "caseId": "RC_129dd317e9bb",
+      "canonicalEventTitle": "튀르키예 철강사의 유럽 유통망 확장 및 철스크랩·봉형강 약세",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "경쟁동향",
+      "facts": [
+        "Koç Metalurji 등 튀르키예 주요 철강사의 네덜란드 무역 자회사 설립을 통한 유럽 유통 망 확장",
+        "튀르키예 철스크랩 수입가 톤당 $402 정체 및 철근 판매가($615-620/톤) 손익분기점 하회"
+      ],
+      "inferences": [
+        "튀르키예 철강사들이 원가 정체 속에서 유럽 현지 무역 거점을 통해 저가 물량 공급을 지속하려 함",
+        "봉형강 약세가 직접 강판 가격에 반영되지는 않으나 튀르키예 철강사의 전반적인 대유럽 수출 공격성 증대"
+      ],
+      "assumptions": [
+        "튀르키예 밀의 판재류(GI/COLOR 등) 생산/수출 부문도 무역 자회사를 활용해 유럽 공급을 늘릴 것임"
+      ],
+      "missingEvidence": [
+        "튀르키예산 표면처리강판(GI, COLOR)의 대유럽 수출 오퍼 가격 및 물량 증감 데이터"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [
+          "Europe",
+          "GCC"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "튀르키예 철강사의 네덜란드 현지 무역 자회사 설립 및 원자재(스크랩) 정체",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "유럽 내 튀르키예산 철강재 직접 유통망 확충 및 오퍼가 하락 압박",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "유럽 시장 내 한국산 강판과의 가격 경쟁 가열 및 마진 축소",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "DOWN",
+        "cost": "NEUTRAL",
+        "demand": "NEUTRAL",
+        "sales": "DOWN",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "UP",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 2,
+        "exposureProximity": 1,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 1
+      },
+      "threat": "유럽 현지 무역망을 갖춘 튀르키예산 철강재의 가격 공격으로 한국산 판재류의 유럽 시장 점유율 위협",
+      "opportunity": "",
+      "timeHorizon": "1-3_MONTHS",
+      "watchSignals": [
+        "튀르키예산 GI/COLOR 제품의 대유럽 CIF 오퍼 가격 변화",
+        "유럽 철강 세이프가드 튀르키예 할당량 소진율"
+      ],
+      "counterScenario": "튀르키예 밀의 수익성 악화로 추가 가격 하락 조성이 불가능해져 오퍼가가 반등하는 경우",
+      "suggestedActions": [
+        "유럽 현지 무역 자회사를 통한 튀르키예산 판재류 유통 가격 모니터링",
+        "한국산 GI/COLOR의 고품질 및 세이프가드 쿼터 안정성을 강조한 차별화 영업 전략"
+      ],
+      "evidenceFingerprints": [
+        "7bbd2cd00e79763e",
+        "9751a574d85c8c50",
+        "e1623250c834df38",
+        "614246abb602f6ad",
+        "64f41165053ab3ec",
+        "60f9d6f52fb2a93d",
+        "42033ef008b1f07d"
+      ],
+      "evidenceIndices": [
+        218,
+        220,
+        221,
+        321,
+        386,
+        388,
+        393
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 7
+        }
+      ]
+    },
+    "RC_20d0577ef15b": {
+      "caseId": "RC_20d0577ef15b",
+      "canonicalEventTitle": "LME 알루미늄 수급 타이트 및 갈바륨(GL) 원가 상승 압력",
+      "assessmentStatus": "ALERT",
+      "severity": "MEDIUM",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "원자재",
+      "facts": [
+        "LME 알루미늄 시장 내 수급 숏티지 우려 및 시장 불안성 증대 보고",
+        "글로벌 알루미늄 1차 수요 증가 대처를 위해 추가 제련소 건설 필요성 제기"
+      ],
+      "inferences": [
+        "알루미늄 가격의 구조적/단기적 상승이 발생할 경우 Galvalume(GL, 55% Al-Zn 도금)의 도금 원가 직접 상승",
+        "GL 강판 생산용 알루미늄 원자재 조달 단가 부담 가중"
+      ],
+      "assumptions": [
+        "LME 알루미늄 가격 상승세가 도금용 합금(55% Al) 조달 가격으로 즉각 전이될 것임"
+      ],
+      "missingEvidence": [
+        "LME 알루미늄 현물 및 선물 가격의 정확한 상승폭 및 지속 기간"
+      ],
+      "exposure": {
+        "products": [
+          "GL"
+        ],
+        "regions": [
+          "Korea Export"
+        ],
+        "routes": [],
+        "tradeMeasures": []
+      },
+      "causalChain": [
+        {
+          "step": "LME 알루미늄 시장 공급 숏티지 우려 및 원자재 가격 상승",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "GL(갈바륨) 생산용 알루미늄 도금 소재 조달 원가 증가",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "GL 강판 제조원가 상승으로 인한 판매 마진 축소 또는 오퍼가 인상 압박",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "UP",
+        "cost": "UP",
+        "demand": "NEUTRAL",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 2,
+        "exposureProximity": 2,
+        "causalStrength": 2,
+        "businessMateriality": 2,
+        "urgency": 1
+      },
+      "threat": "GL 강판 55% 알루미늄 도금층 원가 급증에 따른 제조 마진 압박",
+      "opportunity": "알루미늄 원가 인상분을 이유로 GL 제품의 글로벌 수출 오퍼가를 적기에 인상 추진",
+      "timeHorizon": "1-3_MONTHS",
+      "watchSignals": [
+        "LME 알루미늄 재고량 추이 및 현자-선물 스프레드(Backwardation)",
+        "알루미늄 합금 도금재 공급사 조달 오퍼가"
+      ],
+      "counterScenario": "글로벌 알루미늄 제련소 가동률 회복 및 재고 증가로 LME 가격이 급락 반전하는 경우",
+      "suggestedActions": [
+        "GL 강판 수출 오퍼가 산정 시 LME 알루미늄 연동 가격 구조 도입 검토",
+        "알루미늄 도금 원자재 재고 확보 및 원가 헷징 전략 점검"
+      ],
+      "evidenceFingerprints": [
+        "584b5b7c6150cc96",
+        "6f194bbf13dcbcc6",
+        "5c161ea89d0f54fe",
+        "027c03e3a5886cd3"
+      ],
+      "evidenceIndices": [
+        240,
+        347,
+        354,
+        374
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "ALERT",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 4
+        }
+      ]
+    },
+    "RC_5f02ee8164d1": {
+      "caseId": "RC_5f02ee8164d1",
+      "canonicalEventTitle": "CPTPP 신규 가입 협상 개시 논의",
+      "assessmentStatus": "WATCH",
+      "severity": "LOW",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "통상정책",
+      "facts": [
+        "CPTPP 회원국들이 신규 가입 희망국들과의 가입 협상 개시 방안 논의 발표"
+      ],
+      "inferences": [
+        "아시아·태평양 역내 무역 협정 확장에 따라 가입국 간 철강재 관세 혜택 재편 가능성 존재"
+      ],
+      "assumptions": [
+        "신규 가입국에 아시아 철강 경쟁국이나 주요 한국 강판 수출 대상국이 포함될 수 있음"
+      ],
+      "missingEvidence": [
+        "협상 대상 신규 가입국 명단, 철강 품목 양어표 및 타임라인"
+      ],
+      "exposure": {
+        "products": [],
+        "regions": [
+          "Asia"
+        ],
+        "routes": [],
+        "tradeMeasures": [
+          "CPTPP"
+        ]
+      },
+      "causalChain": [
+        {
+          "step": "CPTPP 신규 가입 협상 개시 논의 발표",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "경쟁국 가입 성사 시 역내 관세 철폐 혜택 확정",
+          "state": "UNCONFIRMED"
+        },
+        {
+          "step": "한국산 비회원국 제품 대비 가격 경쟁력 우위/열위 변동",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "UNKNOWN",
+        "cost": "NEUTRAL",
+        "demand": "NEUTRAL",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "NEUTRAL",
+        "opportunity": "NEUTRAL"
+      },
+      "scores": {
+        "evidenceQuality": 1,
+        "exposureProximity": 1,
+        "causalStrength": 1,
+        "businessMateriality": 1,
+        "urgency": 0
+      },
+      "threat": "아시아 역내 경쟁국의 CPTPP 가입 시 한국산 철강재의 상대적 특혜관세 불이익 발생 가능성",
+      "opportunity": "",
+      "timeHorizon": "LONG_TERM",
+      "watchSignals": [
+        "CPTPP 신규 가입 승인 대상국 공식 발표",
+        "한국 정부의 CPTPP 가입 추진 동향"
+      ],
+      "counterScenario": "가입 협상이장기간 지연되거나 철강 품목이 관세 철폐 대상에서 제외되는 경우",
+      "suggestedActions": [
+        "CPTPP 가입 대상국 추이 모니터링"
+      ],
+      "evidenceFingerprints": [
+        "9d19d5f75cb59110"
+      ],
+      "evidenceIndices": [
+        250
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "WATCH",
+          "severity": "LOW",
+          "newEvidenceCount": 1
+        }
+      ]
+    },
+    "RC_1d93d7f0176e": {
+      "caseId": "RC_1d93d7f0176e",
+      "canonicalEventTitle": "브라질의 중국산 열연(HRC) 최종 반덤핑 관세 부과 결정",
+      "assessmentStatus": "ALERT",
+      "severity": "MEDIUM",
+      "firstSeen": "2026-11-28T10:10:00.973Z",
+      "lastUpdated": "2026-11-28T10:10:00.973Z",
+      "lastAnalyzed": "2026-11-28T10:10:00.973Z",
+      "riskType": "통상정책",
+      "facts": [
+        "브라질 정부가 중국산 열연(HRC) 수입재에 대해 최종 반덤핑(AD) 관세 부과 승인"
+      ],
+      "inferences": [
+        "중국산 HRC의 남미 수출길이 차단되면서 잉여 HRC 물량이 아시아 및 한국 등으로 우회/밀어내기 공급될 위험 증가",
+        "HRC 원자재 가격 하락으로 인한 아시아 밀들의 하공정 제품(CRC, GI, COLOR) 가격 하락 압력"
+      ],
+      "assumptions": [
+        "중국 열연 밀들이 브라질 물량을 대체하기 위해 아시아 가공용 HRC 오퍼 가격을 인하할 것임"
+      ],
+      "missingEvidence": [
+        "브라질 AD 관세율 수치 및 중국의 대브라질 HRC 수출 규모"
+      ],
+      "exposure": {
+        "products": [
+          "CRC",
+          "GI",
+          "GL",
+          "COLOR"
+        ],
+        "regions": [
+          "Asia",
+          "Korea Export"
+        ],
+        "routes": [],
+        "tradeMeasures": [
+          "Anti-dumping"
+        ]
+      },
+      "causalChain": [
+        {
+          "step": "브라질, 중국산 HRC에 최종 반덤핑 관세 승인",
+          "state": "CONFIRMED"
+        },
+        {
+          "step": "중국산 잉여 HRC의 아시아 및 한국 시장 저가 오퍼 증가",
+          "state": "CONDITIONAL"
+        },
+        {
+          "step": "HRC 원가 하락과 동시에 아시아산 도금/컬러강판 덤핑 가열로 글로벌 강판가 하락 압력",
+          "state": "UNCONFIRMED"
+        }
+      ],
+      "impactVectors": {
+        "price": "DOWN",
+        "cost": "DOWN",
+        "demand": "NEUTRAL",
+        "sales": "NEUTRAL",
+        "freight": "NEUTRAL",
+        "leadTime": "NEUTRAL",
+        "compliance": "NEUTRAL",
+        "competition": "UP",
+        "opportunity": "UP"
+      },
+      "scores": {
+        "evidenceQuality": 2,
+        "exposureProximity": 2,
+        "causalStrength": 2,
+        "businessMateriality": 2,
+        "urgency": 1
+      },
+      "threat": "중국산 저가 HRC를 공급받는 아시아 경쟁 재가공사(베트남 등)의 GI/COLOR 저가 오퍼로 글로벌 가격 경쟁 가열",
+      "opportunity": "한국 밀 및 삼국간 무역 시 HRC 원자재 조달 단가 인하 기회 활용",
+      "timeHorizon": "1-3_MONTHS",
+      "watchSignals": [
+        "중국산 HRC 아시아 FOB 오퍼 가격 변화",
+        "베트남/인도네시아의 중국산 HRC 수입량 변동"
+      ],
+      "counterScenario": "중국 감산 정책으로 전체 HRC 수출 여력이 감소하여 타 지역 밀어내기 물량이 제한되는 경우",
+      "suggestedActions": [
+        "중국산 HRC 원자재 오퍼가 하락세를 활용한 삼국간 무역 조달 원가 절감 모색",
+        "아시아산 GI/COLOR 저가 수입재의 국내 및 주력 시장 침투 모니터링"
+      ],
+      "evidenceFingerprints": [
+        "7029cf6d1fb64ea6"
+      ],
+      "evidenceIndices": [
+        251
+      ],
+      "history": [
+        {
+          "date": "2026-11-28T10:10:00.973Z",
+          "status": "ALERT",
+          "severity": "MEDIUM",
+          "newEvidenceCount": 1
         }
       ]
     }
